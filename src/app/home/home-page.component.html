@@ -1,0 +1,46 @@
+<app-nav></app-nav>
+<!-- <div class="contanier min-vh-100">
+    <div class="row min-vh-100 justify-content-center text-md-center align-items-center" style="background-color: blue;">
+        <div class="col" style="background-color: green;">
+            <h1> The Early Church Game</h1>
+        </div>
+        <div class="col" style="background-color: green;">
+            <div class="d-grid gap-2 col-3 mx-auto">
+                <button class="btn btn-outline-secondary" type="button" role="button" (click)="openCreateARoomModel()">Create A Room</button>
+                <button class="btn btn-outline-secondary" type="button" role="button" (click)="openJoinARoomModal()">Join A Room</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="row justify-content-center text-center" id="gameTitle" >
+            <div class="col-5 align-self-center text-center">
+                    <!-- <p style="font-size: 1.8rem;"> The Early Church Game</p> -->
+                    <h1> 抉择 The Early Church <i class="fa-solid fa-church"></i></h1>
+            </div>
+            <div class="w-100"></div>
+            <div class="col-10 align-self-center" >
+                <div class="d-grid gap-2 col-3 mx-auto">
+                    <button class="btn btn-outline-secondary" type="button" role="button" (click)="openCreateARoomModel()">
+                        <h5>Create Room</h5>
+                    </button>
+                    <button class="btn btn-outline-secondary" type="button" role="button" (click)="openJoinARoomModal()">
+                        <h5>Join Room</h5>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-copyright></app-copyright>
+
+<div class="modal fade" id="joinARoom" tabindex="-1" aria-labelledby="joinARoomModal" aria-hidden="true">
+    <app-join-a-room></app-join-a-room>
+</div>
+
+<div class="modal fade" id="createARoom" tabindex="-1" aria-labelledby="createARoomModal" aria-hidden="true">
+    <app-create-a-room></app-create-a-room>
+</div>
