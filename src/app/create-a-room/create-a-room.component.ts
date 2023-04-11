@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, FormControl, Validators } from
 import { Router } from '@angular/router';
 
 import { SignalrService } from '../service/signalr.service';
+import { HttpsCommService } from '../service/https-comm.service';
 
 
 @Component({
@@ -13,9 +14,9 @@ import { SignalrService } from '../service/signalr.service';
 export class CreateARoomComponent implements OnInit {
 
   form: FormGroup = new FormGroup({
-    userName: new FormControl(""),
+    name: new FormControl(""),
     groupName: new FormControl(""),
-    numberOfPlayers: new FormControl("")
+    maxPlayerInGroup: new FormControl("")
   });
   submitted = false;
   options = [
@@ -25,18 +26,19 @@ export class CreateARoomComponent implements OnInit {
     { name: "11", value: 11},
     { name: "12", value: 12}
   ]
+  isHidden: boolean
 
-  constructor(public singalrService: SignalrService, 
+  constructor(private singalrService: SignalrService,
+    private http: HttpsCommService,
     private formBuilder: FormBuilder,
     private router: Router) {
       this.form = this.formBuilder.group({
-        username: ['', Validators.required],
+        name: ['', Validators.required],
         groupName: ['', 
           Validators.required],
-          // Validators.minLength(1), 
-          // Validators.maxLength(10)],
-        numberOfPlayers: ['', Validators.required]
+        maxPlayerInGroup: ['', Validators.required]
       });
+      this.isHidden = false;
   }
 
   ngOnInit(): void {
@@ -52,11 +54,28 @@ export class CreateARoomComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    console.log(JSON.stringify(this.form.value));
-    // this.singalrService.connection.invoke("onConntionAndCreateGroup",this.form.value).catch(
-    //     (err: any) => console.log(`PlayerGroupsHub.onConntionAndCreateGroup() error: ${err}`));
-    this.onReset();
-    this.router.navigate(['/gameRoom']);
+    this.http.checkIfGroupExists(this.form.value.groupName).subscribe(
+      response => {
+        // if game room not exists
+        if(!response){
+          console.log(this.form.value);
+          this.singalrService.connection.invoke("onConntionAndCreateGroup",this.form.value)
+          .then(
+            () => {
+              let gameRoom = this.form.value.groupName;
+              let name = this.form.value.userName;
+              this.onReset();
+              this.router.navigate(['/gameRoom', {groupName: gameRoom, name: name}]);
+            }
+          ).catch(
+            (err: any) => console.log(`PlayerGroupsHub.onConntionAndCreateGroup() error: ${err}`)
+          );
+        } else {
+          this.isHidden = true;
+          this.onReset();
+        }
+      }
+    );
   }
 
   onReset(): void {

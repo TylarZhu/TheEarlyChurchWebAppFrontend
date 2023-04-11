@@ -1,3 +1,122 @@
 <div class="container">
-    
+    <nav class="navbar rounded shadow fixed-top" style="background-color: #b3d6ef;">
+        <div class="container justify-content-center text-center d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#backToMenu">
+                <i class="fa-solid fa-backward"></i>
+            </button>
+            <h5>{{groupName}}</h5>
+            <div></div>
+        </div>
+    </nav>
+</div>
+<div class="container-fluid d-flex pt-5">
+    <div class="row flex-fill pt-2">
+            <div class="col justify-content-center text-center pt-2">
+                <div class="dropdown-center">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Massage and History 
+                        <i class="fa-regular fa-comments"></i>
+                    </button>
+                    <div class="dropdown-menu" style="max-height: 85vh; max-width: 58vh;">
+                        <div *ngFor="let message of messages; index as i;">
+                            <div class="dropdown-item">
+                                <div *ngIf="message.type === 'system'; then system else game"></div>
+                                <ng-template #game>
+                                    <p class="badge bg-primary text-wrap fw-bold fs-6">
+                                        {{message.message}}
+                                    </p>
+                                </ng-template>
+                                <ng-template #system>
+                                    <p class="badge bg-warning text-wrap fw-bold fs-6">
+                                        {{message.message}}
+                                    </p>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-100"></div>
+            <div class="col pt-2">
+                <div class="list-group">
+                    <!-- <div *ngFor="let user of onlineUser; index as i;">
+                        <div class="list-group-item list-group-item-success">
+                            <div class="d-flex w-100">
+                                <h5 class="flex-grow-1">   
+                                    <span class="badge rounded-pill bg-danger">{{i + 1}}</span>
+                                        {{user.name}}
+                                    <span class="badge rounded-pill bg-primary" id="inGame">In Game</span> 
+                                    <span class="badge rounded-pill bg-danger" id="outGame">Out Game</span> 
+                                    <span class="badge rounded-pill bg-secondary" id="userId">
+                                        {{user.userId}}
+                                    </span> 
+                                </h5>
+                                <button type="button" class="btn btn-primary" id="vote">Vote</button>
+                                <button type="button" class="btn btn-danger" id="exile">Exile</button>
+                                <button type="button" class="btn btn-warning" id="check">Check</button>
+                                <button type="button" class="btn btn-info" id="fire">Fire</button>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div *ngFor="let user of onlineUser; index as i;">
+                        <div class="list-group-item list-group-item-success">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="d-flex align-items-center">
+                                            <span class="badge bg-danger d-flex justify-content-center align-items-center">
+                                                <div>{{i + 1}}</div>
+                                            </span>
+                                            <h5 class="p-2">{{user.name}}</h5>
+                                    </div>
+                                </div>
+                                <div class="w-100"></div>
+                                <div class="col">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary d-flex justify-content-center align-items-center" id="inGame">
+                                            <div>In Game</div>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="row pt-2">
+                                <div class="col">
+                                    <button type="button" class="btn btn-primary" id="vote">Vote</button>
+                                    <button type="button" class="btn btn-danger" id="exile">Exile</button>
+                                    <button type="button" class="btn btn-warning" id="check">Check</button>
+                                    <button type="button" class="btn btn-info" id="fire">Fire</button>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+    </div>
+</div>
+
+<div class="modal fade" id="backToMenu" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="backToMenu" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title fs-6">Back to Home</p>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="badge bg-danger text-wrap fw-bold fs-3">
+                    Are you sure to go back to home?
+                </p>
+                <p class="badge bg-primary text-wrap fs-6">
+                    You cannot continue to play once you quit.
+                </p>
+            </div>
+            <div class="modal-footer justify-content-center text-center d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="userLeavesGroup()">Yes</button>
+            </div>
+        </div>
+        
+    </div>
+        
 </div>

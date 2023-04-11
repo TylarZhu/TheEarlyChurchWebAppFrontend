@@ -7,20 +7,20 @@
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="username" class="form-label">Your firstname</label>
+                    <label class="form-label">Your firstname</label>
                     <input
                         type="text"
-                        formControlName="username"
+                        formControlName="name"
                         class="form-control"
-                        [ngClass]="{ 'is-invalid': submitted && f['username'].errors }"
+                        [ngClass]="{ 'is-invalid': submitted && f['name'].errors }"
                     />
-                    <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
-                        <div *ngIf="f['username'].errors['required']">Firstname is required</div>
+                    <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">
+                        <div *ngIf="f['name'].errors['required']">Firstname is required</div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="username" class="form-label">Group Name</label>
+                    <label class="form-label">Group Name</label>
                     <input
                         type="text"
                         formControlName="groupName"
@@ -34,33 +34,32 @@
                         <div *ngIf="f['groupName'].errors['required']">
                             Group Name is required
                         </div>
-                        <!-- <div *ngIf="f['groupName'].errors['minlength']">
-                            Group Name must be at least 1 characters
-                        </div>
-                        <div *ngIf="f['groupName'].errors['maxlength']">
-                            Group Name must not exceed 10 characters
-                        </div> -->
                     </div>
                     
                 </div>
 
                 <div class="form-group">
-                    <label for="username" class="form-label">Number of players in the room</label>
+                    <label class="form-label">Number of players in the room</label>
                     <select class="form-select" 
-                        formControlName="numberOfPlayers">
+                        formControlName="maxPlayerInGroup">
                         <option *ngFor="let o of options" [value]="o.name">
                             {{o.name}}
                         </option>
                     </select>
-                    <div class="invalid-feedback" *ngIf="submitted && f['numberOfPlayers']?.invalid">
+                    <div class="invalid-feedback" *ngIf="submitted && f['maxPlayerInGroup']?.invalid">
                         <sup>*</sup>Please provide number of players
                       </div>
                 </div>
                 
             </div>
             <div class="modal-footer">
+                <div *ngIf="isHidden" class="form-group alert alert-danger d-flex align-items-center" role="alert">
+                    <div>
+                        Group Already Exists! Try join group!
+                    </div>
+                </div>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Create <i class="fa-solid fa-door-open"></i></button>
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Create<i class="fa-solid fa-door-open"></i></button>
                 </div>
             </div>
         </form>

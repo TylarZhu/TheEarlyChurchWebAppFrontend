@@ -2,6 +2,7 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { NavComponent } from './nav/nav.component';
@@ -12,6 +13,7 @@ import { CopyrightComponent } from './copyright/copyright.component';
 import { GameRoomComponent } from './game-room/game-room.component';
 
 import { SignalrService } from './service/signalr.service';
+import { HttpsCommService } from './service/https-comm.service';
 
 @NgModule({
   declarations: [
@@ -25,20 +27,23 @@ import { SignalrService } from './service/signalr.service';
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     ReactiveFormsModule,
     RouterModule.forRoot([
       {path: '', component: HomePageComponent},
+      {path: 'home', component: HomePageComponent},
       {path: 'gameRoom', component: GameRoomComponent}
     ])
   ],
   providers: [
     SignalrService,
-    // {
-    //   provide: APP_INITIALIZER,
-    //   useFactory: (SignalrService: SignalrService) => () => SignalrService.initConnection(),
-    //   deps: [SignalrService],
-    //   multi: true
-    // }
+    HttpsCommService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (SignalrService: SignalrService) => () => SignalrService.initConnection(),
+      deps: [SignalrService],
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

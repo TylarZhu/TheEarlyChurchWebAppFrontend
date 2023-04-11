@@ -1,0 +1,15 @@
+.list-group{
+    max-height: 85vh;
+    /* position:relative; */
+    /* min-height: 87vh; */
+    overflow: scroll;
+    /* overflow-y:hidden; */
+    overflow-x: hidden;
+    /* overflow-y: hidden; */
+    /* -webkit-overflow-scrolling: touch; */
+}
+
+.dropdown-menu{
+    overflow: scroll;
+    overflow-x: hidden;
+}

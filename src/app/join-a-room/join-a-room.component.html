@@ -4,22 +4,62 @@
             <h1 class="modal-title fs-5" id="bugModal">Join a room</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Your firstname</label>
+                    <input
+                        type="text"
+                        formControlName="name"
+                        class="form-control"
+                        [ngClass]="{ 'is-invalid': submitted && f['name'].errors }"
+                    />
+                    <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">
+                        <div *ngIf="f['name'].errors['required']">Firstname is required</div>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Your firstname</label>
-                <input type="email" class="form-control" id="exampleFormControlInput" placeholder="firstname">
+                <div class="form-group">
+                    <label class="form-label">Group Name</label>
+                    <input
+                        type="text"
+                        formControlName="groupName"
+                        class="form-control"
+                        [ngClass]="{ 'is-invalid': submitted && f['groupName'].errors }"
+                    />
+                    <div id="passwordHelpBlock" class="form-text">
+                        Your group name must be 1-10 characters long without spaces.
+                    </div>
+                    <div *ngIf="submitted && f['groupName'].errors" class="invalid-feedback">
+                        <div *ngIf="f['groupName'].errors['required']">
+                            Group Name is required
+                        </div>
+                    </div>
+                    
+                </div>
+                
             </div>
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label" aria-labelledby="passwordHelpBlock">Room Number</label>
-                <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="Room Number">
-                <div id="passwordHelpBlock" class="form-text">
-                    Your room number must be a 5 digit number.
+            <div class="modal-footer">
+                <!-- [hidden]="isHidden" -->
+                <div *ngIf="gourpDoesNotExists" class="form-group alert alert-danger d-flex align-items-center" role="alert">
+                    <div>
+                        Group does not exists!
+                    </div>
+                </div>
+                <div *ngIf="groupIsFull" class="form-group alert alert-danger d-flex align-items-center" role="alert">
+                    <div>
+                        Group is full!
+                    </div>
+                </div>
+                <div *ngIf="nameIsDuplicate" class="form-group alert alert-danger d-flex align-items-center" role="alert">
+                    <div>
+                        Your Name is duplicate! Try another name please.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal"> Join <i class="fa-solid fa-up-right-from-square"></i></button>
                 </div>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal"> Join <i class="fa-solid fa-up-right-from-square"></i></button>
-        </div>
+        </form>
     </div>
 </div>
