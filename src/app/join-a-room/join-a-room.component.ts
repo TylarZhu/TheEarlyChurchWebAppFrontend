@@ -47,7 +47,6 @@ export class JoinARoomComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    console.log(this.form.value)
     this.http.checkIfGroupExists(this.form.value.groupName).subscribe(
       response => {
         // if game room exists
@@ -96,6 +95,11 @@ export class JoinARoomComponent implements OnInit {
         }
       }
     );
+
+    // let gameRoom = this.form.value.groupName;
+    // let name = this.form.value.name;
+    // this.onReset();
+    // this.router.navigate(['/gameRoom', {groupName: gameRoom, name: name}]);
   }
 
   onReset(): void {

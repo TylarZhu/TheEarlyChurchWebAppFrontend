@@ -15,12 +15,18 @@ export class SignalrService {
   connection: singalR.HubConnection;
   onlineUser: BehaviorSubject<IOnlineUsers[]>
   messagesToAll: BehaviorSubject<IMessage[]>
+  groupLeader: BehaviorSubject<IOnlineUsers>
 
   constructor(private httpService: HttpsCommService) {
+    const initUser: IOnlineUsers = {userId: "",
+      connectionId: "",
+      name: "",
+      groupName: ""};
     this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
     this.connection = new singalR.HubConnectionBuilder().withUrl(this.hubUrl).withAutomaticReconnect().build();
     this.onlineUser =  new BehaviorSubject<IOnlineUsers[]>([]);
     this.messagesToAll = new BehaviorSubject<IMessage[]>([]);
+    this.groupLeader = new BehaviorSubject<IOnlineUsers>(initUser);
   }
 
   public async initConnection(): Promise<void>{
@@ -52,6 +58,10 @@ export class SignalrService {
 
     this.connection.on('updateOnlineUserList', (onlineUser: IOnlineUsers[]) => {
       this.onlineUser.next(onlineUser);
+    });
+
+    this.connection.on('updateGroupLeader', (onlineUser: IOnlineUsers) => {
+      this.groupLeader.next(onlineUser);
     });
 
     

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
-import { first } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 import { IOnlineUsers } from '../interface/IOnlineUser';
 import { Observable, firstValueFrom } from 'rxjs';
@@ -11,11 +11,14 @@ import { Observable, firstValueFrom } from 'rxjs';
 })
 export class HttpsCommService {
   huburl: string;
+  // groupLeader: BehaviorSubject<boolean>
+  // groupLeaderName: BehaviorSubject<string>
   
 
   constructor(private http: HttpClient) { 
     this.huburl = "https://localhost:7252/HubRequest";
-    
+    // this.groupLeader = new BehaviorSubject<boolean>(false);
+    // this.groupLeaderName = new BehaviorSubject<string>("");
   }
 
   public createNewUserAndGroup(connectionId: string, groupName: string, username: string, groupMaxPlayers: string): void {
@@ -36,6 +39,14 @@ export class HttpsCommService {
     ).subscribe(
       response => {
         console.log(response);
+        this.checkIfUserIsGroupLeader(groupName, username).subscribe(
+          response => {
+            // this.groupLeader.next(response);
+            // if(response){
+            //   this.groupLeaderName.next(username);
+            // }
+          }
+        );
       }
     );
   }
@@ -54,5 +65,9 @@ export class HttpsCommService {
 
   public checkIfUserNameInGroupDuplicate(groupName: string, userName: string): Observable<boolean> {
     return this.http.get<boolean>(this.huburl + "/checkIfUserNameInGroupDuplicate/" + groupName + "/" + userName);
+  }
+
+  public checkIfUserIsGroupLeader(groupName: string, userName: string): Observable<boolean> {
+    return this.http.get<boolean>(this.huburl + "/checkIfUserIsGroupLeader/" + groupName + "/" + userName);
   }
 }

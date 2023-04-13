@@ -19,6 +19,7 @@ export class GameRoomComponent implements OnInit  {
   number: number;
   groupName: string | null;
   name: string | null;
+  groupLeader: IOnlineUsers;
   
 
   
@@ -31,6 +32,7 @@ export class GameRoomComponent implements OnInit  {
       this.groupName = this.route.snapshot.paramMap.get('groupName');
       this.name = this.route.snapshot.paramMap.get('name');
       this.messages = [];
+      this.groupLeader = null!;
   }
 
   ngOnInit(): void {
@@ -39,7 +41,10 @@ export class GameRoomComponent implements OnInit  {
     });
     this.singalrService.messagesToAll.subscribe((messages: IMessage[]) => {
       this.messages = messages;
-    })
+    });
+    this.singalrService.groupLeader.subscribe((groupLeader: IOnlineUsers) =>{
+      this.groupLeader = groupLeader;
+    });
   }
   
   showInOurGame():void {
@@ -48,6 +53,10 @@ export class GameRoomComponent implements OnInit  {
     if(inGame && outGame) {
       
     }
+  }
+
+  gameStart(): void{
+
   }
 
   async userLeavesGroup(){

@@ -63,7 +63,7 @@ export class CreateARoomComponent implements OnInit {
           .then(
             () => {
               let gameRoom = this.form.value.groupName;
-              let name = this.form.value.userName;
+              let name = this.form.value.name;
               this.onReset();
               this.router.navigate(['/gameRoom', {groupName: gameRoom, name: name}]);
             }
