@@ -11,14 +11,9 @@ import { Observable, firstValueFrom } from 'rxjs';
 })
 export class HttpsCommService {
   huburl: string;
-  // groupLeader: BehaviorSubject<boolean>
-  // groupLeaderName: BehaviorSubject<string>
-  
 
   constructor(private http: HttpClient) { 
     this.huburl = "https://localhost:7252/HubRequest";
-    // this.groupLeader = new BehaviorSubject<boolean>(false);
-    // this.groupLeaderName = new BehaviorSubject<string>("");
   }
 
   public createNewUserAndGroup(connectionId: string, groupName: string, username: string, groupMaxPlayers: string): void {
@@ -27,32 +22,22 @@ export class HttpsCommService {
       "name": username, 
       "groupName": groupName, 
       "maxPlayerInGroup": groupMaxPlayers};
-      if(body.maxPlayerInGroup == null) {
-        body.maxPlayerInGroup = "";
-      }
-
-    console.log(body);
-
+    if(body.maxPlayerInGroup == null) {
+      body.maxPlayerInGroup = "";
+    }
     this.http.post(this.huburl + "/onlineUser", 
       body,
       {headers}
     ).subscribe(
       response => {
-        console.log(response);
-        this.checkIfUserIsGroupLeader(groupName, username).subscribe(
-          response => {
-            // this.groupLeader.next(response);
-            // if(response){
-            //   this.groupLeaderName.next(username);
-            // }
-          }
-        );
       }
     );
   }
 
-  public userLeaveTheGame(groupName: string, userName: string): Promise<IOnlineUsers>{
-    return firstValueFrom(this.http.delete<IOnlineUsers>(this.huburl + "/userLeaveTheGame/" + groupName + "/" + userName));
+  public userLeaveTheGame(groupName: string, userName: string, gameOn: boolean): Promise<IOnlineUsers>{
+    return firstValueFrom(
+      this.http.delete<IOnlineUsers>(
+        this.huburl + "/userLeaveTheGame/" + groupName + "/" + userName + "/" + gameOn));
   }
 
   public checkIfGroupExists(groupName: string): Observable<boolean> {
@@ -67,7 +52,16 @@ export class HttpsCommService {
     return this.http.get<boolean>(this.huburl + "/checkIfUserNameInGroupDuplicate/" + groupName + "/" + userName);
   }
 
-  public checkIfUserIsGroupLeader(groupName: string, userName: string): Observable<boolean> {
-    return this.http.get<boolean>(this.huburl + "/checkIfUserIsGroupLeader/" + groupName + "/" + userName);
+  public assignNextGroupLeader(groupName: string, nextGroupLeader: string, originalGroupLeader: string): void{
+    console.log(nextGroupLeader);
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.post<IOnlineUsers>(
+      this.huburl + "/assignNextGroupLeader/" + groupName + "/" + nextGroupLeader + "/" + originalGroupLeader,
+      {},
+      {headers}
+    ).subscribe(
+      response => {
+      }
+    ); 
   }
 }

@@ -20,6 +20,7 @@ export class GameRoomComponent implements OnInit  {
   groupName: string | null;
   name: string | null;
   groupLeader: IOnlineUsers;
+  gameOn: boolean;
   
 
   
@@ -33,6 +34,7 @@ export class GameRoomComponent implements OnInit  {
       this.name = this.route.snapshot.paramMap.get('name');
       this.messages = [];
       this.groupLeader = null!;
+      this.gameOn = false;
   }
 
   ngOnInit(): void {
@@ -55,13 +57,17 @@ export class GameRoomComponent implements OnInit  {
     }
   }
 
-  gameStart(): void{
+  async assignNewGroupLeader(nextLeader: string):Promise<void> {
+    await this.httpService.assignNextGroupLeader(this.groupName!, nextLeader, this.groupLeader.name);
+  }
 
+  gameStart(): void{
+    this.gameOn = true;
   }
 
   async userLeavesGroup(){
     await this.singalrService.connection.invoke("leaveGroup", this.groupName);
-    await this.httpService.userLeaveTheGame(this.groupName!, this.name!).then(
+    await this.httpService.userLeaveTheGame(this.groupName!, this.name!, this.gameOn).then(
       response => {
         console.log("DELETE call successful value returned in body", response);
       }

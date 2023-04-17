@@ -11,9 +11,4 @@ export class NavComponent {
   constructor(private singalrService: SignalrService){
 
   }
-  closeApp(){
-    this.singalrService.onDisconnect().then(()=>{
-      window.close();
-    });
-  }
 }

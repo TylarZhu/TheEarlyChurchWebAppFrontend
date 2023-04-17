@@ -9,7 +9,14 @@
     /* -webkit-overflow-scrolling: touch; */
 }
 
-.dropdown-menu{
+#messageGroup{
     overflow: scroll;
     overflow-x: hidden;
+}
+
+.caret-off::before {
+    display: none;
+}
+.caret-off::after {
+    display: none;
 }
