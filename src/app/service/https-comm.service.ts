@@ -5,15 +5,18 @@ import { BehaviorSubject } from 'rxjs';
 
 import { IOnlineUsers } from '../interface/IOnlineUser';
 import { Observable, firstValueFrom } from 'rxjs';
+import { IGroupInfo } from '../interface/IGroupInfo'; 
 
 @Injectable({
   providedIn: 'root'
 })
 export class HttpsCommService {
   huburl: string;
+  inGameUrl: string;
 
   constructor(private http: HttpClient) { 
     this.huburl = "https://localhost:7252/HubRequest";
+    this.inGameUrl = "https://localhost:7252/InGame";
   }
 
   public createNewUserAndGroup(connectionId: string, groupName: string, username: string, groupMaxPlayers: string): void {
@@ -25,7 +28,7 @@ export class HttpsCommService {
     if(body.maxPlayerInGroup == null) {
       body.maxPlayerInGroup = "";
     }
-    this.http.post(this.huburl + "/onlineUser", 
+    this.http.post<IGroupInfo>(this.huburl + "/onlineUser", 
       body,
       {headers}
     ).subscribe(
@@ -63,5 +66,34 @@ export class HttpsCommService {
       response => {
       }
     ); 
+  }
+
+  public CreateAGame(groupName: string, half: number): Observable<IOnlineUsers> {
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    return this.http.post<IOnlineUsers>(
+      this.inGameUrl + "/CreateAGame",
+      {
+        "groupName": groupName,
+        "christans": JSON.stringify(half),
+        "judaisms": JSON.stringify(half)
+      },
+      {headers}
+    ); 
+  }
+
+  public getMaxPlayersInGroup(groupName: string): void {
+    this.http.get<void>(this.huburl + "/GetMaxPlayersInGroup/" + groupName).subscribe(
+      response => {
+
+      }
+    );
+  }
+
+  public getIdentitiesExplanation(groupName: string): void{
+    this.http.get(this.inGameUrl + "/GetIdentitiesExplanation" + "/" + groupName).subscribe(
+      response => {
+
+      }
+    );
   }
 }

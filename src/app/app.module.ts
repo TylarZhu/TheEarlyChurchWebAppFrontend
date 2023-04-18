@@ -11,6 +11,7 @@ import { CreateARoomComponent } from './create-a-room/create-a-room.component';
 import { JoinARoomComponent } from './join-a-room/join-a-room.component';
 import { CopyrightComponent } from './copyright/copyright.component';
 import { GameRoomComponent } from './game-room/game-room.component';
+import { PlayersListComponent } from './players-list/players-list.component';
 
 import { SignalrService } from './service/signalr.service';
 import { HttpsCommService } from './service/https-comm.service';
@@ -23,7 +24,8 @@ import { HttpsCommService } from './service/https-comm.service';
     CreateARoomComponent,
     JoinARoomComponent,
     CopyrightComponent,
-    GameRoomComponent
+    GameRoomComponent,
+    PlayersListComponent
   ],
   imports: [
     BrowserModule,

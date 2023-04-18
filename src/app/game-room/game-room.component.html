@@ -1,6 +1,6 @@
 <div class="container">
     <nav class="navbar rounded shadow fixed-top" style="background-color: #b3d6ef;">
-        <div class="container  text-center d-flex justify-content-between">
+        <div class="container text-center d-flex justify-content-between">
             <div>
                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#backToMenu">
                     <i class="fa-solid fa-backward"></i>
@@ -8,7 +8,10 @@
             </div>
             
             <div>
-                <h4>{{groupName}} <i class="fa-solid fa-people-group"></i></h4>
+                <h4>
+                    {{groupName}} {{onlineUser.length}}/{{MaxPlayer}}
+                </h4>
+                
             </div>
             <div>
                 <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#info"> 
@@ -46,66 +49,26 @@
                 </div>
             </div>
             <div *ngIf="groupName == groupLeader.groupName && 
-                name == groupLeader.name" class="col pt-2 d-flex flex-row-reverse" >
-                <button class="btn btn-warning" (click)="gameStart()">
+                name == groupLeader.name && !gameOn" class="col pt-2 d-flex flex-row-reverse" >
+                <button class="btn btn-warning"  (click)="gameStart()" [disabled]="!startGameShow">
                     Start The Game! <i class="fa-solid fa-circle-play"></i>
                 </button>
             </div>
+            <button #viewMyIdentity [hidden]="true" data-bs-toggle="modal" data-bs-target="#viewMyIdentity" ></button>
             <div class="w-100"></div>
             <div class="col pt-2">
                 <div class="list-group">
-                    <div *ngFor="let user of onlineUser; index as i;">
-                        <div class="list-group-item list-group-item-success">
-                            <div class="row">
-                                <div class="col">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <div *ngIf="groupName == groupLeader.groupName && 
-                                                user.name == groupLeader.name" class="p-2">
-                                                <i class="fa-solid fa-star" style="color: #b3b611;"></i>
-                                            </div>
-                                            <span class="badge bg-danger d-flex justify-content-center align-items-center">
-                                                <div>{{i + 1}}</div>
-                                            </span>
-                                            <h5 class="p-2">{{user.name}}</h5>
-                                        </div>
-                                        <div *ngIf="groupName == groupLeader.groupName && 
-                                            name == groupLeader.name" class="dropdown">
-                                            <button class="btn btn-outline-secondary dropdown-toggle caret-off" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fa-solid fa-ellipsis"></i>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <div class="dropdown-item" (click)="assignNewGroupLeader(user.name)">Assign Group Leader</div>  
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="w-100"></div>
-                                <div class="col">
-                                    <div class="d-flex align-items-center">
-                                        <span class="badge bg-primary d-flex justify-content-center align-items-center" id="inGame">
-                                            <div>In Game</div>
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                            </div>
-                            <div class="row pt-2">
-                                <div class="col">
-                                    <button type="button" class="btn btn-primary" id="vote">Vote</button>
-                                    <button type="button" class="btn btn-danger" id="exile">Exile</button>
-                                    <button type="button" class="btn btn-warning" id="check">Check</button>
-                                    <button type="button" class="btn btn-info" id="fire">Fire</button>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    
+                    <app-players-list 
+                        [childGroupName]="groupName" 
+                        [childOnlineUser]="onlineUser"
+                        [childGroupLeader]="groupLeader"
+                        [childName]="name"
+                        [childGameOn]="gameOn"></app-players-list>
                 </div>
             </div>
     </div>
 </div>
+
 
 <div class="modal fade" id="backToMenu" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="backToMenu" aria-hidden="true">
     <div class="modal-dialog">
@@ -128,7 +91,39 @@
         </div>
         
     </div>
+</div>
+
+<div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="viewMyIdentity" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">My Identity</p>
+            </div>
+            <div class="modal-body">
+                <div class="fs-6">
+                    <div>
+                        You identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
+                    </div>
+                    <div class="fs-6">
+                        Description:
+                        <ul>
+                            <div *ngFor="let ability of abilities;">
+                                <li class="fs-6">{{ability}}</li>
+                            </div>
+                        </ul>
+                    </div>
+                    <div class="fs-6">
+                        If you forget your identity, please click the <strong>top right question mark button</strong> to view again.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer d-flex justify-content-right">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >Got it! <i class="fa-regular fa-circle-check"></i></button>
+            </div>
+        </div>
         
+    </div>
 </div>
 
 <div class="modal fade" id="info" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="info" aria-hidden="true">
@@ -137,16 +132,23 @@
             <div class="modal-header">
                 <h5 class="modal-title">You Identity</h5>
             </div>
-            <div class="modal-body text-center">
-                <p class="badge bg-info text-wrap fw-bold text-dark">
-                    If you saw any bug, please send to the developer! We are happy to help you!
-                </p>
+            <div class="modal-body">
+                <div>
+                    You identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
+                </div>
+                <div class="fs-6">
+                    Description:
+                    <ul>
+                        <div *ngFor="let ability of abilities;">
+                            <li class="fs-6">{{ability}}</li>
+                        </div>
+                    </ul>
+                </div>
             </div>
             <div class="modal-footer text-center d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >Got it! <i class="fa-regular fa-circle-check"></i></button>
             </div>
         </div>
         
-    </div>
-        
+    </div> 
 </div>

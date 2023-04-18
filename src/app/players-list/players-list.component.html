@@ -1,0 +1,48 @@
+<div *ngFor="let user of childOnlineUser; index as i;">
+    <div class="list-group-item list-group-item-success">
+        <div class="row">
+            <div class="col">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div *ngIf="childGroupName == childGroupLeader.groupName && 
+                            user.name == childGroupLeader.name" class="p-2">
+                            <i class="fa-solid fa-star" style="color: #b3b611;"></i>
+                        </div>
+                        <span class="badge bg-danger d-flex justify-content-center align-items-center">
+                            <div>{{i + 1}}</div>
+                        </span>
+                        <h5 class="p-2">{{user.name}}</h5>
+                    </div>
+                    <div *ngIf="childGroupName == childGroupLeader.groupName && 
+                        childName == childGroupLeader.name && !childGameOn" class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle caret-off" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" (click)="assignNewGroupLeader(user.name)">Assign Group Leader</div>  
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-100"></div>
+            <div class="col">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary d-flex justify-content-center align-items-center" id="inGame">
+                        <div>In Game</div>
+                    </span>
+                </div>
+            </div>
+            
+        </div>
+        <div class="row pt-2">
+            <div class="col">
+                <button type="button" class="btn btn-primary" id="vote">Vote</button>
+                <button type="button" class="btn btn-danger" id="exile">Exile</button>
+                <button type="button" class="btn btn-warning" id="check">Check</button>
+                <button type="button" class="btn btn-info" id="fire">Fire</button>
+            </div>
+        </div>
+        
+    </div>
+</div>
+

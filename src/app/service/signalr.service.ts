@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as singalR from '@microsoft/signalr';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, max } from 'rxjs';
 
 import { IOnlineUsers } from '../interface/IOnlineUser'
 import { IMessage } from '../interface/IMessage';
@@ -13,20 +13,25 @@ export class SignalrService {
 
   hubUrl: string;
   connection: singalR.HubConnection;
-  onlineUser: BehaviorSubject<IOnlineUsers[]>
-  messagesToAll: BehaviorSubject<IMessage[]>
-  groupLeader: BehaviorSubject<IOnlineUsers>
+  onlineUser: BehaviorSubject<IOnlineUsers[]>;
+  messagesToAll: BehaviorSubject<IMessage[]>;
+  identitiesExplanation: BehaviorSubject<string[]>;
+  groupLeader: BehaviorSubject<IOnlineUsers>;
+  maxPlayer: BehaviorSubject<number>;
 
   constructor(private httpService: HttpsCommService) {
     const initUser: IOnlineUsers = {userId: "",
       connectionId: "",
       name: "",
-      groupName: ""};
+      groupName: "",
+      identity: ""};
     this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
     this.connection = new singalR.HubConnectionBuilder().withUrl(this.hubUrl).withAutomaticReconnect().build();
     this.onlineUser =  new BehaviorSubject<IOnlineUsers[]>([]);
     this.messagesToAll = new BehaviorSubject<IMessage[]>([]);
     this.groupLeader = new BehaviorSubject<IOnlineUsers>(initUser);
+    this.maxPlayer = new BehaviorSubject<number>(0);
+    this.identitiesExplanation = new BehaviorSubject<string[]>([]);
   }
 
   public async initConnection(): Promise<void>{
@@ -41,7 +46,6 @@ export class SignalrService {
 
   public async onDisconnect() {
     this.connection.onclose(async () => {
-      // this.httpService.userLeaveTheGame(groupname);
       await this.initConnection();
     });
   }
@@ -64,6 +68,16 @@ export class SignalrService {
       this.groupLeader.next(onlineUser);
     });
 
+    this.connection.on("updatePlayersIdentities", (onlineUser: IOnlineUsers[]) => {
+      this.onlineUser.next(onlineUser);
+    });
+    this.connection.on("IdentitiesExplanation", (identitiesExplanation: string[]) => {
+      this.identitiesExplanation.next(identitiesExplanation);
+    });
+
+    this.connection.on("getMaxPlayersInGroup", (maxPlayer: number) => {
+      this.maxPlayer.next(maxPlayer);
+    })
     
 
     // this.connection.on('leaveGroupUserConnectionId', (userId: string) => {
