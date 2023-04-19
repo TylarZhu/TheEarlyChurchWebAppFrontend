@@ -56,7 +56,6 @@ export class HttpsCommService {
   }
 
   public assignNextGroupLeader(groupName: string, nextGroupLeader: string, originalGroupLeader: string): void{
-    console.log(nextGroupLeader);
     const headers = new HttpHeaders().set("Content-Type", "application/json");
     this.http.post<IOnlineUsers>(
       this.huburl + "/assignNextGroupLeader/" + groupName + "/" + nextGroupLeader + "/" + originalGroupLeader,
@@ -95,5 +94,17 @@ export class HttpsCommService {
 
       }
     );
+  }
+
+  public WaitOnOtherPlayerAction(groupName: string, name: string): void{
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.post<IOnlineUsers>(
+      this.inGameUrl + "/WaitOnOtherPlayerAction/" + groupName + "/" + name,
+      {},
+      {headers}
+    ).subscribe(
+      response => {
+      }
+    ); 
   }
 }

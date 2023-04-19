@@ -18,6 +18,7 @@ export class SignalrService {
   identitiesExplanation: BehaviorSubject<string[]>;
   groupLeader: BehaviorSubject<IOnlineUsers>;
   maxPlayer: BehaviorSubject<number>;
+  wait: BehaviorSubject<boolean>;
 
   constructor(private httpService: HttpsCommService) {
     const initUser: IOnlineUsers = {userId: "",
@@ -33,6 +34,7 @@ export class SignalrService {
     this.groupLeader = new BehaviorSubject<IOnlineUsers>(initUser);
     this.maxPlayer = new BehaviorSubject<number>(0);
     this.identitiesExplanation = new BehaviorSubject<string[]>([]);
+    this.wait = new BehaviorSubject<boolean>(false);
   }
 
   public async initConnection(): Promise<void>{
@@ -75,10 +77,12 @@ export class SignalrService {
     this.connection.on("IdentitiesExplanation", (identitiesExplanation: string[]) => {
       this.identitiesExplanation.next(identitiesExplanation);
     });
-
     this.connection.on("getMaxPlayersInGroup", (maxPlayer: number) => {
       this.maxPlayer.next(maxPlayer);
-    })
+    });
+    this.connection.on("waitOnOtherPlayersActionInGroup", (wait: boolean) => {
+      this.wait.next(wait);
+    });
     
 
     // this.connection.on('leaveGroupUserConnectionId', (userId: string) => {

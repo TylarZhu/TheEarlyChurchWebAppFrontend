@@ -16,6 +16,8 @@ import { tap } from 'rxjs';
 export class GameRoomComponent implements OnInit, AfterViewInit  {
 
   @ViewChild('viewMyIdentity', {read: ElementRef}) identityModal?: ElementRef;
+  @ViewChild('waitingForOtherPlayers', {read: ElementRef}) waitingForOtherPlayersModal?: ElementRef;
+  @ViewChild('closeWaitingForOtherPlayers', {read: ElementRef}) closeWaitingForOtherPlayers?: ElementRef;
 
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
@@ -28,6 +30,9 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   identity: string;
   startGameShow: boolean;
   abilities: string[];
+  day: number;
+  daylightOrNight: string;
+  waitingStateThisPlayer: boolean
 
   
   constructor(private httpService: HttpsCommService, 
@@ -45,6 +50,9 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.identity = "";
       this.startGameShow = false;
       this.abilities = [];
+      this.day = 0;
+      this.daylightOrNight = "Daylight";
+      this.waitingStateThisPlayer = true;
   }
 
   ngOnInit(): void {
@@ -79,6 +87,18 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     })).subscribe((maxPlayer: number) => {
       this.MaxPlayer = maxPlayer;
     });
+    this.singalrService.wait.pipe(tap(
+      wait => {
+        if(wait)
+        {
+          this.waitingForOtherPlayersModal?.nativeElement.click();
+        } else {
+          this.closeWaitingForOtherPlayers?.nativeElement.click();
+        }
+      })).subscribe((wait: boolean) =>{
+      this.waitingStateThisPlayer = wait;
+
+    });
   }
 
   ngAfterViewInit(): void {
@@ -95,19 +115,20 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   async gameStart(): Promise<void> {
     this.gameOn = true;
     let half = this.onlineUser.length / 2; 
-
     await this.httpService.CreateAGame(this.groupName!, half).subscribe(
       response => {
-        
       }
     );
+  }
+
+  findViewIdentityReadyToPlay(): void {
+    this.httpService.WaitOnOtherPlayerAction(this.groupName!, this.name!);
   }
 
   async userLeavesGroup(){
     await this.singalrService.connection.invoke("leaveGroup", this.groupName);
     await this.httpService.userLeaveTheGame(this.groupName!, this.name!, this.gameOn).then(
       response => {
-        console.log("DELETE call successful value returned in body", response);
       }
     );
     this.router.navigate(['/']);

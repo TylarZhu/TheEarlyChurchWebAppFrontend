@@ -23,7 +23,7 @@
 </div>
 <div class="container-fluid d-flex pt-5">
     <div class="row flex-fill pt-2 justify-content-between" >
-            <div class="col justify-content-center text-center pt-2">
+            <div class="col justify-content-start pt-2">
                 <div class="dropdown-center">
                     <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Massages 
@@ -48,13 +48,19 @@
                     </div>
                 </div>
             </div>
+            <div class="col pt-2 justify-content-start">
+                <strong>Day {{day}} {{daylightOrNight}}</strong>
+            </div>
             <div *ngIf="groupName == groupLeader.groupName && 
-                name == groupLeader.name && !gameOn" class="col pt-2 d-flex flex-row-reverse" >
+                name == groupLeader.name && !gameOn"  class="col pt-2 d-flex flex-row-reverse" >
                 <button class="btn btn-warning"  (click)="gameStart()" [disabled]="!startGameShow">
-                    Start The Game! <i class="fa-solid fa-circle-play"></i>
+                    Start Game <i class="fa-solid fa-circle-play"></i>
                 </button>
             </div>
+            
             <button #viewMyIdentity [hidden]="true" data-bs-toggle="modal" data-bs-target="#viewMyIdentity" ></button>
+            <button #waitingForOtherPlayers  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayers"></button> 
+            
             <div class="w-100"></div>
             <div class="col pt-2">
                 <div class="list-group">
@@ -119,7 +125,7 @@
             </div>
             
             <div class="modal-footer d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >Got it! <i class="fa-regular fa-circle-check"></i></button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="findViewIdentityReadyToPlay()">Got it! <i class="fa-regular fa-circle-check"></i></button>
             </div>
         </div>
         
@@ -147,6 +153,21 @@
             </div>
             <div class="modal-footer text-center d-flex justify-content-right">
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >Got it! <i class="fa-regular fa-circle-check"></i></button>
+            </div>
+        </div>
+        
+    </div> 
+</div>
+
+<div class="modal fade" id="waitingForOtherPlayers" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayers" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5> Waiting for other players' actions ... </h5>
+                <button #closeWaitingForOtherPlayers  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal" ></button>
             </div>
         </div>
         
