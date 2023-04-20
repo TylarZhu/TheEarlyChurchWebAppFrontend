@@ -60,7 +60,9 @@
             
             <button #viewMyIdentity [hidden]="true" data-bs-toggle="modal" data-bs-target="#viewMyIdentity" ></button>
             <button #waitingForOtherPlayers  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayers"></button> 
-            
+            <button #discussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#discussionModel"></button>
+            <button #waitingDiscussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingDiscussionModel"></button>
+
             <div class="w-100"></div>
             <div class="col pt-2">
                 <div class="list-group">
@@ -99,37 +101,31 @@
     </div>
 </div>
 
-<div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="viewMyIdentity" aria-hidden="true">
+<div class="modal fade" id="discussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="discussionModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <p class="modal-title">My Identity</p>
+                <p class="modal-title">Discussion</p>
             </div>
-            <div class="modal-body">
-                <div class="fs-6">
-                    <div>
-                        You identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
-                    </div>
-                    <div class="fs-6">
-                        Description:
-                        <ul>
-                            <div *ngFor="let ability of abilities;">
-                                <li class="fs-6">{{ability}}</li>
-                            </div>
-                        </ul>
-                    </div>
-                    <div class="fs-6">
-                        If you forget your identity, please click the <strong>top right question mark button</strong> to view again.
-                    </div>
+            <div class="modal-body text-center">
+                <div>
+                    Today's topic is <strong>{{discussionTopic}}</strong>
+                    It is your turn to discuss! Please tell what you know to the others ...
                 </div>
             </div>
-            
             <div class="modal-footer d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="findViewIdentityReadyToPlay()">Got it! <i class="fa-regular fa-circle-check"></i></button>
+                <!-- <button #closeDiscussionModel type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedDiscussion()">Finished<i class="fa-regular fa-circle-check"></i></button> -->
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedDiscussion()">Finished<i class="fa-regular fa-circle-check"></i></button>
             </div>
         </div>
-        
     </div>
+</div>
+
+<div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="viewMyIdentity" aria-hidden="true">
+    <app-view-identity-modal 
+    [childAbilities]="abilities"
+    [identity]="identity"
+    (findViewIdentityReadyToPlay)="findViewIdentityReadyToPlay()"></app-view-identity-modal>
 </div>
 
 <div class="modal fade" id="info" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="info" aria-hidden="true">
@@ -166,8 +162,23 @@
                 <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <h5> Waiting for other players' actions ... </h5>
+                <h5> Waiting for other players to finish viewing their identity ... </h5>
                 <button #closeWaitingForOtherPlayers  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal" ></button>
+            </div>
+        </div>
+        
+    </div> 
+</div>
+
+<div class="modal fade" id="waitingDiscussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="waitingDiscussionModel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-grow text-warning" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5> Waiting for other players to finish talking ... </h5>
+                <button #closeWaitingDiscussionModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal" ></button>
             </div>
         </div>
         

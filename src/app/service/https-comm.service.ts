@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
 
 import { IOnlineUsers } from '../interface/IOnlineUser';
 import { Observable, firstValueFrom } from 'rxjs';
@@ -96,15 +95,23 @@ export class HttpsCommService {
     );
   }
 
-  public WaitOnOtherPlayerAction(groupName: string, name: string): void{
+  public IdentityViewingState(groupName: string, name: string): void{
     const headers = new HttpHeaders().set("Content-Type", "application/json");
     this.http.post<IOnlineUsers>(
-      this.inGameUrl + "/WaitOnOtherPlayerAction/" + groupName + "/" + name,
+      this.inGameUrl + "/IdentityViewingState/" + groupName + "/" + name,
       {},
       {headers}
     ).subscribe(
       response => {
       }
     ); 
+  }
+
+  public whoIsDiscussing(groupName: string, name: string){
+    this.http.get(this.inGameUrl + "/WhoIsDiscussing" + "/" + groupName + "/" + name).subscribe(
+      response => {
+
+      }
+    );
   }
 }

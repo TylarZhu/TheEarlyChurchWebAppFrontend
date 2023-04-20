@@ -7,6 +7,7 @@ import { IOnlineUsers } from '../interface/IOnlineUser';
 import { SignalrService } from '../service/signalr.service'
 import { IMessage } from '../interface/IMessage';
 import { tap } from 'rxjs';
+import { INextStep } from '../interface/INextStep';
 
 @Component({
   selector: 'app-game-room',
@@ -16,12 +17,18 @@ import { tap } from 'rxjs';
 export class GameRoomComponent implements OnInit, AfterViewInit  {
 
   @ViewChild('viewMyIdentity', {read: ElementRef}) identityModal?: ElementRef;
+
   @ViewChild('waitingForOtherPlayers', {read: ElementRef}) waitingForOtherPlayersModal?: ElementRef;
   @ViewChild('closeWaitingForOtherPlayers', {read: ElementRef}) closeWaitingForOtherPlayers?: ElementRef;
 
+  @ViewChild('waitingDiscussionModel', {read: ElementRef}) waitingDiscussionModel?: ElementRef;
+  @ViewChild('closeWaitingDiscussionModel', {read: ElementRef}) closeWaitingDiscussionModel?: ElementRef;
+
+  @ViewChild('discussionModel', {read: ElementRef}) discussionModel?: ElementRef;
+  // @ViewChild('closeDiscussionModel', {read: ElementRef}) closeDiscussionModel?: ElementRef;
+
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
-  number: number;
   groupName: string | null;
   name: string | null;
   groupLeader: IOnlineUsers;
@@ -32,7 +39,9 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   abilities: string[];
   day: number;
   daylightOrNight: string;
-  waitingStateThisPlayer: boolean
+  nextStep: INextStep;
+  discussionTopic: string;
+  voteState: string;
 
   
   constructor(private httpService: HttpsCommService, 
@@ -40,7 +49,6 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     private singalrService: SignalrService,
     private router: Router){
       this.onlineUser = [];
-      this.number = 1;
       this.groupName = this.route.snapshot.paramMap.get('groupName');
       this.name = this.route.snapshot.paramMap.get('name');
       this.MaxPlayer = 0;
@@ -50,9 +58,11 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.identity = "";
       this.startGameShow = false;
       this.abilities = [];
-      this.day = 0;
+      this.day = 1;
       this.daylightOrNight = "Daylight";
-      this.waitingStateThisPlayer = true;
+      this.nextStep = null!;
+      this.discussionTopic = "";
+      this.voteState = "BeforeVote";
   }
 
   ngOnInit(): void {
@@ -61,7 +71,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
         if(onlineUser[0] != null && onlineUser[0].identity!= ""){
             onlineUser.forEach(x => {
             if(x.name == this.name){
-              this.identity = x.identity;
+              this.identity = this.DeserializeIdentity(x.identity);
             }
           });
           this.httpService.getIdentitiesExplanation(this.groupName!);
@@ -80,28 +90,93 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     this.singalrService.identitiesExplanation.subscribe((identitiesExplanation: string[]) => {
       this.abilities = identitiesExplanation
     });
-    this.singalrService.maxPlayer.pipe(tap( x => {
-      if(x > 0 && x == this.onlineUser.length){
-        this.startGameShow = true;
+
+
+    this.singalrService.nextStep.pipe(tap(
+      nextStep => {
+        if(nextStep.nextStepName == "discussing")
+        {
+          if(nextStep.options.length == 0)
+          {
+            this.discussionTopic = "Freely Disscuss";
+          }
+          else
+          {
+            this.discussionTopic = nextStep.options[0];
+          }
+          this.httpService.whoIsDiscussing(this.groupName!, "none");
+        }
       }
-    })).subscribe((maxPlayer: number) => {
-      this.MaxPlayer = maxPlayer;
-    });
-    this.singalrService.wait.pipe(tap(
-      wait => {
-        if(wait)
+    )).subscribe();
+
+
+    this.singalrService.maxPlayer.pipe(tap( x => {
+        if(x > 0 && x == this.onlineUser.length){
+          this.startGameShow = true;
+        }
+      })).subscribe((maxPlayer: number) => {
+        this.MaxPlayer = maxPlayer;
+      }
+    );
+
+    this.singalrService.finishDisscussion.pipe(tap(
+        finishDisscussion => {
+          if(finishDisscussion == "InDisscussion"){
+            this.closeWaitingDiscussionModel?.nativeElement.click();
+            this.discussionModel?.nativeElement.click();
+          } else if(finishDisscussion == "FinishDisscussionWaitOthers") {
+            this.waitingDiscussionModel?.nativeElement.click();
+          } else {
+            this.closeWaitingDiscussionModel?.nativeElement.click();
+          }
+      })).subscribe();
+
+
+    this.singalrService.finishedViewIdentityOrNot.pipe(tap(
+      finishedViewIdentityOrNot => {
+        if(finishedViewIdentityOrNot)
         {
           this.waitingForOtherPlayersModal?.nativeElement.click();
         } else {
           this.closeWaitingForOtherPlayers?.nativeElement.click();
         }
-      })).subscribe((wait: boolean) =>{
-      this.waitingStateThisPlayer = wait;
-
-    });
+      })).subscribe();
   }
 
   ngAfterViewInit(): void {
+  }
+
+  DeserializeIdentity(identity: string): string {
+    let x = Number(identity);
+    switch(x){
+      case 0: {
+        return "Nicodemus";
+      }
+      case 1:{
+        return "Judas";
+      }
+      case 2:{
+        return "Scribes";
+      }
+      case 3:{
+        return "Pharisee";
+      }
+      case 4:{
+        return "Judaism";
+      }
+      case 5:{
+        return "Peter";
+      }
+      case 6:{
+        return "John";
+      }
+      case 7:{
+        return "Laity";
+      }
+      default:{
+        return "";
+      }
+    }
   }
   
   showInOurGame():void {
@@ -121,8 +196,12 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     );
   }
 
+  finishedDiscussion() {
+    this.httpService.whoIsDiscussing(this.groupName!, this.name!);
+  }
+
   findViewIdentityReadyToPlay(): void {
-    this.httpService.WaitOnOtherPlayerAction(this.groupName!, this.name!);
+    this.httpService.IdentityViewingState(this.groupName!, this.name!);
   }
 
   async userLeavesGroup(){

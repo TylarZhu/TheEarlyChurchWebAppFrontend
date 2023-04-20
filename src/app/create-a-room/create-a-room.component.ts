@@ -58,7 +58,6 @@ export class CreateARoomComponent implements OnInit {
       response => {
         // if game room not exists
         if(!response){
-          console.log(this.form.value);
           this.singalrService.connection.invoke("onConntionAndCreateGroup",this.form.value)
           .then(
             () => {

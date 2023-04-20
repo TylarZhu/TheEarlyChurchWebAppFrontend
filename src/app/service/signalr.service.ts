@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as singalR from '@microsoft/signalr';
-import { BehaviorSubject, max } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { IOnlineUsers } from '../interface/IOnlineUser'
 import { IMessage } from '../interface/IMessage';
 import { HttpsCommService } from './https-comm.service';
+import { INextStep } from '../interface/INextStep';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,9 @@ export class SignalrService {
   identitiesExplanation: BehaviorSubject<string[]>;
   groupLeader: BehaviorSubject<IOnlineUsers>;
   maxPlayer: BehaviorSubject<number>;
-  wait: BehaviorSubject<boolean>;
+  finishedViewIdentityOrNot: BehaviorSubject<boolean>;
+  finishDisscussion: BehaviorSubject<string>;
+  nextStep: BehaviorSubject<INextStep>;
 
   constructor(private httpService: HttpsCommService) {
     const initUser: IOnlineUsers = {userId: "",
@@ -26,6 +29,10 @@ export class SignalrService {
       name: "",
       groupName: "",
       identity: ""};
+    const initNextStep: INextStep = {
+      nextStepName: "",
+      options: []
+    };
     this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
     this.connection = new singalR.HubConnectionBuilder().withUrl(this.hubUrl).withAutomaticReconnect().build();
     this.connection.serverTimeoutInMilliseconds = 100000;
@@ -34,7 +41,9 @@ export class SignalrService {
     this.groupLeader = new BehaviorSubject<IOnlineUsers>(initUser);
     this.maxPlayer = new BehaviorSubject<number>(0);
     this.identitiesExplanation = new BehaviorSubject<string[]>([]);
-    this.wait = new BehaviorSubject<boolean>(false);
+    this.finishedViewIdentityOrNot = new BehaviorSubject<boolean>(false);
+    this.finishDisscussion = new BehaviorSubject<string>("");
+    this.nextStep = new BehaviorSubject<INextStep>(initNextStep);
   }
 
   public async initConnection(): Promise<void>{
@@ -55,22 +64,18 @@ export class SignalrService {
 
   private setSignalrClientMethods(): void{
     this.connection.on('ReceiveMessages', (messages: IMessage[]) => {
-      console.log(messages);
       this.messagesToAll.next(messages);
     });
 
     this.connection.on('CreateNewUserJoinNewGroup', (connectionID: string, groupName: string, name: string, groupMaxPlayers: string) => {
       this.httpService.createNewUserAndGroup(connectionID, groupName, name, groupMaxPlayers);
     });
-
     this.connection.on('updateOnlineUserList', (onlineUser: IOnlineUsers[]) => {
       this.onlineUser.next(onlineUser);
     });
-
     this.connection.on('updateGroupLeader', (onlineUser: IOnlineUsers) => {
       this.groupLeader.next(onlineUser);
     });
-
     this.connection.on("updatePlayersIdentities", (onlineUser: IOnlineUsers[]) => {
       this.onlineUser.next(onlineUser);
     });
@@ -80,10 +85,15 @@ export class SignalrService {
     this.connection.on("getMaxPlayersInGroup", (maxPlayer: number) => {
       this.maxPlayer.next(maxPlayer);
     });
-    this.connection.on("waitOnOtherPlayersActionInGroup", (wait: boolean) => {
-      this.wait.next(wait);
+    this.connection.on("finishedViewIdentityAndWaitOnOtherPlayers", (wait: boolean) => {
+      this.finishedViewIdentityOrNot.next(wait);
     });
-    
+    this.connection.on("currentUserInDiscusstion", (finishDisscussion: string) => {
+      this.finishDisscussion.next(finishDisscussion);
+    });
+    this.connection.on("nextStep", (nextStep: INextStep) => {
+      this.nextStep.next(nextStep);
+    });
 
     // this.connection.on('leaveGroupUserConnectionId', (userId: string) => {
     //   this.httpService.userLeaveTheGame(userId);
