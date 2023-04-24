@@ -36,10 +36,13 @@ export class HttpsCommService {
     );
   }
 
-  public userLeaveTheGame(groupName: string, userName: string, gameOn: boolean): Promise<IOnlineUsers>{
-    return firstValueFrom(
+  public userLeaveTheGame(groupName: string, userName: string, gameOn: boolean): void{
+
       this.http.delete<IOnlineUsers>(
-        this.huburl + "/userLeaveTheGame/" + groupName + "/" + userName + "/" + gameOn));
+        this.huburl + "/userLeaveTheGame/" + groupName + "/" + userName + "/" + gameOn)
+        .subscribe(response => {
+        }
+      );
   }
 
   public checkIfGroupExists(groupName: string): Observable<boolean> {
@@ -66,9 +69,9 @@ export class HttpsCommService {
     ); 
   }
 
-  public CreateAGame(groupName: string, half: number): Observable<IOnlineUsers> {
+  public CreateAGame(groupName: string, half: number): void {
     const headers = new HttpHeaders().set("Content-Type", "application/json");
-    return this.http.post<IOnlineUsers>(
+    this.http.post<IOnlineUsers>(
       this.inGameUrl + "/CreateAGame",
       {
         "groupName": groupName,
@@ -76,19 +79,12 @@ export class HttpsCommService {
         "judaisms": JSON.stringify(half)
       },
       {headers}
-    ); 
+    ).subscribe(response => {
+    }); 
   }
 
   public getMaxPlayersInGroup(groupName: string): void {
     this.http.get<void>(this.huburl + "/GetMaxPlayersInGroup/" + groupName).subscribe(
-      response => {
-
-      }
-    );
-  }
-
-  public getIdentitiesExplanation(groupName: string): void{
-    this.http.get(this.inGameUrl + "/GetIdentitiesExplanation" + "/" + groupName).subscribe(
       response => {
 
       }
@@ -107,10 +103,16 @@ export class HttpsCommService {
     ); 
   }
 
-  public whoIsDiscussing(groupName: string, name: string){
-    this.http.get(this.inGameUrl + "/WhoIsDiscussing" + "/" + groupName + "/" + name).subscribe(
-      response => {
+  public whoIsDiscussing(groupName: string, name: string): void{
+    this.http.get(this.inGameUrl + "/WhoIsDiscussing" + "/" + groupName + "/" + name).subscribe();
+  }
 
+  public voteHimOrHer(groupName: string, voteName: string, fromWho: string): void{
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.post(this.inGameUrl + "/voteHimOrHer" + "/" + groupName + "/" + voteName + "/" + fromWho,
+    {},
+    {headers}).subscribe(
+      response => {
       }
     );
   }

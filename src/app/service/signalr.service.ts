@@ -22,6 +22,11 @@ export class SignalrService {
   finishedViewIdentityOrNot: BehaviorSubject<boolean>;
   finishDisscussion: BehaviorSubject<string>;
   nextStep: BehaviorSubject<INextStep>;
+  playerInGame: BehaviorSubject<boolean>;
+  finishVoteWaitForOthers: BehaviorSubject<boolean>;
+  voteResult: BehaviorSubject<string>;
+  GameOn:  BehaviorSubject<boolean>;
+  identity: BehaviorSubject<string>;
 
   constructor(private httpService: HttpsCommService) {
     const initUser: IOnlineUsers = {userId: "",
@@ -44,6 +49,11 @@ export class SignalrService {
     this.finishedViewIdentityOrNot = new BehaviorSubject<boolean>(false);
     this.finishDisscussion = new BehaviorSubject<string>("");
     this.nextStep = new BehaviorSubject<INextStep>(initNextStep);
+    this.playerInGame = new BehaviorSubject<boolean>(true);
+    this.finishVoteWaitForOthers = new BehaviorSubject<boolean>(false);
+    this.voteResult = new BehaviorSubject<string>("");
+    this.GameOn = new BehaviorSubject<boolean>(false);
+    this.identity = new BehaviorSubject<string>("");
   }
 
   public async initConnection(): Promise<void>{
@@ -76,8 +86,9 @@ export class SignalrService {
     this.connection.on('updateGroupLeader', (onlineUser: IOnlineUsers) => {
       this.groupLeader.next(onlineUser);
     });
-    this.connection.on("updatePlayersIdentities", (onlineUser: IOnlineUsers[]) => {
-      this.onlineUser.next(onlineUser);
+    this.connection.on("updatePlayersIdentities", (identity: string) => {
+      this.identity.next(identity);
+      this.GameOn.next(true);
     });
     this.connection.on("IdentitiesExplanation", (identitiesExplanation: string[]) => {
       this.identitiesExplanation.next(identitiesExplanation);
@@ -94,9 +105,9 @@ export class SignalrService {
     this.connection.on("nextStep", (nextStep: INextStep) => {
       this.nextStep.next(nextStep);
     });
-
-    // this.connection.on('leaveGroupUserConnectionId', (userId: string) => {
-    //   this.httpService.userLeaveTheGame(userId);
-    // });
+    this.connection.on("finishVoteWaitForOthersOrVoteResult", (waitState: boolean, result: string) => {
+      this.finishVoteWaitForOthers.next(waitState);
+      this.voteResult.next(result);
+    });
   }
 }

@@ -23,7 +23,7 @@
 </div>
 <div class="container-fluid d-flex pt-5">
     <div class="row flex-fill pt-2 justify-content-between" >
-            <div class="col justify-content-start pt-2">
+            <div *ngIf="false" class="col justify-content-start pt-2">
                 <div class="dropdown-center">
                     <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Massages 
@@ -52,16 +52,19 @@
                 <strong>Day {{day}} {{daylightOrNight}}</strong>
             </div>
             <div *ngIf="groupName == groupLeader.groupName && 
-                name == groupLeader.name && !gameOn"  class="col pt-2 d-flex flex-row-reverse" >
+                name == groupLeader.name && !gameOn" 
+            class="col pt-2 d-flex flex-row-reverse">
                 <button class="btn btn-warning"  (click)="gameStart()" [disabled]="!startGameShow">
                     Start Game <i class="fa-solid fa-circle-play"></i>
                 </button>
             </div>
             
             <button #viewMyIdentity [hidden]="true" data-bs-toggle="modal" data-bs-target="#viewMyIdentity" ></button>
+            <button #prepareToVoteModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#prepareToVoteModel"></button>
             <button #waitingForOtherPlayers  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayers"></button> 
             <button #discussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#discussionModel"></button>
             <button #waitingDiscussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingDiscussionModel"></button>
+
 
             <div class="w-100"></div>
             <div class="col pt-2">
@@ -71,7 +74,10 @@
                         [childOnlineUser]="onlineUser"
                         [childGroupLeader]="groupLeader"
                         [childName]="name"
-                        [childGameOn]="gameOn"></app-players-list>
+                        [childGameOn]="gameOn"
+                        [voteState]="nextStep.nextStepName"
+                        [playerInGame]="playerInGame"
+                    ></app-players-list>
                 </div>
             </div>
     </div>
@@ -109,13 +115,14 @@
             </div>
             <div class="modal-body text-center">
                 <div>
-                    Today's topic is <strong>{{discussionTopic}}</strong>
-                    It is your turn to discuss! Please tell what you know to the others ...
+                    Today's topic is <strong>{{discussionTopic}}</strong>.
+                </div>
+                <div>
+                    It is your turn to discuss! 
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-right">
-                <!-- <button #closeDiscussionModel type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedDiscussion()">Finished<i class="fa-regular fa-circle-check"></i></button> -->
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedDiscussion()">Finished<i class="fa-regular fa-circle-check"></i></button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedDiscussion()">Finished! <i class="fa-regular fa-circle-check"></i></button>
             </div>
         </div>
     </div>
@@ -174,13 +181,23 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body text-center">
-                <div class="spinner-grow text-warning" style="width: 3rem; height: 3rem;" role="status">
+                <div class="spinner-grow text-danger" style="width: 3rem; height: 3rem;" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
                 <h5> Waiting for other players to finish talking ... </h5>
                 <button #closeWaitingDiscussionModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal" ></button>
             </div>
         </div>
-        
+    </div> 
+</div>
+
+<div class="modal fade" id="prepareToVoteModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="prepareToVoteModel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h5> Get ready to vote! <i class="fa-solid fa-check-to-slot"></i> </h5>
+                <button #closePrepareToVoteModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
+            </div>
+        </div>
     </div> 
 </div>

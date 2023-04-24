@@ -25,7 +25,9 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   @ViewChild('closeWaitingDiscussionModel', {read: ElementRef}) closeWaitingDiscussionModel?: ElementRef;
 
   @ViewChild('discussionModel', {read: ElementRef}) discussionModel?: ElementRef;
-  // @ViewChild('closeDiscussionModel', {read: ElementRef}) closeDiscussionModel?: ElementRef;
+
+  @ViewChild('prepareToVoteModel', {read: ElementRef}) prepareToVoteModel?: ElementRef;
+  @ViewChild('closePrepareToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
 
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
@@ -41,8 +43,8 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   daylightOrNight: string;
   nextStep: INextStep;
   discussionTopic: string;
-  voteState: string;
-
+  playerInGame: boolean;
+  
   
   constructor(private httpService: HttpsCommService, 
     private route: ActivatedRoute,
@@ -62,23 +64,11 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.daylightOrNight = "Daylight";
       this.nextStep = null!;
       this.discussionTopic = "";
-      this.voteState = "BeforeVote";
+      this.playerInGame = true;
   }
 
   ngOnInit(): void {
-    this.singalrService.onlineUser.pipe(tap(
-      onlineUser => {
-        if(onlineUser[0] != null && onlineUser[0].identity!= ""){
-            onlineUser.forEach(x => {
-            if(x.name == this.name){
-              this.identity = this.DeserializeIdentity(x.identity);
-            }
-          });
-          this.httpService.getIdentitiesExplanation(this.groupName!);
-          this.identityModal?.nativeElement.click();
-        }
-      }
-    )).subscribe((onlineUser: IOnlineUsers[]) => {
+    this.singalrService.onlineUser.subscribe((onlineUser: IOnlineUsers[]) => {
       this.onlineUser = onlineUser;
     });
     this.singalrService.messagesToAll.subscribe((messages: IMessage[]) => {
@@ -87,28 +77,20 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     this.singalrService.groupLeader.subscribe((groupLeader: IOnlineUsers) =>{
       this.groupLeader = groupLeader;
     });
-    this.singalrService.identitiesExplanation.subscribe((identitiesExplanation: string[]) => {
+    this.singalrService.identitiesExplanation.pipe(tap(
+      _ => {
+        this.identityModal?.nativeElement.click();
+      }
+    )).subscribe((identitiesExplanation: string[]) => {
       this.abilities = identitiesExplanation
     });
-
-
     this.singalrService.nextStep.pipe(tap(
       nextStep => {
-        if(nextStep.nextStepName == "discussing")
-        {
-          if(nextStep.options.length == 0)
-          {
-            this.discussionTopic = "Freely Disscuss";
-          }
-          else
-          {
-            this.discussionTopic = nextStep.options[0];
-          }
-          this.httpService.whoIsDiscussing(this.groupName!, "none");
-        }
+        this.prepareNextStep(nextStep);
       }
-    )).subscribe();
-
+    )).subscribe((nextStep: INextStep) => {
+      this.nextStep = nextStep;
+    });
 
     this.singalrService.maxPlayer.pipe(tap( x => {
         if(x > 0 && x == this.onlineUser.length){
@@ -121,13 +103,15 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
 
     this.singalrService.finishDisscussion.pipe(tap(
         finishDisscussion => {
-          if(finishDisscussion == "InDisscussion"){
-            this.closeWaitingDiscussionModel?.nativeElement.click();
-            this.discussionModel?.nativeElement.click();
-          } else if(finishDisscussion == "FinishDisscussionWaitOthers") {
-            this.waitingDiscussionModel?.nativeElement.click();
-          } else {
-            this.closeWaitingDiscussionModel?.nativeElement.click();
+          if(this.playerInGame) {
+            if(finishDisscussion == "InDisscussion"){
+              this.closeWaitingDiscussionModel?.nativeElement.click();
+              this.discussionModel?.nativeElement.click();
+            } else if(finishDisscussion == "FinishDisscussionWaitOthers") {
+              this.waitingDiscussionModel?.nativeElement.click();
+            } else {
+              this.closeWaitingDiscussionModel?.nativeElement.click();
+            }
           }
       })).subscribe();
 
@@ -141,41 +125,39 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
           this.closeWaitingForOtherPlayers?.nativeElement.click();
         }
       })).subscribe();
+
+    this.singalrService.playerInGame.subscribe((playerInGame: boolean) => {
+      this.playerInGame = playerInGame;
+    });
+    this.singalrService.GameOn.subscribe((GameOn: boolean) => {
+      this.gameOn = GameOn;
+    });
+    this.singalrService.identity.subscribe((identity: string) => {
+      this.identity = identity;
+    });
+    
   }
 
   ngAfterViewInit(): void {
   }
 
-  DeserializeIdentity(identity: string): string {
-    let x = Number(identity);
-    switch(x){
-      case 0: {
-        return "Nicodemus";
+  prepareNextStep(nextStep: INextStep): void{
+    console.log(nextStep.nextStepName);
+    if(nextStep.nextStepName == "discussing")
+    {
+      if(nextStep.options.length == 0)
+      {
+        this.discussionTopic = "Freely Disscuss";
       }
-      case 1:{
-        return "Judas";
+      else
+      {
+        this.discussionTopic = nextStep.options[0];
       }
-      case 2:{
-        return "Scribes";
-      }
-      case 3:{
-        return "Pharisee";
-      }
-      case 4:{
-        return "Judaism";
-      }
-      case 5:{
-        return "Peter";
-      }
-      case 6:{
-        return "John";
-      }
-      case 7:{
-        return "Laity";
-      }
-      default:{
-        return "";
-      }
+    } else if(nextStep.nextStepName == "vote") {
+      this.prepareToVoteModel?.nativeElement.click();
+      setTimeout(() => {
+        this.closePrepareToVoteModel?.nativeElement.click();
+      }, 4000);
     }
   }
   
@@ -188,12 +170,8 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   }
 
   async gameStart(): Promise<void> {
-    this.gameOn = true;
     let half = this.onlineUser.length / 2; 
-    await this.httpService.CreateAGame(this.groupName!, half).subscribe(
-      response => {
-      }
-    );
+    this.httpService.CreateAGame(this.groupName!, half);
   }
 
   finishedDiscussion() {
@@ -206,10 +184,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
 
   async userLeavesGroup(){
     await this.singalrService.connection.invoke("leaveGroup", this.groupName);
-    await this.httpService.userLeaveTheGame(this.groupName!, this.name!, this.gameOn).then(
-      response => {
-      }
-    );
+    this.httpService.userLeaveTheGame(this.groupName!, this.name!, this.gameOn);
     this.router.navigate(['/']);
   }
 }
