@@ -1,12 +1,12 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
 
 import { HttpsCommService } from '../service/https-comm.service';
 import { IOnlineUsers } from '../interface/IOnlineUser';
 import { SignalrService } from '../service/signalr.service'
 import { IMessage } from '../interface/IMessage';
-import { tap } from 'rxjs';
+import { BehaviorSubject, tap } from 'rxjs';
 import { INextStep } from '../interface/INextStep';
 
 @Component({
@@ -29,6 +29,12 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   @ViewChild('prepareToVoteModel', {read: ElementRef}) prepareToVoteModel?: ElementRef;
   @ViewChild('closePrepareToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
 
+  @ViewChild('winningModel', {read: ElementRef}) winningModel?: ElementRef;
+  @ViewChild('closeWinningModel', {read: ElementRef}) closeWinningModel?: ElementRef;
+
+  @ViewChild('nightWaitingModel', {read: ElementRef}) nightWaitingModel?: ElementRef;
+  @ViewChild('closeNightWaitingModel', {read: ElementRef}) closeNightWaitingModel?: ElementRef;
+
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
   groupName: string | null;
@@ -44,6 +50,16 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   nextStep: INextStep;
   discussionTopic: string;
   playerInGame: boolean;
+  whoWins: string;
+  voteResult: string;
+  PriestRound: boolean;
+  RulerOfTheSynagogue: boolean;
+  NicodemusSavingRound: BehaviorSubject<boolean>;
+  _NicodemusSavingRound: boolean;
+  exileName: string;
+  backupClosingButton: BehaviorSubject<boolean>;
+  _backupClosingButton: boolean;
+
   
   
   constructor(private httpService: HttpsCommService, 
@@ -65,6 +81,15 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.nextStep = null!;
       this.discussionTopic = "";
       this.playerInGame = true;
+      this.whoWins = "";
+      this.PriestRound = false;
+      this.RulerOfTheSynagogue = false;
+      this.voteResult = "";
+      this.NicodemusSavingRound = new BehaviorSubject<boolean>(false);
+      this._NicodemusSavingRound = false;
+      this.exileName = "";
+      this.backupClosingButton = new BehaviorSubject<boolean>(false);
+      this._backupClosingButton = false;
   }
 
   ngOnInit(): void {
@@ -79,7 +104,9 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     });
     this.singalrService.identitiesExplanation.pipe(tap(
       _ => {
-        this.identityModal?.nativeElement.click();
+        if(this.identityModal != null) {
+          this.identityModal.nativeElement.click();
+        }
       }
     )).subscribe((identitiesExplanation: string[]) => {
       this.abilities = identitiesExplanation
@@ -103,26 +130,50 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
 
     this.singalrService.finishDisscussion.pipe(tap(
         finishDisscussion => {
+          // console.log(finishDisscussion);
           if(this.playerInGame) {
             if(finishDisscussion == "InDisscussion"){
-              this.closeWaitingDiscussionModel?.nativeElement.click();
-              this.discussionModel?.nativeElement.click();
+              if (this.closeWaitingDiscussionModel != null && this.discussionModel != null) {
+                this.closeWaitingDiscussionModel.nativeElement.click();
+                this.discussionModel.nativeElement.click();
+              } else {
+                console.log("closeWaitingDiscussionModel or discussionModel is null!");
+              }
             } else if(finishDisscussion == "FinishDisscussionWaitOthers") {
-              this.waitingDiscussionModel?.nativeElement.click();
+              if(this.waitingDiscussionModel != null) {
+                this.waitingDiscussionModel.nativeElement.click();
+              } else {
+                console.log("waitingDiscussionModel is null!");
+              }
             } else {
-              this.closeWaitingDiscussionModel?.nativeElement.click();
+              if(this.closeWaitingDiscussionModel != null) {
+                console.log("Closing!");
+                this.backupClosingButton.next(true);
+                this.closeWaitingDiscussionModel.nativeElement.click();
+                
+              } else {
+                console.log("closeWaitingDiscussionModel is null!");
+              }
             }
           }
       })).subscribe();
 
-
+    
     this.singalrService.finishedViewIdentityOrNot.pipe(tap(
       finishedViewIdentityOrNot => {
         if(finishedViewIdentityOrNot)
         {
-          this.waitingForOtherPlayersModal?.nativeElement.click();
+          if(this.waitingForOtherPlayersModal != null) {
+            this.waitingForOtherPlayersModal.nativeElement.click();
+          } else {
+            console.log("waitingForOtherPlayersModal is null!");
+          }
         } else {
-          this.closeWaitingForOtherPlayers?.nativeElement.click();
+          if(this.closeWaitingForOtherPlayers != null) {
+            this.closeWaitingForOtherPlayers.nativeElement.click();
+          } else {
+            console.log("closeWaitingForOtherPlayers is null!");
+          }
         }
       })).subscribe();
 
@@ -135,42 +186,90 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     this.singalrService.identity.subscribe((identity: string) => {
       this.identity = identity;
     });
-    
+    this.singalrService.voteResult.subscribe((voteResult: string) => {
+      this.voteResult = voteResult;
+    });
+
+    // assign priest and ROTS on the first night.
+    this.singalrService.PriestRound.pipe(tap(
+      // if Priest finish exilting, 
+      (PriestRound: boolean) => {
+        if(!PriestRound) {
+          if(this.nightWaitingModel != null) {
+            this.nightWaitingModel.nativeElement.click();
+          } else {
+            console.log("nightWaitingModel is null!");
+          }
+        }
+    })).subscribe((PriestRound: boolean) => {
+      this.PriestRound = PriestRound;
+    });
+    this.singalrService.RulerOfTheSynagogue.subscribe((RulerOfTheSynagogue: boolean) => {
+      this.RulerOfTheSynagogue = RulerOfTheSynagogue;
+    });
+
+    this.backupClosingButton.subscribe((backupClosingButton) => {
+      this._backupClosingButton = backupClosingButton;
+    });
+    this.NicodemusSavingRound.subscribe((NicodemusSavingRound) => {
+      this._NicodemusSavingRound = NicodemusSavingRound;
+    });
   }
 
   ngAfterViewInit(): void {
   }
 
   prepareNextStep(nextStep: INextStep): void{
-    console.log(nextStep.nextStepName);
     if(nextStep.nextStepName == "discussing")
     {
       if(nextStep.options.length == 0)
       {
         this.discussionTopic = "Freely Disscuss";
-      }
-      else
-      {
+      } else {
         this.discussionTopic = nextStep.options[0];
       }
     } else if(nextStep.nextStepName == "vote") {
-      this.prepareToVoteModel?.nativeElement.click();
+      if(this.prepareToVoteModel != null) {
+        this.prepareToVoteModel.nativeElement.click();
+      } else {
+        console.log("prepareToVoteModel is null");
+      }
       setTimeout(() => {
-        this.closePrepareToVoteModel?.nativeElement.click();
-      }, 4000);
+        if(this.closePrepareToVoteModel != null) {
+          this.closePrepareToVoteModel.nativeElement.click();
+        } else {
+          console.log("closePrepareToVoteModel is null!");
+        }
+      }, 3000);
+    } else if(nextStep.nextStepName == "Wins") {
+      // this.whoWins = nextStep.options[0];
+      // this.winningModel?.nativeElement.click();
+      // setTimeout(() => {
+      //   this.closeWinningModel?.nativeElement.click();
+      //   // reset everything TODO
+      // }, 3000);
+    } else if(nextStep.nextStepName == "SetUserToNightWaiting") {
+        this.backupClosingButton.next(false);
+        if(this.nightWaitingModel != null) {
+          this.nightWaitingModel.nativeElement.click();
+        } else {
+          console.log("nightWaitingModel is null!");
+        }
+    } else if(nextStep.nextStepName == "NicodemusSavingRound") {
+      console.log("NicodemusSavingRound");
+      this.exileName = nextStep.options[0];
+      this.NicodemusSavingRound.next(true); 
     }
   }
   
-  showInOurGame():void {
-    const inGame = document.getElementById('inGame');
-    const outGame = document.getElementById('outGame');
-    if(inGame && outGame) {
-      
-    }
+  NicodemusAction(action: boolean) 
+  {
+    this.NicodemusSavingRound.next(false);
+    this.httpService.NicodemusAction(this.groupName!, action);
   }
 
   async gameStart(): Promise<void> {
-    let half = this.onlineUser.length / 2; 
+    let half = this.onlineUser.length / 2;
     this.httpService.CreateAGame(this.groupName!, half);
   }
 

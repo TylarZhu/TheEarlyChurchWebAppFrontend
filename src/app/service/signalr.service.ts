@@ -11,14 +11,21 @@ import { INextStep } from '../interface/INextStep';
   providedIn: 'root'
 })
 export class SignalrService {
-
   hubUrl: string;
   connection: singalR.HubConnection;
+
+  // -------------- //
+  // Group Entities //
+  // -------------- //
   onlineUser: BehaviorSubject<IOnlineUsers[]>;
   messagesToAll: BehaviorSubject<IMessage[]>;
   identitiesExplanation: BehaviorSubject<string[]>;
   groupLeader: BehaviorSubject<IOnlineUsers>;
   maxPlayer: BehaviorSubject<number>;
+
+  // ------------- //
+  // Game Entities //
+  // ------------- //
   finishedViewIdentityOrNot: BehaviorSubject<boolean>;
   finishDisscussion: BehaviorSubject<string>;
   nextStep: BehaviorSubject<INextStep>;
@@ -27,6 +34,10 @@ export class SignalrService {
   voteResult: BehaviorSubject<string>;
   GameOn:  BehaviorSubject<boolean>;
   identity: BehaviorSubject<string>;
+  PriestRound: BehaviorSubject<boolean>;
+  PriestName: BehaviorSubject<string>;
+  RulerOfTheSynagogue: BehaviorSubject<boolean>;
+
 
   constructor(private httpService: HttpsCommService) {
     const initUser: IOnlineUsers = {userId: "",
@@ -54,6 +65,9 @@ export class SignalrService {
     this.voteResult = new BehaviorSubject<string>("");
     this.GameOn = new BehaviorSubject<boolean>(false);
     this.identity = new BehaviorSubject<string>("");
+    this.PriestRound = new BehaviorSubject<boolean>(false);
+    this.RulerOfTheSynagogue = new BehaviorSubject<boolean>(false);
+    this.PriestName = new BehaviorSubject<string>("");
   }
 
   public async initConnection(): Promise<void>{
@@ -108,6 +122,13 @@ export class SignalrService {
     this.connection.on("finishVoteWaitForOthersOrVoteResult", (waitState: boolean, result: string) => {
       this.finishVoteWaitForOthers.next(waitState);
       this.voteResult.next(result);
+    });
+    this.connection.on("PriestRound", (status: boolean, priestName: string) => {
+      this.PriestRound.next(status);
+      this.PriestName.next(priestName);
+    });
+    this.connection.on("AssignRulerOfTheSynagogue", (status: boolean) => {
+      this.RulerOfTheSynagogue.next(status);
     });
   }
 }

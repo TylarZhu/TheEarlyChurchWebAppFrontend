@@ -64,11 +64,13 @@
             <button #waitingForOtherPlayers  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayers"></button> 
             <button #discussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#discussionModel"></button>
             <button #waitingDiscussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingDiscussionModel"></button>
-
-
+            <button #winningModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#winningModel"></button>
+            <button #nightWaitingModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#nightWaitingModel"></button>
+        
             <div class="w-100"></div>
             <div class="col pt-2">
                 <div class="list-group">
+                    <!-- isPriest make sure Priest does not exile himself -->
                     <app-players-list 
                         [childGroupName]="groupName" 
                         [childOnlineUser]="onlineUser"
@@ -110,15 +112,21 @@
 <div class="modal fade" id="discussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="discussionModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <p class="modal-title">Discussion</p>
+            <div class="modal-header d-flex justify-content-between">
+                <div>
+                    <p class="modal-title">Discussion</p>
+                </div>
             </div>
-            <div class="modal-body text-center">
+            <div class="modal-body">
                 <div>
                     Today's topic is <strong>{{discussionTopic}}</strong>.
                 </div>
                 <div>
                     It is your turn to discuss! 
+                </div>
+
+                <div>
+                    Just a reminder, you identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-right">
@@ -187,6 +195,11 @@
                 <h5> Waiting for other players to finish talking ... </h5>
                 <button #closeWaitingDiscussionModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal" ></button>
             </div>
+            <div *ngIf="_backupClosingButton">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
     </div> 
 </div>
@@ -197,6 +210,58 @@
             <div class="modal-body text-center">
                 <h5> Get ready to vote! <i class="fa-solid fa-check-to-slot"></i> </h5>
                 <button #closePrepareToVoteModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
+            </div>
+        </div>
+    </div> 
+</div>
+
+<div class="modal fade" id="winningModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="winningModel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h5> {{whoWins}} Wins! <i class="fa-solid fa-crown"></i> </h5>
+                <button #closeWinningModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
+            </div>
+        </div>
+    </div> 
+</div>
+
+<div class="modal fade" id="nightWaitingModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-grow text-danger" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div> 
+                    <strong>{{voteResult}}</strong>
+                </div>
+                <div> It is <strong> Day {{day}} </strong> night time! <i class="fa-solid fa-cloud-moon"></i> </div>
+                <div> Please <strong>do not look at other's screen</strong>, and wait for the daylight ... </div>
+                <div *ngIf="PriestRound">
+                    <div> You are the <strong>Priest</strong> in this game!</div>
+                    <div> It is your turn! If you are ready, please click the exlie button. </div>
+                </div>
+                <div *ngIf="RulerOfTheSynagogue">
+                    <div> You are the <strong>Ruler Of The Synagogue</strong> in this game!</div>
+                </div>
+                <div *ngIf="_NicodemusSavingRound">
+                    <div> You are the <strong>Nicodemus</strong> in this game!</div>
+                    <div> It is your turn! Tonight, <strong> {{exileName}} </strong> will be exiled. Are you going to save him/her? </div>
+                </div>
+                <button #closeNightWaitingModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
+            </div>
+            <div *ngIf="PriestRound">
+                <div class="modal-footer d-flex justify-content-right">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ready to exile <i class="fa-regular fa-circle-check"></i></button>
+                </div>
+            </div>
+            <div *ngIf="_NicodemusSavingRound">
+                <div class="modal-footer text-center d-flex justify-content-between">
+                    <button type="button" class="btn btn-danger" (click)="NicodemusAction(false)">No <i class="fa-solid fa-xmark"></i></button>
+
+                    <button type="button" class="btn btn-primary" (click)="NicodemusAction(true)">Save <i class="fa-solid fa-handshake-angle"></i></button>
+                </div>
             </div>
         </div>
     </div> 

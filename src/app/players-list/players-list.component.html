@@ -25,12 +25,16 @@
                     </div>
                     <div *ngIf="playerInGame && childGameOn">
                         <div *ngIf="voteState == 'vote'">
-                            <button type="button" class="btn btn-danger" id="vote"  data-bs-toggle="modal" data-bs-target="#voteConformationModel" (click)="voteHimOrHer(user.name, false)">
+                            <button type="button" class="btn btn-danger" id="vote" 
+                            data-bs-toggle="modal" data-bs-target="#voteConformationModel" (click)="voteHimOrHer(user.name, false)">
                                 Vote <i class="fa-regular fa-envelope"></i>
                             </button>
                         </div>
-                        <div *ngIf="false">
-                            <button type="button" class="btn btn-danger" id="exile">Exile <i class="fa-solid fa-person-walking"></i></button>
+                        <div *ngIf="isPriest && user.name != PriestName">
+                            <button type="button" class="btn btn-danger" id="exile"
+                            data-bs-toggle="modal" data-bs-target="#exileConformationModel" (click)="exileHimOrHer(user.name, false)">
+                                Exile <i class="fa-solid fa-person-walking"></i>
+                            </button>
                         </div>
                         <div *ngIf="false">
                             <button type="button" class="btn btn-danger" id="check">Check <i class="fa-solid fa-magnifying-glass"></i></button>
@@ -76,6 +80,22 @@
     </div>
 </div>
 
+<div class="modal fade" id="exileConformationModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="exileConformationModel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div>
+                    Are you sure to exile <strong>{{votePersonName}}</strong>?
+                </div>
+            </div>
+            <div class="modal-footer text-center d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No <i class="fa-solid fa-xmark"></i></button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="exileHimOrHer(votePersonName, true)">Conform <i class="fa-regular fa-circle-check"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <button #waitOthersToVoteModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitOthersToVoteModel"></button>
 <div class="modal fade" id="waitOthersToVoteModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="waitOthersToVoteModel" aria-hidden="true">
     <div class="modal-dialog">
@@ -86,18 +106,6 @@
                 </div>
                 <h5> Please wait for others to finish voting ...  <i class="fa-solid fa-check-to-slot"></i> </h5>
                 <button #closeWaitOthersToVoteModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
-            </div>
-        </div>
-    </div> 
-</div>
-
-<button #voteResultModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#voteResultModel"></button>
-<div class="modal fade" id="voteResultModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="voteResultModel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body text-center">
-                <h5> {{voteResult}} </h5>
-                <button #closeVoteResultModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
             </div>
         </div>
     </div> 

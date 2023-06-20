@@ -116,4 +116,29 @@ export class HttpsCommService {
       }
     );
   }
+
+  public assignPriestAndRulerOfTheSynagogue(groupName: string) {
+    this.http.get(this.inGameUrl + "/assignPriestAndRulerOfTheSynagogue" + "/" + groupName).subscribe();
+  }
+
+  public aboutToExileHimOrHer(groupName: string, exileName: string): void{
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.put(this.inGameUrl + "/aboutToExileHimOrHer" + "/" + groupName + "/" + exileName, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
+
+  public NicodemusAction(groupName: string, saveOrNot: boolean)
+  {
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.put(this.inGameUrl + "/NicodemusAction" + "/" + groupName + "/" + saveOrNot, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
 }

@@ -3,6 +3,7 @@ import { HttpsCommService } from '../service/https-comm.service';
 
 import { IOnlineUsers } from '../interface/IOnlineUser';
 import { SignalrService } from '../service/signalr.service';
+import { GameRoomComponent } from '../game-room/game-room.component';
 import { tap } from 'rxjs';
 
 @Component({
@@ -16,23 +17,23 @@ export class PlayersListComponent implements OnInit{
   @Input() childOnlineUser: IOnlineUsers[];
   @Input() childGroupLeader: IOnlineUsers;
   @Input() childName: string | null;
-  @Input() childGameOn: boolean;
-  @Input() voteState: string
-  @Input() playerInGame: boolean
+  @Input() childGameOn: boolean; 
+  @Input() playerInGame: boolean;
+  @Input() voteState: string;
 
   @ViewChild('waitOthersToVoteModel', {read: ElementRef}) waitOthersToVoteModel?: ElementRef;
   @ViewChild('closeWaitOthersToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
 
-  @ViewChild('voteResultModel', {read: ElementRef}) voteResultModel?: ElementRef;
-  @ViewChild('closeVoteResultModel', {read: ElementRef}) closeVoteResultModel?: ElementRef;
-
   votePersonName: string;
   conformToVote: boolean;
-  voteResult: string;
-  
+  exilePersonName: string;
+  exileToVote: boolean;
+  isPriest: boolean;
+  PriestName: string;
   
   constructor(private httpService: HttpsCommService,
-      private singalrService: SignalrService){
+      private singalrService: SignalrService,
+      private gameRoomComponent: GameRoomComponent){
     this.childGroupName = "";
     this.childOnlineUser = [];
     this.childGroupLeader = null!;
@@ -42,22 +43,34 @@ export class PlayersListComponent implements OnInit{
     this.votePersonName = "";
     this.conformToVote = false;
     this.playerInGame = true;
-    this.voteResult = "";
+    this.exilePersonName = "";
+    this.exileToVote = false;
+    this.isPriest = false;
+    this.PriestName = "";
   }
 
   ngOnInit(): void {
     this.singalrService.finishVoteWaitForOthers.pipe(tap(
       finishVoteWaitForOthers => {
         if(finishVoteWaitForOthers) {
-          this.waitOthersToVoteModel?.nativeElement.click();
+          if(this.waitOthersToVoteModel != null) {
+            this.waitOthersToVoteModel.nativeElement.click();
+          } else {
+            console.log("waitOthersToVoteModel is null!");
+          }
         } else {
-          this.closePrepareToVoteModel?.nativeElement.click();
-          this.showVoteResult();
+          if(this.closePrepareToVoteModel != null) {
+            this.closePrepareToVoteModel.nativeElement.click();
+          } else {
+            console.log("closePrepareToVoteModel is null!");
+          }
         }
       })).subscribe();
-
-    this.singalrService.voteResult.subscribe((voteResult: string) => {
-      this.voteResult = voteResult;
+    this.singalrService.PriestRound.subscribe((PriestRound: boolean) => {
+      this.isPriest = PriestRound;
+    });
+    this.singalrService.PriestName.subscribe((PriestName: string) => {
+      this.PriestName = PriestName;
     });
   }
 
@@ -65,17 +78,18 @@ export class PlayersListComponent implements OnInit{
     await this.httpService.assignNextGroupLeader(this.childGroupName!, nextLeader, this.childGroupLeader.name);
   }
 
-  showVoteResult() {
-    this.voteResultModel?.nativeElement.click();
-    setTimeout(() => {
-      this.closeVoteResultModel?.nativeElement.click();
-    }, 4000);
+  exileHimOrHer(name: string, conformToExile: boolean) {
+    this.votePersonName = name;
+    if(conformToExile && this.playerInGame) {
+      this.httpService.aboutToExileHimOrHer(this.childGroupName!, name);
+    }
   }
 
-  async voteHimOrHer(name: string, conformToVote: boolean){
+  voteHimOrHer(name: string, conformToVote: boolean){
     this.votePersonName = name;
     if(conformToVote && this.playerInGame) {
       this.httpService.voteHimOrHer(this.childGroupName!, name, this.childName!);
+      this.conformToVote = false;
     }
   }
 }
