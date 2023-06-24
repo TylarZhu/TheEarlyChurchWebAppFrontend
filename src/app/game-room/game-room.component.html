@@ -25,7 +25,8 @@
     <div class="row flex-fill pt-2 justify-content-between" >
             <div *ngIf="false" class="col justify-content-start pt-2">
                 <div class="dropdown-center">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-primary dropdown-toggle" type="button" 
+                    data-bs-toggle="dropdown" aria-expanded="false">
                         Massages 
                         <i class="fa-regular fa-comments"></i>
                     </button>
@@ -66,6 +67,7 @@
             <button #waitingDiscussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingDiscussionModel"></button>
             <button #winningModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#winningModel"></button>
             <button #nightWaitingModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#nightWaitingModel"></button>
+            <button #AnnounceExileModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#AnnounceExileModel"></button>
         
             <div class="w-100"></div>
             <div class="col pt-2">
@@ -78,7 +80,6 @@
                         [childName]="name"
                         [childGameOn]="gameOn"
                         [voteState]="nextStep.nextStepName"
-                        [playerInGame]="playerInGame"
                     ></app-players-list>
                 </div>
             </div>
@@ -86,7 +87,8 @@
 </div>
 
 
-<div class="modal fade" id="backToMenu" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="backToMenu" aria-hidden="true">
+<div class="modal fade" id="backToMenu" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="backToMenu" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -101,15 +103,20 @@
                 </p>
             </div>
             <div class="modal-footer text-center d-flex justify-content-between">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No <i class="fa-solid fa-xmark"></i></button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="userLeavesGroup()">Yes <i class="fa-solid fa-right-from-bracket"></i></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    No <i class="fa-solid fa-xmark"></i>
+                </button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="userLeavesGroup()">
+                    Yes <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </div>
         </div>
         
     </div>
 </div>
 
-<div class="modal fade" id="discussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="discussionModel" aria-hidden="true">
+<div class="modal fade" id="discussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="discussionModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header d-flex justify-content-between">
@@ -130,20 +137,24 @@
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedDiscussion()">Finished! <i class="fa-regular fa-circle-check"></i></button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedDiscussion()">
+                    Finished! <i class="fa-regular fa-circle-check"></i>
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="viewMyIdentity" aria-hidden="true">
+<div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="viewMyIdentity" aria-hidden="true">
     <app-view-identity-modal 
     [childAbilities]="abilities"
     [identity]="identity"
     (findViewIdentityReadyToPlay)="findViewIdentityReadyToPlay()"></app-view-identity-modal>
 </div>
 
-<div class="modal fade" id="info" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="info" aria-hidden="true">
+<div class="modal fade" id="info" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="info" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -163,14 +174,17 @@
                 </div>
             </div>
             <div class="modal-footer text-center d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >Got it! <i class="fa-regular fa-circle-check"></i></button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >
+                    Got it! <i class="fa-regular fa-circle-check"></i>
+                </button>
             </div>
         </div>
         
     </div> 
 </div>
 
-<div class="modal fade" id="waitingForOtherPlayers" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayers" aria-hidden="true">
+<div class="modal fade" id="waitingForOtherPlayers" tabindex="-1" data-bs-backdrop="static" 
+data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayers" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body text-center">
@@ -178,14 +192,16 @@
                     <span class="visually-hidden">Loading...</span>
                 </div>
                 <h5> Waiting for other players to finish viewing their identity ... </h5>
-                <button #closeWaitingForOtherPlayers  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal" ></button>
+                <button #closeWaitingForOtherPlayers  [hidden]="true" type="button" class="btn btn-primary" 
+                data-bs-dismiss="modal" ></button>
             </div>
         </div>
         
     </div> 
 </div>
 
-<div class="modal fade" id="waitingDiscussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="waitingDiscussionModel" aria-hidden="true">
+<div class="modal fade" id="waitingDiscussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="waitingDiscussionModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body text-center">
@@ -193,7 +209,8 @@
                     <span class="visually-hidden">Loading...</span>
                 </div>
                 <h5> Waiting for other players to finish talking ... </h5>
-                <button #closeWaitingDiscussionModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal" ></button>
+                <button #closeWaitingDiscussionModel  [hidden]="true" type="button" class="btn btn-primary" 
+                data-bs-dismiss="modal" ></button>
             </div>
             <div *ngIf="_backupClosingButton">
                 <div class="modal-footer">
@@ -204,29 +221,34 @@
     </div> 
 </div>
 
-<div class="modal fade" id="prepareToVoteModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="prepareToVoteModel" aria-hidden="true">
+<div class="modal fade" id="prepareToVoteModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="prepareToVoteModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body text-center">
                 <h5> Get ready to vote! <i class="fa-solid fa-check-to-slot"></i> </h5>
-                <button #closePrepareToVoteModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
+                <button #closePrepareToVoteModel  [hidden]="true" type="button" class="btn btn-primary" 
+                data-bs-dismiss="modal"></button>
             </div>
         </div>
     </div> 
 </div>
 
-<div class="modal fade" id="winningModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="winningModel" aria-hidden="true">
+<div class="modal fade" id="winningModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="winningModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body text-center">
                 <h5> {{whoWins}} Wins! <i class="fa-solid fa-crown"></i> </h5>
-                <button #closeWinningModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
+                <button #closeWinningModel  [hidden]="true" type="button" class="btn btn-primary" 
+                data-bs-dismiss="modal"></button>
             </div>
         </div>
     </div> 
 </div>
 
-<div class="modal fade" id="nightWaitingModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
+<div class="modal fade" id="nightWaitingModel" tabindex="-1" data-bs-backdrop="static" 
+data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body text-center">
@@ -246,22 +268,67 @@
                     <div> You are the <strong>Ruler Of The Synagogue</strong> in this game!</div>
                 </div>
                 <div *ngIf="_NicodemusSavingRound">
-                    <div> You are the <strong>Nicodemus</strong> in this game!</div>
-                    <div> It is your turn! Tonight, <strong> {{exileName}} </strong> will be exiled. Are you going to save him/her? </div>
+                    <div> You are <strong>Nicodemus</strong> in this game!</div>
+                    <div> It is your turn! Tonight, <strong> {{aboutToExileName}} </strong> will be exiled. Are you going to save him/her? </div>
+                </div>
+                <div *ngIf="_JohnFireRound">
+                    <div> You are <strong>John</strong> in this game! It is your turn!</div>
+                </div>
+
+                <div *ngIf="_JudasCheckRound">
+                    <div> You are <strong>Judas</strong> in this game! It is your turn!</div>
                 </div>
                 <button #closeNightWaitingModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal"></button>
             </div>
             <div *ngIf="PriestRound">
                 <div class="modal-footer d-flex justify-content-right">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ready to exile <i class="fa-regular fa-circle-check"></i></button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        Ready to exile <i class="fa-regular fa-circle-check"></i>
+                    </button>
                 </div>
             </div>
             <div *ngIf="_NicodemusSavingRound">
                 <div class="modal-footer text-center d-flex justify-content-between">
-                    <button type="button" class="btn btn-danger" (click)="NicodemusAction(false)">No <i class="fa-solid fa-xmark"></i></button>
-
-                    <button type="button" class="btn btn-primary" (click)="NicodemusAction(true)">Save <i class="fa-solid fa-handshake-angle"></i></button>
+                    <button type="button" class="btn btn-danger" (click)="NicodemusAction(false)">
+                        No <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary" (click)="NicodemusAction(true)">
+                        Save <i class="fa-solid fa-handshake-angle"></i>
+                    </button>
                 </div>
+            </div>
+            <div *ngIf="_JohnFireRound">
+                <div class="modal-footer text-center d-flex justify-content-between">
+                    <button type="button" class="btn btn-danger" (click)="BeginToFire(false)">
+                        No <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="BeginToFire(true)">
+                        Fire <i class="fa-solid fa-fire-flame-curved"></i>
+                    </button>
+                </div>
+            </div>
+            <div *ngIf="_JudasCheckRound">
+                <div class="modal-footer d-flex justify-content-right">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="BeginToCheck()">
+                        check <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>
+
+<div class="modal fade" id="AnnounceExileModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="AnnounceExileModel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h5> {{exileName}} has been exiled! <i class="fa-solid fa-crown"></i> </h5>
+            </div>
+            <div class="modal-footer d-flex justify-content-right">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="BeginToCheck()">
+                    Ok <i class="fa-regular fa-circle-check"></i>
+                </button>
             </div>
         </div>
     </div> 

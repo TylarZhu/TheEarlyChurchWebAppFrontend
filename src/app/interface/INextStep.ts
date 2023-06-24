@@ -1,4 +1,4 @@
 export interface INextStep{
     nextStepName: string,
-    options: string[]
+    options?: string[]
 }

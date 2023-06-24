@@ -29,7 +29,7 @@ export class SignalrService {
   finishedViewIdentityOrNot: BehaviorSubject<boolean>;
   finishDisscussion: BehaviorSubject<string>;
   nextStep: BehaviorSubject<INextStep>;
-  playerInGame: BehaviorSubject<boolean>;
+  playerInGame: BehaviorSubject<string[]>;
   finishVoteWaitForOthers: BehaviorSubject<boolean>;
   voteResult: BehaviorSubject<string>;
   GameOn:  BehaviorSubject<boolean>;
@@ -37,6 +37,8 @@ export class SignalrService {
   PriestRound: BehaviorSubject<boolean>;
   PriestName: BehaviorSubject<string>;
   RulerOfTheSynagogue: BehaviorSubject<boolean>;
+  JudasCheckResult: BehaviorSubject<boolean>;
+  exileName: BehaviorSubject<string>;
 
 
   constructor(private httpService: HttpsCommService) {
@@ -60,7 +62,7 @@ export class SignalrService {
     this.finishedViewIdentityOrNot = new BehaviorSubject<boolean>(false);
     this.finishDisscussion = new BehaviorSubject<string>("");
     this.nextStep = new BehaviorSubject<INextStep>(initNextStep);
-    this.playerInGame = new BehaviorSubject<boolean>(true);
+    this.playerInGame = new BehaviorSubject<string[]>([]);
     this.finishVoteWaitForOthers = new BehaviorSubject<boolean>(false);
     this.voteResult = new BehaviorSubject<string>("");
     this.GameOn = new BehaviorSubject<boolean>(false);
@@ -68,6 +70,8 @@ export class SignalrService {
     this.PriestRound = new BehaviorSubject<boolean>(false);
     this.RulerOfTheSynagogue = new BehaviorSubject<boolean>(false);
     this.PriestName = new BehaviorSubject<string>("");
+    this.JudasCheckResult = new BehaviorSubject<boolean>(false);
+    this.exileName = new BehaviorSubject<string>("");
   }
 
   public async initConnection(): Promise<void>{
@@ -129,6 +133,15 @@ export class SignalrService {
     });
     this.connection.on("AssignRulerOfTheSynagogue", (status: boolean) => {
       this.RulerOfTheSynagogue.next(status);
+    });
+    this.connection.on("JudasCheckResult", (status: boolean) => {
+      this.JudasCheckResult.next(status);
+    });
+    this.connection.on("updateExiledUsers", (user: string[]) => {
+      this.playerInGame.next(user);
+    });
+    this.connection.on("announceExile", (name: string) => {
+      this.exileName.next(name);
     });
   }
 }

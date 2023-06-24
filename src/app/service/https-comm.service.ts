@@ -117,7 +117,7 @@ export class HttpsCommService {
     );
   }
 
-  public assignPriestAndRulerOfTheSynagogue(groupName: string) {
+  public assignPriestAndRulerOfTheSynagogue(groupName: string): void {
     this.http.get(this.inGameUrl + "/assignPriestAndRulerOfTheSynagogue" + "/" + groupName).subscribe();
   }
 
@@ -131,10 +131,39 @@ export class HttpsCommService {
     );
   }
 
-  public NicodemusAction(groupName: string, saveOrNot: boolean)
-  {
+  public NicodemusAction(groupName: string, saveOrNot: boolean): void {
     const headers = new HttpHeaders().set("Content-Type", "application/json");
     this.http.put(this.inGameUrl + "/NicodemusAction" + "/" + groupName + "/" + saveOrNot, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
+
+  public FireHimOrHer(groupName: string, firePerson: string): void {
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.put(this.inGameUrl + "/JohnFireRound" + "/" + groupName + "/" + firePerson + "/" + true, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
+
+  public JudasCheckRound(groupName: string, checkPerson: string): void {
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.put(this.inGameUrl + "/JudasCheckRound" + "/" + groupName + "/" + checkPerson, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
+  
+  public NightRoundEnd(groupName: string): void{
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.put(this.inGameUrl + "/Daylight" + "/" + groupName, 
     {},
     {headers}).subscribe(
       response => {

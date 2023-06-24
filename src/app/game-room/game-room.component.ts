@@ -35,6 +35,8 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   @ViewChild('nightWaitingModel', {read: ElementRef}) nightWaitingModel?: ElementRef;
   @ViewChild('closeNightWaitingModel', {read: ElementRef}) closeNightWaitingModel?: ElementRef;
 
+  @ViewChild('AnnounceExileModel', {read: ElementRef}) AnnounceExileModel?: ElementRef;
+
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
   groupName: string | null;
@@ -49,16 +51,21 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   daylightOrNight: string;
   nextStep: INextStep;
   discussionTopic: string;
-  playerInGame: boolean;
+  playerInGame: string[];
   whoWins: string;
   voteResult: string;
   PriestRound: boolean;
   RulerOfTheSynagogue: boolean;
   NicodemusSavingRound: BehaviorSubject<boolean>;
   _NicodemusSavingRound: boolean;
+  aboutToExileName: string;
   exileName: string;
   backupClosingButton: BehaviorSubject<boolean>;
   _backupClosingButton: boolean;
+  JohnFireRound: BehaviorSubject<boolean>;
+  _JohnFireRound: boolean;
+  JudasCheckRound: BehaviorSubject<boolean>;
+  _JudasCheckRound: boolean;
 
   
   
@@ -80,16 +87,21 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.daylightOrNight = "Daylight";
       this.nextStep = null!;
       this.discussionTopic = "";
-      this.playerInGame = true;
+      this.playerInGame = [];
       this.whoWins = "";
       this.PriestRound = false;
       this.RulerOfTheSynagogue = false;
       this.voteResult = "";
       this.NicodemusSavingRound = new BehaviorSubject<boolean>(false);
       this._NicodemusSavingRound = false;
+      this.aboutToExileName = "";
       this.exileName = "";
       this.backupClosingButton = new BehaviorSubject<boolean>(false);
       this._backupClosingButton = false;
+      this.JohnFireRound = new BehaviorSubject<boolean>(false);
+      this._JohnFireRound = false;
+      this.JudasCheckRound = new BehaviorSubject<boolean>(false);
+      this._JudasCheckRound = false;
   }
 
   ngOnInit(): void {
@@ -131,9 +143,10 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     this.singalrService.finishDisscussion.pipe(tap(
         finishDisscussion => {
           // console.log(finishDisscussion);
-          if(this.playerInGame) {
+          if(!this.playerInGame.includes(this.name!)) {
             if(finishDisscussion == "InDisscussion"){
               if (this.closeWaitingDiscussionModel != null && this.discussionModel != null) {
+                this.backupClosingButton.next(true);
                 this.closeWaitingDiscussionModel.nativeElement.click();
                 this.discussionModel.nativeElement.click();
               } else {
@@ -141,6 +154,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
               }
             } else if(finishDisscussion == "FinishDisscussionWaitOthers") {
               if(this.waitingDiscussionModel != null) {
+                this.backupClosingButton.next(false);
                 this.waitingDiscussionModel.nativeElement.click();
               } else {
                 console.log("waitingDiscussionModel is null!");
@@ -177,7 +191,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
         }
       })).subscribe();
 
-    this.singalrService.playerInGame.subscribe((playerInGame: boolean) => {
+    this.singalrService.playerInGame.subscribe((playerInGame: string[]) => {
       this.playerInGame = playerInGame;
     });
     this.singalrService.GameOn.subscribe((GameOn: boolean) => {
@@ -214,19 +228,33 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     this.NicodemusSavingRound.subscribe((NicodemusSavingRound) => {
       this._NicodemusSavingRound = NicodemusSavingRound;
     });
+    this.JohnFireRound.subscribe((JohnFireRound) => {
+      this._JohnFireRound = JohnFireRound;
+    });
+    this.JudasCheckRound.subscribe((JudasCheckRound) => {
+      this._JudasCheckRound = JudasCheckRound;
+    });
+    this.singalrService.exileName.pipe(tap(_ => {
+      if(this.AnnounceExileModel != null) {
+        this.AnnounceExileModel.nativeElement.click();
+      }
+    })).subscribe((exileName: string) => {
+      this.exileName = exileName;
+    });
   }
 
   ngAfterViewInit(): void {
   }
 
   prepareNextStep(nextStep: INextStep): void{
+    console.log(nextStep.nextStepName);
     if(nextStep.nextStepName == "discussing")
     {
-      if(nextStep.options.length == 0)
+      if(nextStep.options == undefined)
       {
         this.discussionTopic = "Freely Disscuss";
       } else {
-        this.discussionTopic = nextStep.options[0];
+        this.discussionTopic = nextStep.options![0];
       }
     } else if(nextStep.nextStepName == "vote") {
       if(this.prepareToVoteModel != null) {
@@ -241,13 +269,6 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
           console.log("closePrepareToVoteModel is null!");
         }
       }, 3000);
-    } else if(nextStep.nextStepName == "Wins") {
-      // this.whoWins = nextStep.options[0];
-      // this.winningModel?.nativeElement.click();
-      // setTimeout(() => {
-      //   this.closeWinningModel?.nativeElement.click();
-      //   // reset everything TODO
-      // }, 3000);
     } else if(nextStep.nextStepName == "SetUserToNightWaiting") {
         this.backupClosingButton.next(false);
         if(this.nightWaitingModel != null) {
@@ -256,9 +277,18 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
           console.log("nightWaitingModel is null!");
         }
     } else if(nextStep.nextStepName == "NicodemusSavingRound") {
-      console.log("NicodemusSavingRound");
-      this.exileName = nextStep.options[0];
+      this.aboutToExileName = nextStep.options![0];
       this.NicodemusSavingRound.next(true); 
+    } else if(nextStep.nextStepName == "JohnFireRound") {
+      this.JohnFireRound.next(true);
+    } else if(nextStep.nextStepName == "JudasCheckRound") {
+      this.JudasCheckRound.next(true);
+    } else if(nextStep.nextStepName == "quitNightWaiting") {
+      if(this.closeNightWaitingModel != null) {
+        this.closeNightWaitingModel.nativeElement.click();
+      } else {
+        console.log("nightWaitingModel is null!");
+      }
     }
   }
   
@@ -266,6 +296,19 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   {
     this.NicodemusSavingRound.next(false);
     this.httpService.NicodemusAction(this.groupName!, action);
+  }
+
+  BeginToFire(choice: boolean)
+  {
+    if(!choice) {
+      this.httpService.FireHimOrHer(this.groupName!, "");
+    }
+    this.JohnFireRound.next(false);
+  }
+
+  BeginToCheck()
+  {
+    this.JudasCheckRound.next(false);
   }
 
   async gameStart(): Promise<void> {
