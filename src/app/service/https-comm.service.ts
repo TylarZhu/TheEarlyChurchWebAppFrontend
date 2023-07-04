@@ -163,7 +163,7 @@ export class HttpsCommService {
   
   public NightRoundEnd(groupName: string): void{
     const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.put(this.inGameUrl + "/Daylight" + "/" + groupName, 
+    this.http.put(this.inGameUrl + "/NightRoundEnd" + "/" + groupName, 
     {},
     {headers}).subscribe(
       response => {

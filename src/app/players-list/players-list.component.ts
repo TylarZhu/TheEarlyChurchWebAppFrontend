@@ -135,6 +135,7 @@ export class PlayersListComponent implements OnInit{
   exileHimOrHer(name: string, conformToExile: boolean) {
     this.userChoosePersonName = name;
     if(conformToExile) {
+      this.singalrService.changePriestRoundStatus(false);
       this.httpService.aboutToExileHimOrHer(this.childGroupName!, name);
     }
   }

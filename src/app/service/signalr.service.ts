@@ -39,6 +39,11 @@ export class SignalrService {
   RulerOfTheSynagogue: BehaviorSubject<boolean>;
   JudasCheckResult: BehaviorSubject<boolean>;
   exileName: BehaviorSubject<string>;
+  ROTSName: BehaviorSubject<string>;
+  NicodemusName: BehaviorSubject<string>;
+  NicodemusMeetingRound: BehaviorSubject<boolean>;
+  PriestMeetingRound: BehaviorSubject<boolean>;
+  day: BehaviorSubject<number>;
 
 
   constructor(private httpService: HttpsCommService) {
@@ -72,6 +77,11 @@ export class SignalrService {
     this.PriestName = new BehaviorSubject<string>("");
     this.JudasCheckResult = new BehaviorSubject<boolean>(false);
     this.exileName = new BehaviorSubject<string>("");
+    this.ROTSName = new BehaviorSubject<string>("");
+    this.NicodemusName = new BehaviorSubject<string>("");
+    this.NicodemusMeetingRound = new BehaviorSubject<boolean>(false);
+    this.PriestMeetingRound = new BehaviorSubject<boolean>(false);
+    this.day = new BehaviorSubject<number>(1);
   }
 
   public async initConnection(): Promise<void>{
@@ -127,13 +137,23 @@ export class SignalrService {
       this.finishVoteWaitForOthers.next(waitState);
       this.voteResult.next(result);
     });
-    this.connection.on("PriestRound", (status: boolean, priestName: string) => {
-      this.PriestRound.next(status);
+
+    this.connection.on("PriestROTSNicoMeet", (ROTSName: string, priestName: string, NicodemusName: string) => {
+      this.ROTSName.next(ROTSName);
       this.PriestName.next(priestName);
+      this.NicodemusName.next(NicodemusName);
     });
-    this.connection.on("AssignRulerOfTheSynagogue", (status: boolean) => {
-      this.RulerOfTheSynagogue.next(status);
+    this.connection.on("PriestRound", () => {
+      this.PriestMeetingRound.next(true);
+      this.PriestRound.next(true);
     });
+    this.connection.on("RulerOfTheSynagogueMeeting", () => {
+      this.RulerOfTheSynagogue.next(true);
+    });
+    this.connection.on("NicoMeeting", () => {
+      this.NicodemusMeetingRound.next(true);
+    });
+
     this.connection.on("JudasCheckResult", (status: boolean) => {
       this.JudasCheckResult.next(status);
     });
@@ -143,5 +163,12 @@ export class SignalrService {
     this.connection.on("announceExile", (name: string) => {
       this.exileName.next(name);
     });
+    this.connection.on("changeDay", (day: number) => {
+      this.day.next(day);
+    });
+  }
+
+  public changePriestRoundStatus(status: boolean): void {
+    this.PriestRound.next(status);
   }
 }

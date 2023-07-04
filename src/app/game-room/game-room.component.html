@@ -22,7 +22,7 @@
     </nav>
 </div>
 <div class="container-fluid d-flex pt-5">
-    <div class="row flex-fill pt-2 justify-content-between" >
+    <div class="row flex-fill pt-2 justify-content-between">
             <div *ngIf="false" class="col justify-content-start pt-2">
                 <div class="dropdown-center">
                     <button class="btn btn-primary dropdown-toggle" type="button" 
@@ -50,13 +50,19 @@
                 </div>
             </div>
             <div class="col pt-2 justify-content-start">
-                <strong>Day {{day}} {{daylightOrNight}}</strong>
+                <strong>Day {{day}}</strong>
             </div>
             <div *ngIf="groupName == groupLeader.groupName && 
                 name == groupLeader.name && !gameOn" 
             class="col pt-2 d-flex flex-row-reverse">
                 <button class="btn btn-warning"  (click)="gameStart()" [disabled]="!startGameShow">
                     Start Game <i class="fa-solid fa-circle-play"></i>
+                </button>
+            </div>
+
+            <div class="col pt-2 d-flex flex-row-reverse" *ngIf="_nightWaitModalShowFlag">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nightWaitingModel">
+                    Show <i class="fa-regular fa-eye"></i>
                 </button>
             </div>
             
@@ -195,6 +201,11 @@ data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayers" aria-hidden="t
                 <button #closeWaitingForOtherPlayers  [hidden]="true" type="button" class="btn btn-primary" 
                 data-bs-dismiss="modal" ></button>
             </div>
+            <div *ngIf="_backupIdentityClosingButton">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
         
     </div> 
@@ -251,6 +262,12 @@ aria-labelledby="winningModel" aria-hidden="true">
 data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+                <h5 class="modal-title fs-6">Night waiting screen</h5>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Hide <i class="fa-regular fa-eye-slash"></i>
+                </button>
+            </div>
             <div class="modal-body text-center">
                 <div class="spinner-grow text-danger" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -260,16 +277,32 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
                 </div>
                 <div> It is <strong> Day {{day}} </strong> night time! <i class="fa-solid fa-cloud-moon"></i> </div>
                 <div> Please <strong>do not look at other's screen</strong>, and wait for the daylight ... </div>
-                <div *ngIf="PriestRound">
+                <div *ngIf="_PriestMeetingRound">
                     <div> You are the <strong>Priest</strong> in this game!</div>
-                    <div> It is your turn! If you are ready, please click the exlie button. </div>
+                    <div> 
+                        You know <strong> {{ROTSName}} </strong> and <strong> {{NicodemusName}} </strong> that
+                        one of them is <strong> Nicodemus </strong> and another one is <strong> Ruler Of The Synagogue </strong>.
+                    </div>
+                    <div *ngIf="PriestRound">
+                        <div> It is your turn! If you are ready, please click the exlie button. </div>
+                    </div>
                 </div>
                 <div *ngIf="RulerOfTheSynagogue">
                     <div> You are the <strong>Ruler Of The Synagogue</strong> in this game!</div>
+                    <div> 
+                        You know <strong> {{PriestName}} </strong> and <strong> {{NicodemusName}} </strong> that
+                        one of them is <strong> Priest </strong> and another one is <strong> Nicodemus </strong>.
+                    </div>
                 </div>
-                <div *ngIf="_NicodemusSavingRound">
+                <div *ngIf="_NicodemusMeetingRound">
                     <div> You are <strong>Nicodemus</strong> in this game!</div>
-                    <div> It is your turn! Tonight, <strong> {{aboutToExileName}} </strong> will be exiled. Are you going to save him/her? </div>
+                    <div> 
+                        You know <strong> {{PriestName}} </strong> and <strong> {{ROTSName}} </strong> that
+                        one of them is <strong> Priest </strong> and another one is <strong> Ruler Of The Synagogue </strong>.
+                    </div>
+                    <div *ngIf="_NicodemusSavingRound">
+                        <div> It is your turn! Tonight, <strong> {{aboutToExileName}} </strong> will be exiled. Are you going to save him/her? </div>
+                    </div>
                 </div>
                 <div *ngIf="_JohnFireRound">
                     <div> You are <strong>John</strong> in this game! It is your turn!</div>
@@ -322,8 +355,11 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
 aria-labelledby="AnnounceExileModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+                <h5 class="modal-title fs-6">Exile Result</h5>
+            </div>
             <div class="modal-body text-center">
-                <h5> {{exileName}} has been exiled! <i class="fa-solid fa-skull"></i> </h5>
+                <h5> {{exileName}} has been exiled last night! <i class="fa-solid fa-skull"></i> </h5>
             </div>
             <div class="modal-footer d-flex justify-content-right">
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="BeginToCheck()">
