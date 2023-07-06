@@ -8,6 +8,9 @@ import { SignalrService } from '../service/signalr.service'
 import { IMessage } from '../interface/IMessage';
 import { BehaviorSubject, tap } from 'rxjs';
 import { INextStep } from '../interface/INextStep';
+import { IQuestions } from '../interface/IQuestions';
+
+// import { PlayersListComponent } from '../players-list/players-list.component';
 
 @Component({
   selector: 'app-game-room',
@@ -21,8 +24,8 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   @ViewChild('waitingForOtherPlayers', {read: ElementRef}) waitingForOtherPlayersModal?: ElementRef;
   @ViewChild('closeWaitingForOtherPlayers', {read: ElementRef}) closeWaitingForOtherPlayers?: ElementRef;
 
-  @ViewChild('waitingDiscussionModel', {read: ElementRef}) waitingDiscussionModel?: ElementRef;
-  @ViewChild('closeWaitingDiscussionModel', {read: ElementRef}) closeWaitingDiscussionModel?: ElementRef;
+  // @ViewChild('waitingDiscussionModel', {read: ElementRef}) waitingDiscussionModel?: ElementRef;
+  // @ViewChild('closeWaitingDiscussionModel', {read: ElementRef}) closeWaitingDiscussionModel?: ElementRef;
 
   @ViewChild('discussionModel', {read: ElementRef}) discussionModel?: ElementRef;
 
@@ -37,6 +40,9 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
 
   @ViewChild('AnnounceExileModel', {read: ElementRef}) AnnounceExileModel?: ElementRef;
 
+  @ViewChild('SpiritualFormationQuestion', {read: ElementRef}) SpiritualFormationQuestion?: ElementRef;
+  
+
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
   groupName: string | null;
@@ -50,12 +56,12 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   day: number;
   nextStep: INextStep;
   discussionTopic: string;
-  playerInGame: string[];
+  playerNotInGame: IOnlineUsers[];
   whoWins: string;
   voteResult: string;
   PriestRound: boolean;
   RulerOfTheSynagogue: boolean;
-
+  // inDiscustion: BehaviorSubject<boolean>;
   aboutToExileName: string;
   exileName: string;
   ROTSName: string;
@@ -77,12 +83,40 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   _PriestMeetingRound: boolean;
 
   // DOM Property
-  backupClosingButton: BehaviorSubject<boolean>;
-  _backupClosingButton: boolean;
+  // backupClosingButton: BehaviorSubject<boolean>;
+  // _backupClosingButton: boolean;
   backupIdentityClosingButton: BehaviorSubject<boolean>;
   _backupIdentityClosingButton: boolean;
   nightWaitModalShowFlag: BehaviorSubject<boolean>;
   _nightWaitModalShowFlag: boolean;
+
+  playerChoice: string = "";
+  playerChoiceCorrect: boolean = false;
+  playerFinishChoice: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  _playerFinishChoice: boolean = false;
+
+  ACorrect: boolean = false;
+  BCorrect: boolean = false;
+  CCorrect: boolean = false;
+  DCorrect: boolean = false;
+  AWrong: boolean = false;
+  BWrong: boolean = false;
+  CWrong: boolean = false;
+  DWrong: boolean = false;
+
+
+  SpiritualQuestion: IQuestions = {
+    Id: "",
+    question: {
+      Q: "",
+      A: "",
+      B: "",
+      C: "",
+      D: "",
+      An: "",
+      Ex: undefined
+    }
+  };
   
   
   constructor(private httpService: HttpsCommService, 
@@ -102,7 +136,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.day = 1;
       this.nextStep = null!;
       this.discussionTopic = "";
-      this.playerInGame = [];
+      this.playerNotInGame = [];
       this.whoWins = "";
       this.PriestRound = false;
       this.RulerOfTheSynagogue = false;
@@ -111,13 +145,13 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this._NicodemusSavingRound = false;
       this.aboutToExileName = "";
       this.exileName = "";
-      this.backupClosingButton = new BehaviorSubject<boolean>(false);
-      this._backupClosingButton = false;
+      // this.backupClosingButton = new BehaviorSubject<boolean>(false);
+      // this._backupClosingButton = false;
       this.JohnFireRound = new BehaviorSubject<boolean>(false);
       this._JohnFireRound = false;
       this.JudasCheckRound = new BehaviorSubject<boolean>(false);
       this._JudasCheckRound = false;
-
+      // this.inDiscustion = new BehaviorSubject<boolean>(false);
       this.backupIdentityClosingButton = new BehaviorSubject<boolean>(false);
       this._backupIdentityClosingButton = false;
       this.nightWaitModalShowFlag = new BehaviorSubject<boolean>(false);
@@ -141,7 +175,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     });
     this.singalrService.identitiesExplanation.pipe(tap(
       _ => {
-        if(this.identityModal != null) {
+        if(this.identityModal !== undefined) {
           this.identityModal.nativeElement.click();
         }
       }
@@ -168,32 +202,11 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     this.singalrService.finishDisscussion.pipe(tap(
         finishDisscussion => {
           // console.log(finishDisscussion);
-          if(!this.playerInGame.includes(this.name!)) {
-            if(finishDisscussion == "InDisscussion"){
-              if (this.closeWaitingDiscussionModel != null && this.discussionModel != null) {
-                this.backupClosingButton.next(true);
-                this.closeWaitingDiscussionModel.nativeElement.click();
-                this.discussionModel.nativeElement.click();
-              } else {
-                console.log("closeWaitingDiscussionModel or discussionModel is null!");
-              }
-            } else if(finishDisscussion == "FinishDisscussionWaitOthers") {
-              if(this.waitingDiscussionModel != null) {
-                this.backupClosingButton.next(false);
-                this.waitingDiscussionModel.nativeElement.click();
-              } else {
-                console.log("waitingDiscussionModel is null!");
-              }
-            } else {
-              if(this.closeWaitingDiscussionModel != null) {
-                console.log("Closing!");
-                this.backupClosingButton.next(true);
-                this.closeWaitingDiscussionModel.nativeElement.click();
-                
-              } else {
-                console.log("closeWaitingDiscussionModel is null!");
-              }
+          if(finishDisscussion == "InDisscussion"){
+            if(this.discussionModel !== undefined) {
+              this.discussionModel.nativeElement.click();
             }
+            // this.inDiscustion.next(true);
           }
       })).subscribe();
 
@@ -202,13 +215,13 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       finishedViewIdentityOrNot => {
         if(finishedViewIdentityOrNot)
         {
-          if(this.waitingForOtherPlayersModal != null) {
+          if(this.waitingForOtherPlayersModal !== undefined) {
             this.waitingForOtherPlayersModal.nativeElement.click();
           } else {
             console.log("waitingForOtherPlayersModal is null!");
           }
         } else {
-          if(this.closeWaitingForOtherPlayers != null) {
+          if(this.closeWaitingForOtherPlayers !== undefined) {
             this.closeWaitingForOtherPlayers.nativeElement.click();
           } else {
             console.log("closeWaitingForOtherPlayers is null!");
@@ -216,8 +229,8 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
         }
       })).subscribe();
 
-    this.singalrService.playerInGame.subscribe((playerInGame: string[]) => {
-      this.playerInGame = playerInGame;
+    this.singalrService.playerNotInGame.subscribe((playerNotInGame: IOnlineUsers[]) => {
+      this.playerNotInGame = playerNotInGame;
     });
     this.singalrService.GameOn.subscribe((GameOn: boolean) => {
       this.gameOn = GameOn;
@@ -234,7 +247,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       // if Priest finish exilting, then send to waiting stat.
       (PriestRound: boolean) => {
         if(!PriestRound) {
-          if(this.nightWaitingModel != null) {
+          if(this.nightWaitingModel !== undefined) {
             this.nightWaitingModel.nativeElement.click();
           } else {
             console.log("nightWaitingModel is null!");
@@ -247,9 +260,9 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.RulerOfTheSynagogue = RulerOfTheSynagogue;
     });
 
-    this.backupClosingButton.subscribe((backupClosingButton) => {
-      this._backupClosingButton = backupClosingButton;
-    });
+    // this.backupClosingButton.subscribe((backupClosingButton) => {
+    //   this._backupClosingButton = backupClosingButton;
+    // });
     this.NicodemusSavingRound.subscribe((NicodemusSavingRound) => {
       this._NicodemusSavingRound = NicodemusSavingRound;
     });
@@ -260,7 +273,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this._JudasCheckRound = JudasCheckRound;
     });
     this.singalrService.exileName.pipe(tap(_ => {
-      if(this.AnnounceExileModel != null) {
+      if(this.AnnounceExileModel !== undefined) {
         this.AnnounceExileModel.nativeElement.click();
       }
     })).subscribe((exileName: string) => {
@@ -291,6 +304,20 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     this.singalrService.day.subscribe((day: number) => {
       this.day = day;
     });
+    this.singalrService.question.pipe(tap((question: IQuestions) => {
+      if(question.Id != "") {
+        if(this.SpiritualFormationQuestion !== undefined) {
+          this.SpiritualFormationQuestion.nativeElement.click();
+        } else {
+          console.log("SpiritualFormationQuestion is undefine");
+        }
+      }
+    })).subscribe((question: IQuestions) => {
+      this.SpiritualQuestion = question;
+    });
+    this.playerFinishChoice.subscribe((playerFinishChoice: boolean) => {
+      this._playerFinishChoice = playerFinishChoice;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -308,13 +335,13 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       }
     } else if(nextStep.nextStepName == "vote") {
       this.backupIdentityClosingButton.next(false);
-      if(this.prepareToVoteModel != null) {
+      if(this.prepareToVoteModel !== undefined) {
         this.prepareToVoteModel.nativeElement.click();
       } else {
         console.log("prepareToVoteModel is null");
       }
       setTimeout(() => {
-        if(this.closePrepareToVoteModel != null) {
+        if(this.closePrepareToVoteModel !== undefined) {
           this.closePrepareToVoteModel.nativeElement.click();
         } else {
           console.log("closePrepareToVoteModel is null!");
@@ -322,8 +349,8 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       }, 3000);
     } else if(nextStep.nextStepName == "SetUserToNightWaiting") {
       this.nightWaitModalShowFlag.next(true);
-      this.backupClosingButton.next(false);
-      if(this.nightWaitingModel != null) {
+      // this.backupClosingButton.next(false);
+      if(this.nightWaitingModel !== undefined) {
         this.nightWaitingModel.nativeElement.click();
       } else {
         console.log("nightWaitingModel is null!");
@@ -337,7 +364,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.JudasCheckRound.next(true);
     } else if(nextStep.nextStepName == "quitNightWaiting") {
       this.nightWaitModalShowFlag.next(false);
-      if(this.closeNightWaitingModel != null) {
+      if(this.closeNightWaitingModel !== undefined) {
         this.closeNightWaitingModel.nativeElement.click();
       } else {
         console.log("nightWaitingModel is null!");
@@ -345,23 +372,35 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     }
   }
   
+  // return true, if player is still in game. Otherwise not.
+  checkIfCurrentPlayerIsInGameOrNot(currentName: string): boolean{
+    var flag = true;
+    this.playerNotInGame.forEach(player => {
+      if(player.name == currentName) {
+        flag = false;
+      }
+    });
+    return flag;
+  }
+
   NicodemusAction(action: boolean) 
   {
     this.NicodemusSavingRound.next(false);
     this.httpService.NicodemusAction(this.groupName!, action);
   }
 
-  BeginToFire(choice: boolean)
+  DoNotFire()
   {
-    if(!choice) {
-      this.httpService.FireHimOrHer(this.groupName!, "");
-    }
     this.JohnFireRound.next(false);
+    this.httpService.FireHimOrHer(this.groupName!, "NULL");
   }
 
-  BeginToCheck()
-  {
+  BeginToCheck() {
     this.JudasCheckRound.next(false);
+  }
+
+  finishedToViewTheExileResult() {
+    this.httpService.finishedToViewTheExileResult(this.groupName!);
   }
 
   async gameStart(): Promise<void> {
@@ -370,7 +409,8 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   }
 
   finishedDiscussion() {
-    this.httpService.whoIsDiscussing(this.groupName!, this.name!);
+    // this.inDiscustion.next(false);
+    this.httpService.whoIsDiscussing(this.groupName!);
   }
 
   findViewIdentityReadyToPlay(): void {
@@ -381,5 +421,81 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     await this.singalrService.connection.invoke("leaveGroup", this.groupName);
     this.httpService.userLeaveTheGame(this.groupName!, this.name!, this.gameOn);
     this.router.navigate(['/']);
+  }
+  conformAnswer() {
+    this.playerFinishChoice.next(true);
+    if(this.playerChoice == this.SpiritualQuestion.question.An) {
+      this.playerChoiceCorrect = true;
+      switch(this.playerChoice) {
+        case 'A':
+          this.ACorrect = true;
+          break;
+        case 'B':
+          this.BCorrect = true;
+          break;
+        case 'C':
+          this.CCorrect = true;
+          break;
+        case 'D':
+          this.DCorrect = true;
+          break;
+      }
+    } else {
+      this.playerChoiceCorrect = false;
+      switch(this.SpiritualQuestion.question.An) {
+        case 'A':
+          this.ACorrect = true;
+          break;
+        case 'B':
+          this.BCorrect = true;
+          break;
+        case 'C':
+          this.CCorrect = true;
+          break;
+        case 'D':
+          this.DCorrect = true;
+          break;
+      }
+      switch(this.playerChoice) {
+        case 'A':
+          this.AWrong = true;
+          break;
+        case 'B':
+          this.BWrong = true;
+          break;
+        case 'C':
+          this.CWrong = true;
+          break;
+        case 'D':
+          this.DWrong = true;
+          break;
+      }
+    }
+  }
+
+  increaseWeightOrNot() {
+    this.ACorrect = false;
+    this.BCorrect = false;
+    this.CCorrect = false;
+    this.DCorrect = false;
+    this.AWrong = false;
+    this.BWrong = false;
+    this.CWrong = false;
+    this.DWrong = false;
+    this.playerFinishChoice.next(false);
+    const initQuesiont = {
+      Id: "",
+      question: {
+        Q: "",
+        A: "",
+        B: "",
+        C: "",
+        D: "",
+        An: "",
+        Ex: undefined
+      }
+    }
+    this.singalrService.question.next(initQuesiont);
+    this.httpService.spiritualQuestionAnsweredCorrectOrNot(this.groupName!, this.name!, this.playerChoiceCorrect);
   }
 }

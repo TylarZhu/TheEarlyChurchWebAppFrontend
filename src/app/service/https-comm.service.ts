@@ -103,8 +103,8 @@ export class HttpsCommService {
     ); 
   }
 
-  public whoIsDiscussing(groupName: string, name: string): void{
-    this.http.get(this.inGameUrl + "/WhoIsDiscussing" + "/" + groupName + "/" + name).subscribe();
+  public whoIsDiscussing(groupName: string): void{
+    this.http.get(this.inGameUrl + "/WhoIsDiscussing" + "/" + groupName).subscribe();
   }
 
   public voteHimOrHer(groupName: string, voteName: string, fromWho: string): void{
@@ -164,6 +164,26 @@ export class HttpsCommService {
   public NightRoundEnd(groupName: string): void{
     const headers = new HttpHeaders().set("Content-Type", "application/json");
     this.http.put(this.inGameUrl + "/NightRoundEnd" + "/" + groupName, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
+
+  public finishedToViewTheExileResult(groupName: string): void {
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.post(this.inGameUrl + "/finishedToViewTheExileResult" + "/" + groupName, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
+
+  public spiritualQuestionAnsweredCorrectOrNot(groupName: string, name: string, playerChoiceCorrectOrNot: boolean): void {
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.post(this.inGameUrl + "/spiritualQuestionAnsweredCorrectOrNot" + "/" + groupName + "/" + name + "/" + playerChoiceCorrectOrNot, 
     {},
     {headers}).subscribe(
       response => {

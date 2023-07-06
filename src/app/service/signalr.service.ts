@@ -6,6 +6,7 @@ import { IOnlineUsers } from '../interface/IOnlineUser'
 import { IMessage } from '../interface/IMessage';
 import { HttpsCommService } from './https-comm.service';
 import { INextStep } from '../interface/INextStep';
+import { IQuestions } from '../interface/IQuestions';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,7 @@ export class SignalrService {
   finishedViewIdentityOrNot: BehaviorSubject<boolean>;
   finishDisscussion: BehaviorSubject<string>;
   nextStep: BehaviorSubject<INextStep>;
-  playerInGame: BehaviorSubject<string[]>;
+  playerNotInGame: BehaviorSubject<IOnlineUsers[]>;
   finishVoteWaitForOthers: BehaviorSubject<boolean>;
   voteResult: BehaviorSubject<string>;
   GameOn:  BehaviorSubject<boolean>;
@@ -44,6 +45,9 @@ export class SignalrService {
   NicodemusMeetingRound: BehaviorSubject<boolean>;
   PriestMeetingRound: BehaviorSubject<boolean>;
   day: BehaviorSubject<number>;
+  inDiscusstionUserName: BehaviorSubject<string>;
+  question: BehaviorSubject<IQuestions>;
+  inAnswerQuestionName: BehaviorSubject<string> = new BehaviorSubject<string>("");
 
 
   constructor(private httpService: HttpsCommService) {
@@ -56,6 +60,18 @@ export class SignalrService {
       nextStepName: "",
       options: []
     };
+    const initQuestion: IQuestions = {
+      Id: "",
+      question: {
+        Q: "",
+        A: "",
+        B: "",
+        C: "",
+        D: "",
+        An: "",
+        Ex: undefined
+      }
+    }
     this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
     this.connection = new singalR.HubConnectionBuilder().withUrl(this.hubUrl).withAutomaticReconnect().build();
     this.connection.serverTimeoutInMilliseconds = 100000;
@@ -67,7 +83,7 @@ export class SignalrService {
     this.finishedViewIdentityOrNot = new BehaviorSubject<boolean>(false);
     this.finishDisscussion = new BehaviorSubject<string>("");
     this.nextStep = new BehaviorSubject<INextStep>(initNextStep);
-    this.playerInGame = new BehaviorSubject<string[]>([]);
+    this.playerNotInGame = new BehaviorSubject<IOnlineUsers[]>([]);
     this.finishVoteWaitForOthers = new BehaviorSubject<boolean>(false);
     this.voteResult = new BehaviorSubject<string>("");
     this.GameOn = new BehaviorSubject<boolean>(false);
@@ -82,6 +98,8 @@ export class SignalrService {
     this.NicodemusMeetingRound = new BehaviorSubject<boolean>(false);
     this.PriestMeetingRound = new BehaviorSubject<boolean>(false);
     this.day = new BehaviorSubject<number>(1);
+    this.inDiscusstionUserName = new BehaviorSubject<string>("");
+    this.question =  new BehaviorSubject<IQuestions>(initQuestion); 
   }
 
   public async initConnection(): Promise<void>{
@@ -127,8 +145,11 @@ export class SignalrService {
     this.connection.on("finishedViewIdentityAndWaitOnOtherPlayers", (wait: boolean) => {
       this.finishedViewIdentityOrNot.next(wait);
     });
-    this.connection.on("currentUserInDiscusstion", (finishDisscussion: string) => {
-      this.finishDisscussion.next(finishDisscussion);
+    // state == InDisscussion, Disscussion modal triggered
+    // state == Waiting, Microphone icron triggered
+    this.connection.on("currentUserInDiscusstion", (state: string, inDiscusstionUserName: string) => {
+      this.finishDisscussion.next(state);
+      this.inDiscusstionUserName.next(inDiscusstionUserName);
     });
     this.connection.on("nextStep", (nextStep: INextStep) => {
       this.nextStep.next(nextStep);
@@ -157,14 +178,20 @@ export class SignalrService {
     this.connection.on("JudasCheckResult", (status: boolean) => {
       this.JudasCheckResult.next(status);
     });
-    this.connection.on("updateExiledUsers", (user: string[]) => {
-      this.playerInGame.next(user);
+    this.connection.on("updateExiledUsers", (user: IOnlineUsers[]) => {
+      this.playerNotInGame.next(user);
     });
     this.connection.on("announceExile", (name: string) => {
       this.exileName.next(name);
     });
     this.connection.on("changeDay", (day: number) => {
       this.day.next(day);
+    });
+    this.connection.on("getAQuestion", (question: IQuestions) => {
+      this.question.next(question);
+    });
+    this.connection.on("inAnswerQuestionName", (inAnswerQuestionName: string) => {
+      this.inAnswerQuestionName.next(inAnswerQuestionName);
     });
   }
 

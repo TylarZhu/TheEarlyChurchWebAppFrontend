@@ -4,8 +4,8 @@ import { HttpsCommService } from '../service/https-comm.service';
 import { IOnlineUsers } from '../interface/IOnlineUser';
 import { INextStep } from '../interface/INextStep';
 import { SignalrService } from '../service/signalr.service';
+import { GameRoomComponent } from '../game-room/game-room.component'
 
-import { GameRoomComponent } from '../game-room/game-room.component';
 import { BehaviorSubject, tap } from 'rxjs';
 
 @Component({
@@ -27,22 +27,21 @@ export class PlayersListComponent implements OnInit{
   
   @ViewChild('JudasCheckingResult', {read: ElementRef}) JudasCheckingResult?: ElementRef;
 
-
-
   userChoosePersonName: string;
   conformToVote: boolean;
   exilePersonName: string;
   exileToVote: boolean;
   isPriest: boolean;
   PriestName: string;
-  JohnFireRound: BehaviorSubject<boolean>;
   _JohnFireRound: boolean;
   JohnCannotFireList: string[];
   JudasCheckRound: BehaviorSubject<boolean>;
   _JudasCheckRound: boolean;
   checkResult: boolean;
   JudasHimself: string;
-  playerInGame: string[];
+  playerNotInGame: IOnlineUsers[];
+  _inDiscustionName: string;
+  _inAnswerQuestionName: string = "";
   
   constructor(private httpService: HttpsCommService,
       private singalrService: SignalrService,
@@ -56,31 +55,31 @@ export class PlayersListComponent implements OnInit{
     this.voteState = "";
     this.userChoosePersonName = "";
     this.conformToVote = false;
-    this.playerInGame = [];
+    this.playerNotInGame = [];
     this.exilePersonName = "";
     this.exileToVote = false;
     this.isPriest = false;
     this.PriestName = "";
-    this.JohnFireRound = new BehaviorSubject<boolean>(false);
     this._JohnFireRound = false;
     this.JohnCannotFireList = [];
     this.JudasCheckRound = new BehaviorSubject<boolean>(false);
     this._JudasCheckRound = false;
     this.checkResult = false;
     this.JudasHimself = "";
+    this._inDiscustionName = "";
   }
 
   ngOnInit(): void {
     this.singalrService.finishVoteWaitForOthers.pipe(tap(
       finishVoteWaitForOthers => {
         if(finishVoteWaitForOthers) {
-          if(this.waitOthersToVoteModel != null) {
+          if(this.waitOthersToVoteModel !== undefined) {
             this.waitOthersToVoteModel.nativeElement.click();
           } else {
             console.log("waitOthersToVoteModel is null!");
           }
         } else {
-          if(this.closePrepareToVoteModel != null) {
+          if(this.closePrepareToVoteModel !== undefined) {
             this.closePrepareToVoteModel.nativeElement.click();
           } else {
             console.log("closePrepareToVoteModel is null!");
@@ -96,19 +95,18 @@ export class PlayersListComponent implements OnInit{
     this.singalrService.nextStep.pipe(tap((nextStep: INextStep) => {
       console.log("PlayerList: " + nextStep.nextStepName);
       if(nextStep.nextStepName == "JohnFireRound") {
-        this.JohnFireRound.next(true);
         this.JohnCannotFireList = nextStep.options!;
       } else if(nextStep.nextStepName == "JudasCheckRound") {
         this.JudasCheckRound.next(true);
         this.JudasHimself = nextStep.options![0];
       }
     })).subscribe();
-    this.JohnFireRound.subscribe((JohnFireRound) => {
+    this.gameRoomComponent.JohnFireRound.subscribe((JohnFireRound) => {
         this._JohnFireRound = JohnFireRound;
       }
     );
     this.singalrService.JudasCheckResult.pipe(tap(_ => {
-      if(this.JudasCheckingResult != null) {
+      if(this.JudasCheckingResult !== undefined) {
         this.JudasCheckingResult.nativeElement.click();
       }
     })).subscribe(
@@ -119,8 +117,19 @@ export class PlayersListComponent implements OnInit{
     this.JudasCheckRound.subscribe((JudasCheckRound) => {
       this._JudasCheckRound = JudasCheckRound;
     });
-    this.singalrService.playerInGame.subscribe((playerInGame: string[]) => {
-      this.playerInGame = playerInGame;
+    this.singalrService.playerNotInGame.subscribe((playerNotInGame: IOnlineUsers[]) => {
+      this.playerNotInGame = playerNotInGame;
+    });
+    // this.gameRoomComponent.inDiscustion.pipe(tap((inDiscustion: boolean) => {
+    //   console.log(inDiscustion);
+    // })).subscribe((inDiscustion: boolean) => {
+    //   this._inDiscustion = inDiscustion;
+    // });
+    this.singalrService.inDiscusstionUserName.subscribe((inDiscusstionUserName: string) => {
+      this._inDiscustionName = inDiscusstionUserName;
+    });
+    this.singalrService.inAnswerQuestionName.subscribe((inAnswerQuestionName: string) => {
+      this._inAnswerQuestionName = inAnswerQuestionName;
     });
   }
 
@@ -140,10 +149,20 @@ export class PlayersListComponent implements OnInit{
     }
   }
 
+  checkIfCurrentPlayerIsInGameOrNot(currentName: string): boolean{
+    var flag = true;
+    this.playerNotInGame.forEach(player => {
+      if(player.name == currentName) {
+        flag = false;
+      }
+    });
+    return flag;
+  }
+
   fireHimOrHer(name: string, conformTofire: boolean) {
     this.userChoosePersonName = name;
     if(conformTofire) {
-      this.JohnFireRound.next(false);
+      this.gameRoomComponent.JohnFireRound.next(false);
       this.httpService.FireHimOrHer(this.childGroupName!, name);
     }
   }

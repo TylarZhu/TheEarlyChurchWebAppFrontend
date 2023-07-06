@@ -8,10 +8,18 @@
                             user.name == childGroupLeader.name && !childGameOn" class="p-2">
                             <i class="fa-regular fa-star"></i>
                         </div>
+                        <div *ngIf="_inDiscustionName == user.name" class="p-2">
+                            <i class="fa-solid fa-microphone"></i>
+                        </div>
+                        <div *ngIf="_inAnswerQuestionName == user.name" class="p-2">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
                         <span class="badge bg-danger d-flex justify-content-center align-items-center">
                             <div>{{i + 1}}</div>
                         </span>
                         <h5 class="p-2">{{user.name}}</h5>
+                        
+                        
                     </div>
                     <div *ngIf="childGroupName == childGroupLeader.groupName && 
                         childName == childGroupLeader.name && !childGameOn"
@@ -24,7 +32,7 @@
                             <div class="dropdown-item" (click)="assignNewGroupLeader(user.name)">Assign Group Leader</div>  
                         </div>
                     </div>
-                    <div *ngIf="playerInGame && childGameOn">
+                    <div *ngIf="checkIfCurrentPlayerIsInGameOrNot(user.name) && childGameOn">
                         <div *ngIf="voteState == 'vote'">
                             <button type="button" class="btn btn-danger" id="vote" 
                             data-bs-toggle="modal" data-bs-target="#voteConformationModel" 
@@ -58,7 +66,8 @@
             </div>
             <div class="w-100"></div>
             <div class="col-2">
-                <div *ngIf="!playerInGame.includes(user.name); then inGameBadge else outGameBadge"> </div>
+                <!-- <div *ngIf="!playerNotInGame.includes(user.name); then inGameBadge else outGameBadge"> </div> -->
+                <div *ngIf="checkIfCurrentPlayerIsInGameOrNot(user.name); then inGameBadge else outGameBadge"> </div>
                 <ng-template #inGameBadge class="d-flex align-items-center">
                     <span class="badge bg-primary d-flex justify-content-center align-items-center">
                         <div>In Game</div>
@@ -147,7 +156,7 @@ data-bs-keyboard="false" aria-labelledby="CheckConformationModel" aria-hidden="t
         <div class="modal-content">
             <div class="modal-body text-center">
                 <div>
-                    Are you sure to fire <strong>{{userChoosePersonName}}</strong> ?
+                    Are you sure to check <strong>{{userChoosePersonName}}</strong> ?
                 </div>
             </div>
             <div class="modal-footer text-center d-flex justify-content-between">
@@ -205,4 +214,3 @@ data-bs-keyboard="false" aria-labelledby="JudasCheckingResult" aria-hidden="true
         </div>
     </div> 
 </div>
-

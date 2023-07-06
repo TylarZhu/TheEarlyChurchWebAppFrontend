@@ -70,10 +70,12 @@
             <button #prepareToVoteModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#prepareToVoteModel"></button>
             <button #waitingForOtherPlayers  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayers"></button> 
             <button #discussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#discussionModel"></button>
-            <button #waitingDiscussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingDiscussionModel"></button>
+            <!-- <button #waitingDiscussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingDiscussionModel"></button> -->
             <button #winningModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#winningModel"></button>
             <button #nightWaitingModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#nightWaitingModel"></button>
             <button #AnnounceExileModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#AnnounceExileModel"></button>
+            <button #SpiritualFormationQuestion [hidden]="true" data-bs-toggle="modal" data-bs-target="#SpiritualFormationQuestion"></button>
+            
         
             <div class="w-100"></div>
             <div class="col pt-2">
@@ -151,12 +153,46 @@ aria-labelledby="discussionModel" aria-hidden="true">
     </div>
 </div>
 
-<div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+<!-- <div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
 aria-labelledby="viewMyIdentity" aria-hidden="true">
     <app-view-identity-modal 
     [childAbilities]="abilities"
     [identity]="identity"
     (findViewIdentityReadyToPlay)="findViewIdentityReadyToPlay()"></app-view-identity-modal>
+</div> -->
+<div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="viewMyIdentity" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">My Identity</p>
+            </div>
+            <div class="modal-body">
+                <div class="fs-6">
+                    <div>
+                        You identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
+                    </div>
+                    <div class="fs-6">
+                        Description:
+                        <ul>
+                            <div *ngFor="let ability of abilities;">
+                                <li class="fs-6">{{ability}}</li>
+                            </div>
+                        </ul>
+                    </div>
+                    <div class="fs-6">
+                        If you forget your identity, please click the <strong>top right question mark button</strong> to view again.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer d-flex justify-content-right">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="findViewIdentityReadyToPlay()">
+                    Got it! <i class="fa-regular fa-circle-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="info" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
@@ -211,7 +247,7 @@ data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayers" aria-hidden="t
     </div> 
 </div>
 
-<div class="modal fade" id="waitingDiscussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+<!-- <div class="modal fade" id="waitingDiscussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
 aria-labelledby="waitingDiscussionModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -230,7 +266,7 @@ aria-labelledby="waitingDiscussionModel" aria-hidden="true">
             </div>
         </div>
     </div> 
-</div>
+</div> -->
 
 <div class="modal fade" id="prepareToVoteModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
 aria-labelledby="prepareToVoteModel" aria-hidden="true">
@@ -332,10 +368,10 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
             </div>
             <div *ngIf="_JohnFireRound">
                 <div class="modal-footer text-center d-flex justify-content-between">
-                    <button type="button" class="btn btn-danger" (click)="BeginToFire(false)">
+                    <button type="button" class="btn btn-danger" (click)="DoNotFire()">
                         No <i class="fa-solid fa-xmark"></i>
                     </button>
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="BeginToFire(true)">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
                         Fire <i class="fa-solid fa-fire-flame-curved"></i>
                     </button>
                 </div>
@@ -362,10 +398,91 @@ aria-labelledby="AnnounceExileModel" aria-hidden="true">
                 <h5> {{exileName}} has been exiled last night! <i class="fa-solid fa-skull"></i> </h5>
             </div>
             <div class="modal-footer d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="BeginToCheck()">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedToViewTheExileResult()">
                     Ok <i class="fa-regular fa-circle-check"></i>
                 </button>
             </div>
         </div>
     </div> 
 </div>
+
+<div class="modal fade" id="SpiritualFormationQuestion" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="SpiritualFormationQuestion" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+                <h5 class="modal-title fs-6">Spiritual Formation Question</h5>
+            </div>
+            <div class="modal-body">
+                <div> {{SpiritualQuestion.question.Q}} </div>
+                <ul class="list-group overflow-hidden">
+                    <li class="list-group-item d-flex justify-content-left" (click)="playerChoice = 'A'">
+                        <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="" id="A">
+
+                        <div *ngIf="ACorrect">
+                            <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
+                        </div>
+                        <div *ngIf="AWrong">
+                            <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
+                        </div>
+
+                        <label class="form-check-label" for="A">{{SpiritualQuestion.question.A}}</label>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-left" (click)="playerChoice = 'B'">
+                        <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="" id="B">
+
+                        <div *ngIf="BCorrect">
+                            <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
+                        </div>
+                        <div *ngIf="BWrong">
+                            <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
+                        </div>
+
+                        <label class="form-check-label" for="B">{{SpiritualQuestion.question.B}}</label>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-left" (click)="playerChoice = 'C'">
+                        <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="" id="C">
+                      
+                        <div *ngIf="CCorrect">
+                            <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
+                        </div>
+                        <div *ngIf="CWrong">
+                            <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
+                        </div>
+                      
+                      <label class="form-check-label" for="C">{{SpiritualQuestion.question.C}}</label>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-left" (click)="playerChoice = 'D'">
+                        <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="" id="D">
+                        
+                        <div *ngIf="DCorrect">
+                            <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
+                        </div>
+                        <div *ngIf="DWrong">
+                            <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
+                        </div>
+
+                        <label class="form-check-label" for="D">{{SpiritualQuestion.question.D}}</label>
+                    </li>
+                </ul>
+                <div *ngIf="_playerFinishChoice && playerChoiceCorrect">
+                    <div> You are correct! </div>
+                </div>
+                <div *ngIf="_playerFinishChoice && !playerChoiceCorrect">
+                    <div> Sorry you are wrong! </div>
+                    <div> Correct Answer: <strong>{{SpiritualQuestion.question.An}}</strong> </div>
+                    <div *ngIf="SpiritualQuestion.question.Ex !== undefined"> Explanation: {{SpiritualQuestion.question.Ex}} </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-right">
+                <button *ngIf="!_playerFinishChoice" type="button" class="btn btn-primary" (click)="conformAnswer()">
+                    Conform <i class="fa-regular fa-circle-check"></i>
+                </button>
+                <button *ngIf="_playerFinishChoice" type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="increaseWeightOrNot()">
+                    Ok <i class="fa-regular fa-circle-check"></i>
+                </button>
+            </div>
+        </div>
+    </div> 
+</div>
+
