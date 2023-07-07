@@ -5,13 +5,23 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">
                         <div *ngIf="childGroupName == childGroupLeader.groupName && 
-                            user.name == childGroupLeader.name && !childGameOn" class="p-2">
+                            user.name == childGroupLeader.name && !childGameOn" class="pe-1">
                             <i class="fa-regular fa-star"></i>
                         </div>
-                        <div *ngIf="_inDiscustionName == user.name" class="p-2">
+                        <!-- JudasName is for priest player and JudasHimself is for Judas -->
+                        <div *ngIf="JudasName == user.name" class="pe-1">
+                            <i class="fa-solid fa-user-secret"></i>
+                        </div>
+                        <div *ngIf="PriestName == user.name && JudasHimself !=''" class="pe-1">
+                            <i class="fa-solid fa-hanukiah"></i>
+                        </div>
+                        <div *ngIf="hintName == user.name" class="pe-1">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div *ngIf="_inDiscustionName == user.name" class="pe-1">
                             <i class="fa-solid fa-microphone"></i>
                         </div>
-                        <div *ngIf="_inAnswerQuestionName == user.name" class="p-2">
+                        <div *ngIf="_inAnswerQuestionName == user.name" class="pe-1">
                             <i class="fa-solid fa-book-open"></i>
                         </div>
                         <span class="badge bg-danger d-flex justify-content-center align-items-center">
@@ -59,6 +69,11 @@
                             data-bs-toggle="modal" data-bs-target="#FireConformationModel" 
                             (click)="fireHimOrHer(user.name, false)">
                                 Fire <i class="fa-solid fa-fire-flame-curved"></i>
+                            </button>
+                        </div>
+                        <div *ngIf="_JudasHintRound && user.name != JudasHimself">
+                            <button type="button" class="btn btn-danger" (click)="HintHimOrHer(user.name)">
+                                <i class="fa-regular fa-hand-point-left"></i>
                             </button>
                         </div>
                     </div>

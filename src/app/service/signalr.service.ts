@@ -48,41 +48,53 @@ export class SignalrService {
   inDiscusstionUserName: BehaviorSubject<string>;
   question: BehaviorSubject<IQuestions>;
   inAnswerQuestionName: BehaviorSubject<string> = new BehaviorSubject<string>("");
+  JudasHintRound: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
+  JudasName: BehaviorSubject<string> = new BehaviorSubject<string>("");
+  HintName: BehaviorSubject<string> = new BehaviorSubject<string>("");
+  ROTSGetInfomation: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  lastExiledPlayerName: BehaviorSubject<string> = new BehaviorSubject<string>("");
+
+  winner: BehaviorSubject<number> = new BehaviorSubject<number>(-1);
+
+  initNextStep: INextStep = {
+    nextStepName: "",
+    options: []
+  };
+  initUser: IOnlineUsers = {
+    userId: "",
+    connectionId: "",
+    name: "",
+    groupName: "",
+    identity: ""
+  };
+  initQuestion: IQuestions = {
+    Id: "",
+    question: {
+      Q: "",
+      A: "",
+      B: "",
+      C: "",
+      D: "",
+      An: "",
+      Ex: undefined
+    }
+  }
 
   constructor(private httpService: HttpsCommService) {
-    const initUser: IOnlineUsers = {userId: "",
-      connectionId: "",
-      name: "",
-      groupName: "",
-      identity: ""};
-    const initNextStep: INextStep = {
-      nextStepName: "",
-      options: []
-    };
-    const initQuestion: IQuestions = {
-      Id: "",
-      question: {
-        Q: "",
-        A: "",
-        B: "",
-        C: "",
-        D: "",
-        An: "",
-        Ex: undefined
-      }
-    }
     this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
     this.connection = new singalR.HubConnectionBuilder().withUrl(this.hubUrl).withAutomaticReconnect().build();
     this.connection.serverTimeoutInMilliseconds = 100000;
     this.onlineUser =  new BehaviorSubject<IOnlineUsers[]>([]);
     this.messagesToAll = new BehaviorSubject<IMessage[]>([]);
-    this.groupLeader = new BehaviorSubject<IOnlineUsers>(initUser);
+    this.groupLeader = new BehaviorSubject<IOnlineUsers>(this.initUser);
     this.maxPlayer = new BehaviorSubject<number>(0);
+
+
     this.identitiesExplanation = new BehaviorSubject<string[]>([]);
     this.finishedViewIdentityOrNot = new BehaviorSubject<boolean>(false);
     this.finishDisscussion = new BehaviorSubject<string>("");
-    this.nextStep = new BehaviorSubject<INextStep>(initNextStep);
+    this.nextStep = new BehaviorSubject<INextStep>(this.initNextStep);
     this.playerNotInGame = new BehaviorSubject<IOnlineUsers[]>([]);
     this.finishVoteWaitForOthers = new BehaviorSubject<boolean>(false);
     this.voteResult = new BehaviorSubject<string>("");
@@ -99,7 +111,7 @@ export class SignalrService {
     this.PriestMeetingRound = new BehaviorSubject<boolean>(false);
     this.day = new BehaviorSubject<number>(1);
     this.inDiscusstionUserName = new BehaviorSubject<string>("");
-    this.question =  new BehaviorSubject<IQuestions>(initQuestion); 
+    this.question =  new BehaviorSubject<IQuestions>(this.initQuestion); 
   }
 
   public async initConnection(): Promise<void>{
@@ -193,9 +205,51 @@ export class SignalrService {
     this.connection.on("inAnswerQuestionName", (inAnswerQuestionName: string) => {
       this.inAnswerQuestionName.next(inAnswerQuestionName);
     });
+    this.connection.on("JudasGivePriestHint", (priestName: string) => {
+      this.JudasHintRound.next(true);
+      this.PriestName.next(priestName);
+    });
+    this.connection.on("PriestReceiveHint", (JudasName: string, HintName: string) => {
+      this.JudasName.next(JudasName);
+      this.HintName.next(HintName);
+    });
+    this.connection.on("announceLastExiledPlayerInfo", (status: boolean, name: string) => {
+      this.ROTSGetInfomation.next(status);
+      this.lastExiledPlayerName.next(name);
+    });
+    this.connection.on("announceWinner", (winner: number) => {
+      this.winner.next(winner);
+      this.GameOn.next(false);
+    });
   }
 
   public changePriestRoundStatus(status: boolean): void {
     this.PriestRound.next(status);
+  }
+
+  public reset(): void {
+    this.finishedViewIdentityOrNot.next(false);
+    this.finishDisscussion.next("");
+    this.nextStep.next(this.initNextStep);
+    this.playerNotInGame.next([]);
+    this.finishVoteWaitForOthers.next(false);
+    this.voteResult.next("");
+    this.GameOn.next(false);
+    this.identity.next("");
+    this.PriestName.next("");
+    this.RulerOfTheSynagogue.next(false);
+    this.exileName.next("");
+    this.ROTSName.next("");
+    this.NicodemusName.next("");
+    this.NicodemusMeetingRound.next(false);
+    this.PriestMeetingRound.next(false);
+    this.day.next(1);
+    this.inDiscusstionUserName.next("");
+    this.question.next(this.initQuestion);
+    this.inAnswerQuestionName.next("");
+    this.JudasName.next("");
+    this.ROTSGetInfomation.next(false);
+    this.lastExiledPlayerName.next("");
+    this.winner.next(-1);
   }
 }

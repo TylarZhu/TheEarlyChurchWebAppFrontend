@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { HttpsCommService } from '../service/https-comm.service';
 
 import { IOnlineUsers } from '../interface/IOnlineUser';
@@ -6,14 +6,14 @@ import { INextStep } from '../interface/INextStep';
 import { SignalrService } from '../service/signalr.service';
 import { GameRoomComponent } from '../game-room/game-room.component'
 
-import { BehaviorSubject, tap } from 'rxjs';
+import { BehaviorSubject, tap, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-players-list',
   templateUrl: './players-list.component.html',
   styleUrls: ['./players-list.component.css']
 })
-export class PlayersListComponent implements OnInit{
+export class PlayersListComponent implements OnInit, OnDestroy{
 
   @Input() childGroupName: string | null;
   @Input() childOnlineUser: IOnlineUsers[];
@@ -42,6 +42,11 @@ export class PlayersListComponent implements OnInit{
   playerNotInGame: IOnlineUsers[];
   _inDiscustionName: string;
   _inAnswerQuestionName: string = "";
+  _JudasHintRound: boolean = false;
+  JudasName: string = "";
+  hintName: string = "";
+
+  private unsubscribe$: Subject<void> = new Subject<void>();
   
   constructor(private httpService: HttpsCommService,
       private singalrService: SignalrService,
@@ -86,10 +91,10 @@ export class PlayersListComponent implements OnInit{
           }
         }
       })).subscribe();
-    this.singalrService.PriestRound.subscribe((PriestRound: boolean) => {
+    this.singalrService.PriestRound.pipe(takeUntil(this.unsubscribe$)).subscribe((PriestRound: boolean) => {
       this.isPriest = PriestRound;
     });
-    this.singalrService.PriestName.subscribe((PriestName: string) => {
+    this.singalrService.PriestName.pipe(takeUntil(this.unsubscribe$)).subscribe((PriestName: string) => {
       this.PriestName = PriestName;
     });
     this.singalrService.nextStep.pipe(tap((nextStep: INextStep) => {
@@ -100,8 +105,8 @@ export class PlayersListComponent implements OnInit{
         this.JudasCheckRound.next(true);
         this.JudasHimself = nextStep.options![0];
       }
-    })).subscribe();
-    this.gameRoomComponent.JohnFireRound.subscribe((JohnFireRound) => {
+    }), takeUntil(this.unsubscribe$)).subscribe();
+    this.gameRoomComponent.JohnFireRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JohnFireRound) => {
         this._JohnFireRound = JohnFireRound;
       }
     );
@@ -109,15 +114,15 @@ export class PlayersListComponent implements OnInit{
       if(this.JudasCheckingResult !== undefined) {
         this.JudasCheckingResult.nativeElement.click();
       }
-    })).subscribe(
+    }), takeUntil(this.unsubscribe$)).subscribe(
       (JudasCheckResult) => {
         this.checkResult = JudasCheckResult;
       }
     );
-    this.JudasCheckRound.subscribe((JudasCheckRound) => {
+    this.JudasCheckRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasCheckRound) => {
       this._JudasCheckRound = JudasCheckRound;
     });
-    this.singalrService.playerNotInGame.subscribe((playerNotInGame: IOnlineUsers[]) => {
+    this.singalrService.playerNotInGame.pipe(takeUntil(this.unsubscribe$)).subscribe((playerNotInGame: IOnlineUsers[]) => {
       this.playerNotInGame = playerNotInGame;
     });
     // this.gameRoomComponent.inDiscustion.pipe(tap((inDiscustion: boolean) => {
@@ -125,13 +130,22 @@ export class PlayersListComponent implements OnInit{
     // })).subscribe((inDiscustion: boolean) => {
     //   this._inDiscustion = inDiscustion;
     // });
-    this.singalrService.inDiscusstionUserName.subscribe((inDiscusstionUserName: string) => {
+    this.singalrService.inDiscusstionUserName.pipe(takeUntil(this.unsubscribe$)).subscribe((inDiscusstionUserName: string) => {
       this._inDiscustionName = inDiscusstionUserName;
     });
-    this.singalrService.inAnswerQuestionName.subscribe((inAnswerQuestionName: string) => {
+    this.singalrService.inAnswerQuestionName.pipe(takeUntil(this.unsubscribe$)).subscribe((inAnswerQuestionName: string) => {
       this._inAnswerQuestionName = inAnswerQuestionName;
     });
-  }
+    this.singalrService.JudasHintRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasHintRound: boolean) => {
+      this._JudasHintRound = JudasHintRound;
+    });
+    this.singalrService.JudasName.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasName: string) => {
+      this.JudasName = JudasName;
+    });
+    this.singalrService.HintName.pipe(takeUntil(this.unsubscribe$)).subscribe((HintName: string) => {
+      this.hintName = HintName;
+    });
+  } 
 
   assignNewGroupLeader(nextLeader: string) {
     this.httpService.assignNextGroupLeader(this.childGroupName!, nextLeader, this.childGroupLeader.name);
@@ -145,6 +159,7 @@ export class PlayersListComponent implements OnInit{
     this.userChoosePersonName = name;
     if(conformToExile) {
       this.singalrService.changePriestRoundStatus(false);
+      this.singalrService.HintName.next("");
       this.httpService.aboutToExileHimOrHer(this.childGroupName!, name);
     }
   }
@@ -171,6 +186,7 @@ export class PlayersListComponent implements OnInit{
     this.userChoosePersonName = name;
     if(conformTofire) {
       this.JudasCheckRound.next(false);
+      this.singalrService.ROTSGetInfomation.next(false);
       this.httpService.JudasCheckRound(this.childGroupName!, name);
     }
   }
@@ -181,5 +197,15 @@ export class PlayersListComponent implements OnInit{
       this.httpService.voteHimOrHer(this.childGroupName!, name, this.childName!);
       this.conformToVote = false;
     }
+  }
+
+  HintHimOrHer(name: string) {
+    this.singalrService.JudasHintRound.next(false);
+    this.httpService.JudasMeetWithPriest(this.childGroupName!, name);
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 }

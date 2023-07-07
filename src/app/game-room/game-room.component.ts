@@ -1,12 +1,13 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, tap } from 'rxjs';
 
 import { HttpsCommService } from '../service/https-comm.service';
 import { IOnlineUsers } from '../interface/IOnlineUser';
 import { SignalrService } from '../service/signalr.service'
 import { IMessage } from '../interface/IMessage';
-import { BehaviorSubject, tap } from 'rxjs';
 import { INextStep } from '../interface/INextStep';
 import { IQuestions } from '../interface/IQuestions';
 
@@ -17,7 +18,7 @@ import { IQuestions } from '../interface/IQuestions';
   templateUrl: './game-room.component.html',
   styleUrls: ['./game-room.component.css']
 })
-export class GameRoomComponent implements OnInit, AfterViewInit  {
+export class GameRoomComponent implements OnInit, OnDestroy  {
 
   @ViewChild('viewMyIdentity', {read: ElementRef}) identityModal?: ElementRef;
 
@@ -33,7 +34,6 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   @ViewChild('closePrepareToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
 
   @ViewChild('winningModel', {read: ElementRef}) winningModel?: ElementRef;
-  @ViewChild('closeWinningModel', {read: ElementRef}) closeWinningModel?: ElementRef;
 
   @ViewChild('nightWaitingModel', {read: ElementRef}) nightWaitingModel?: ElementRef;
   @ViewChild('closeNightWaitingModel', {read: ElementRef}) closeNightWaitingModel?: ElementRef;
@@ -41,7 +41,6 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   @ViewChild('AnnounceExileModel', {read: ElementRef}) AnnounceExileModel?: ElementRef;
 
   @ViewChild('SpiritualFormationQuestion', {read: ElementRef}) SpiritualFormationQuestion?: ElementRef;
-  
 
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
@@ -57,7 +56,6 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   nextStep: INextStep;
   discussionTopic: string;
   playerNotInGame: IOnlineUsers[];
-  whoWins: string;
   voteResult: string;
   PriestRound: boolean;
   RulerOfTheSynagogue: boolean;
@@ -118,6 +116,14 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     }
   };
   
+  _JudasHintRound: boolean = false;
+  JudasName: string = "";
+  hintName: string = "";
+  _ROTSGetInfomation:boolean = false;
+  lastExiledPlayerName: string = "";
+  winner: number = -1;
+
+  private unsubscribe$: Subject<void> = new Subject<void>();
   
   constructor(private httpService: HttpsCommService, 
     private route: ActivatedRoute,
@@ -137,7 +143,6 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this.nextStep = null!;
       this.discussionTopic = "";
       this.playerNotInGame = [];
-      this.whoWins = "";
       this.PriestRound = false;
       this.RulerOfTheSynagogue = false;
       this.voteResult = "";
@@ -145,13 +150,10 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
       this._NicodemusSavingRound = false;
       this.aboutToExileName = "";
       this.exileName = "";
-      // this.backupClosingButton = new BehaviorSubject<boolean>(false);
-      // this._backupClosingButton = false;
       this.JohnFireRound = new BehaviorSubject<boolean>(false);
       this._JohnFireRound = false;
       this.JudasCheckRound = new BehaviorSubject<boolean>(false);
       this._JudasCheckRound = false;
-      // this.inDiscustion = new BehaviorSubject<boolean>(false);
       this.backupIdentityClosingButton = new BehaviorSubject<boolean>(false);
       this._backupIdentityClosingButton = false;
       this.nightWaitModalShowFlag = new BehaviorSubject<boolean>(false);
@@ -164,29 +166,31 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
   }
 
   ngOnInit(): void {
-    this.singalrService.onlineUser.subscribe((onlineUser: IOnlineUsers[]) => {
+    this.singalrService.onlineUser.pipe(takeUntil(this.unsubscribe$)).subscribe((onlineUser: IOnlineUsers[]) => {
       this.onlineUser = onlineUser;
     });
-    this.singalrService.messagesToAll.subscribe((messages: IMessage[]) => {
+    this.singalrService.messagesToAll.pipe(takeUntil(this.unsubscribe$)).subscribe((messages: IMessage[]) => {
       this.messages = messages;
     });
-    this.singalrService.groupLeader.subscribe((groupLeader: IOnlineUsers) =>{
+    this.singalrService.groupLeader.pipe(takeUntil(this.unsubscribe$)).subscribe((groupLeader: IOnlineUsers) =>{
       this.groupLeader = groupLeader;
     });
     this.singalrService.identitiesExplanation.pipe(tap(
-      _ => {
-        if(this.identityModal !== undefined) {
-          this.identityModal.nativeElement.click();
+      (identitiesExplanation: string[]) => {
+        if(identitiesExplanation.length != 0) {
+          if(this.identityModal !== undefined) {
+            this.identityModal.nativeElement.click();
+          }
         }
       }
-    )).subscribe((identitiesExplanation: string[]) => {
+    ), takeUntil(this.unsubscribe$)).subscribe((identitiesExplanation: string[]) => {
       this.abilities = identitiesExplanation
     });
     this.singalrService.nextStep.pipe(tap(
       nextStep => {
         this.prepareNextStep(nextStep);
       }
-    )).subscribe((nextStep: INextStep) => {
+    ), takeUntil(this.unsubscribe$)).subscribe((nextStep: INextStep) => {
       this.nextStep = nextStep;
     });
 
@@ -194,7 +198,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
         if(x > 0 && x == this.onlineUser.length){
           this.startGameShow = true;
         }
-      })).subscribe((maxPlayer: number) => {
+      }), takeUntil(this.unsubscribe$)).subscribe((maxPlayer: number) => {
         this.MaxPlayer = maxPlayer;
       }
     );
@@ -208,7 +212,7 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
             }
             // this.inDiscustion.next(true);
           }
-      })).subscribe();
+      }), takeUntil(this.unsubscribe$)).subscribe();
 
     
     this.singalrService.finishedViewIdentityOrNot.pipe(tap(
@@ -227,18 +231,18 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
             console.log("closeWaitingForOtherPlayers is null!");
           }
         }
-      })).subscribe();
+      }), takeUntil(this.unsubscribe$)).subscribe();
 
-    this.singalrService.playerNotInGame.subscribe((playerNotInGame: IOnlineUsers[]) => {
+    this.singalrService.playerNotInGame.pipe(takeUntil(this.unsubscribe$)).subscribe((playerNotInGame: IOnlineUsers[]) => {
       this.playerNotInGame = playerNotInGame;
     });
-    this.singalrService.GameOn.subscribe((GameOn: boolean) => {
+    this.singalrService.GameOn.pipe(takeUntil(this.unsubscribe$)).subscribe((GameOn: boolean) => {
       this.gameOn = GameOn;
     });
-    this.singalrService.identity.subscribe((identity: string) => {
+    this.singalrService.identity.pipe(takeUntil(this.unsubscribe$)).subscribe((identity: string) => {
       this.identity = identity;
     });
-    this.singalrService.voteResult.subscribe((voteResult: string) => {
+    this.singalrService.voteResult.pipe(takeUntil(this.unsubscribe$)).subscribe((voteResult: string) => {
       this.voteResult = voteResult;
     });
 
@@ -253,55 +257,57 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
             console.log("nightWaitingModel is null!");
           }
         }
-    })).subscribe((PriestRound: boolean) => {
+    }), takeUntil(this.unsubscribe$)).subscribe((PriestRound: boolean) => {
       this.PriestRound = PriestRound;
     });
-    this.singalrService.RulerOfTheSynagogue.subscribe((RulerOfTheSynagogue: boolean) => {
+    this.singalrService.RulerOfTheSynagogue.pipe(takeUntil(this.unsubscribe$)).subscribe((RulerOfTheSynagogue: boolean) => {
       this.RulerOfTheSynagogue = RulerOfTheSynagogue;
     });
 
     // this.backupClosingButton.subscribe((backupClosingButton) => {
     //   this._backupClosingButton = backupClosingButton;
     // });
-    this.NicodemusSavingRound.subscribe((NicodemusSavingRound) => {
+    this.NicodemusSavingRound.pipe(takeUntil(this.unsubscribe$)).subscribe((NicodemusSavingRound) => {
       this._NicodemusSavingRound = NicodemusSavingRound;
     });
-    this.JohnFireRound.subscribe((JohnFireRound) => {
+    this.JohnFireRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JohnFireRound) => {
       this._JohnFireRound = JohnFireRound;
     });
-    this.JudasCheckRound.subscribe((JudasCheckRound) => {
+    this.JudasCheckRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasCheckRound) => {
       this._JudasCheckRound = JudasCheckRound;
     });
-    this.singalrService.exileName.pipe(tap(_ => {
-      if(this.AnnounceExileModel !== undefined) {
-        this.AnnounceExileModel.nativeElement.click();
+    this.singalrService.exileName.pipe(tap((exileName: string) => {
+      if(exileName != "") {
+        if(this.AnnounceExileModel !== undefined) {
+          this.AnnounceExileModel.nativeElement.click();
+        }
       }
-    })).subscribe((exileName: string) => {
+    }), takeUntil(this.unsubscribe$)).subscribe((exileName: string) => {
       this.exileName = exileName;
     });
 
-    this.backupIdentityClosingButton.subscribe((backupIdentityClosingButton: boolean) => {
+    this.backupIdentityClosingButton. pipe(takeUntil(this.unsubscribe$)).subscribe((backupIdentityClosingButton: boolean) => {
       this._backupIdentityClosingButton = backupIdentityClosingButton
     });
-    this.nightWaitModalShowFlag.subscribe((nightWaitModalShowFlag: boolean) => {
+    this.nightWaitModalShowFlag.pipe(takeUntil(this.unsubscribe$)).subscribe((nightWaitModalShowFlag: boolean) => {
       this._nightWaitModalShowFlag = nightWaitModalShowFlag;
     });
-    this.singalrService.PriestName.subscribe((PriestName: string) => {
+    this.singalrService.PriestName.pipe(takeUntil(this.unsubscribe$)).subscribe((PriestName: string) => {
       this.PriestName = PriestName;
     });
-    this.singalrService.ROTSName.subscribe((ROTSName: string) => {
+    this.singalrService.ROTSName.pipe(takeUntil(this.unsubscribe$)).subscribe((ROTSName: string) => {
       this.ROTSName = ROTSName;
     });
-    this.singalrService.NicodemusName.subscribe((NicodemusName: string) => {
+    this.singalrService.NicodemusName.pipe(takeUntil(this.unsubscribe$)).subscribe((NicodemusName: string) => {
       this.NicodemusName = NicodemusName;
     });
-    this.singalrService.PriestMeetingRound.subscribe((PriestMeetingRound: boolean) => {
+    this.singalrService.PriestMeetingRound.pipe(takeUntil(this.unsubscribe$)).subscribe((PriestMeetingRound: boolean) => {
       this._PriestMeetingRound = PriestMeetingRound;
     });
-    this.singalrService.NicodemusMeetingRound.subscribe((NicodemusMeetingRound: boolean) => {
+    this.singalrService.NicodemusMeetingRound.pipe(takeUntil(this.unsubscribe$)).subscribe((NicodemusMeetingRound: boolean) => {
       this._NicodemusMeetingRound = NicodemusMeetingRound;
     });
-    this.singalrService.day.subscribe((day: number) => {
+    this.singalrService.day.pipe(takeUntil(this.unsubscribe$)).subscribe((day: number) => {
       this.day = day;
     });
     this.singalrService.question.pipe(tap((question: IQuestions) => {
@@ -312,15 +318,45 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
           console.log("SpiritualFormationQuestion is undefine");
         }
       }
-    })).subscribe((question: IQuestions) => {
+    }), takeUntil(this.unsubscribe$)).subscribe((question: IQuestions) => {
       this.SpiritualQuestion = question;
     });
-    this.playerFinishChoice.subscribe((playerFinishChoice: boolean) => {
+    this.playerFinishChoice.pipe(takeUntil(this.unsubscribe$)).subscribe((playerFinishChoice: boolean) => {
       this._playerFinishChoice = playerFinishChoice;
+    });
+    this.singalrService.JudasHintRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasHintRound: boolean) => {
+      this._JudasHintRound = JudasHintRound;
+    });
+    this.singalrService.JudasName.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasName: string) => {
+      this.JudasName = JudasName;
+    });
+    this.singalrService.HintName.pipe(takeUntil(this.unsubscribe$)).subscribe((HintName: string) => {
+      this.hintName = HintName;
+    });
+    this.singalrService.ROTSGetInfomation.pipe(takeUntil(this.unsubscribe$))
+    .subscribe((ROTSGetInfomation: boolean) => {
+      this._ROTSGetInfomation = ROTSGetInfomation;
+    });
+    this.singalrService.lastExiledPlayerName.pipe(takeUntil(this.unsubscribe$))
+    .subscribe((lastExiledPlayerName: string) => {
+      this.lastExiledPlayerName = lastExiledPlayerName;
+    });
+    this.singalrService.winner.pipe(takeUntil(this.unsubscribe$))
+    .pipe(tap((winner: number) => {
+      if(winner != -1) {
+        if(this.winningModel !== undefined) {
+          this.winningModel.nativeElement.click();
+        }
+      }
+    })).subscribe((winner: number) =>{
+      this.winner = winner;
     });
   }
 
-  ngAfterViewInit(): void {
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+    console.log("User Quit Game")
   }
 
   prepareNextStep(nextStep: INextStep): void{
@@ -497,5 +533,10 @@ export class GameRoomComponent implements OnInit, AfterViewInit  {
     }
     this.singalrService.question.next(initQuesiont);
     this.httpService.spiritualQuestionAnsweredCorrectOrNot(this.groupName!, this.name!, this.playerChoiceCorrect);
+  }
+
+  reset() {
+    this.startGameShow = false;
+    this.singalrService.reset();
   }
 }

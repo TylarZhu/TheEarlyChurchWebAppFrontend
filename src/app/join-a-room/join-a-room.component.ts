@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { takeUntil, Subject } from 'rxjs';
 
 import { SignalrService } from '../service/signalr.service';
 import { HttpsCommService } from '../service/https-comm.service';
@@ -10,11 +11,13 @@ import { HttpsCommService } from '../service/https-comm.service';
   templateUrl: './join-a-room.component.html',
   styleUrls: ['./join-a-room.component.css']
 })
-export class JoinARoomComponent implements OnInit {
+export class JoinARoomComponent implements OnInit, OnDestroy {
   submitted = false;
   gourpDoesNotExists: boolean;
   groupIsFull: boolean
   nameIsDuplicate: boolean
+
+  private unsubscribe$: Subject<void> = new Subject<void>();
 
   form: FormGroup = new FormGroup({
     name: new FormControl(""),
@@ -47,11 +50,13 @@ export class JoinARoomComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.http.checkIfGroupExists(this.form.value.groupName).subscribe(
+    this.http.checkIfGroupExists(this.form.value.groupName).pipe(takeUntil(this.unsubscribe$))
+    .subscribe(
       response => {
         // if game room exists
         if(response){
-          this.http.checkIfGroupFull(this.form.value.groupName).subscribe(
+          this.http.checkIfGroupFull(this.form.value.groupName).pipe(takeUntil(this.unsubscribe$))
+          .subscribe(
             response => {
               // if game room is not full
               if(!response) {
@@ -95,15 +100,14 @@ export class JoinARoomComponent implements OnInit {
         }
       }
     );
-
-    // let gameRoom = this.form.value.groupName;
-    // let name = this.form.value.name;
-    // this.onReset();
-    // this.router.navigate(['/gameRoom', {groupName: gameRoom, name: name}]);
   }
 
   onReset(): void {
     this.submitted = false;
     this.form.reset();
+  }
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 }

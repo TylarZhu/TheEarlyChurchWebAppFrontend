@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { SignalrService } from '../service/signalr.service';
 import { HttpsCommService } from '../service/https-comm.service';
+import { takeUntil, Subject } from 'rxjs';
 
 
 @Component({
@@ -11,7 +12,7 @@ import { HttpsCommService } from '../service/https-comm.service';
   templateUrl: './create-a-room.component.html',
   styleUrls: ['./create-a-room.component.css']
 })
-export class CreateARoomComponent implements OnInit {
+export class CreateARoomComponent implements OnInit, OnDestroy {
 
   form: FormGroup = new FormGroup({
     name: new FormControl(""),
@@ -26,7 +27,8 @@ export class CreateARoomComponent implements OnInit {
     { name: "11", value: 11},
     { name: "12", value: 12}
   ]
-  isHidden: boolean
+  isHidden: boolean;
+  private unsubscribe$ = new Subject<void>();
 
   constructor(private singalrService: SignalrService,
     private http: HttpsCommService,
@@ -54,7 +56,9 @@ export class CreateARoomComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.http.checkIfGroupExists(this.form.value.groupName).subscribe(
+    this.http.checkIfGroupExists(this.form.value.groupName)
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(
       response => {
         // if game room not exists
         if(!response){
@@ -75,6 +79,11 @@ export class CreateARoomComponent implements OnInit {
         }
       }
     );
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   onReset(): void {

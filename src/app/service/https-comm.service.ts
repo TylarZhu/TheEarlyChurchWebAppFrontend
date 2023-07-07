@@ -190,4 +190,14 @@ export class HttpsCommService {
       }
     );
   }
+
+  public JudasMeetWithPriest(groupName: string, name: string) {
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.post(this.inGameUrl + "/JudasMeetWithPriest" + "/" + groupName + "/" + name, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
 }
