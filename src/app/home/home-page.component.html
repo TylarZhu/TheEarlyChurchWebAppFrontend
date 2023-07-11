@@ -5,7 +5,7 @@
         <div class="row justify-content-center text-center" id="gameTitle" >
             <div class="col-5 align-self-center text-center">
                 <!-- <p style="font-size: 1.8rem;"> The Early Church Game</p> -->
-                <h1> 抉择</h1>
+                <h1>抉择</h1>
             </div>
             <div class="w-100"></div>
             <div class="col-5 align-self-center text-center">
@@ -25,6 +25,7 @@
                     <button class="btn btn-outline-secondary" type="button" role="button" (click)="openJoinARoomModal()">
                         <h5>Join Room</h5>
                     </button>
+                    <button #backgroundAndDeveloperInfo [hidden]="true" data-bs-toggle="modal" data-bs-target="#backgroundAndDeveloperInfo" ></button>
                 </div>
             </div>
         </div>
@@ -39,4 +40,37 @@
 
 <div class="modal fade" id="createARoom" tabindex="-1" aria-labelledby="createARoomModal" aria-hidden="true">
     <app-create-a-room></app-create-a-room>
+</div>
+
+<div class="modal fade" id="backgroundAndDeveloperInfo" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="backgroundAndDeveloperInfo" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+                <h5 class="modal-title fs-6">Our Message <i class="fa-regular fa-envelope"></i></h5>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p class="text-break">Greetings Player,</p>
+
+                    <p class="text-break lh-base">
+                        We would like to praise <strong> Lord for his great work </strong> in using us to develop this exciting game. 
+                        Its purpose is to educate players on <span class="text-decoration-underline">the challenges early Christians faced 
+                            in establishing their first church</span> and <span class="text-decoration-underline">to show God's power in setting them apart from Judaism</span>. 
+                            To learn more about the background history of this game, <span class="text-success">click on the button at the top right corner</span>. 
+                            If you're fascinated by this remarkable history, <span class="text-primary">please reach out and join our Face2Face family</span>. 
+                        We're eager to hear from you and learn more about you. Have fun playing the game!
+                    </p>
+
+                    Blessings,<br>
+                    Face2Face
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-right">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Let's Start! <i class="fa-regular fa-face-laugh-wink"></i>
+                </button>
+            </div>
+        </div>
+    </div> 
 </div>

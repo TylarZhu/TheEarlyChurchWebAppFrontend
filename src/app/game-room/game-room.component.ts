@@ -11,7 +11,7 @@ import { IMessage } from '../interface/IMessage';
 import { INextStep } from '../interface/INextStep';
 import { IQuestions } from '../interface/IQuestions';
 
-// import { PlayersListComponent } from '../players-list/players-list.component';
+import { PlayersListComponent } from '../players-list/players-list.component';
 
 @Component({
   selector: 'app-game-room',
@@ -24,9 +24,6 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
 
   @ViewChild('waitingForOtherPlayers', {read: ElementRef}) waitingForOtherPlayersModal?: ElementRef;
   @ViewChild('closeWaitingForOtherPlayers', {read: ElementRef}) closeWaitingForOtherPlayers?: ElementRef;
-
-  // @ViewChild('waitingDiscussionModel', {read: ElementRef}) waitingDiscussionModel?: ElementRef;
-  // @ViewChild('closeWaitingDiscussionModel', {read: ElementRef}) closeWaitingDiscussionModel?: ElementRef;
 
   @ViewChild('discussionModel', {read: ElementRef}) discussionModel?: ElementRef;
 
@@ -41,6 +38,8 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   @ViewChild('AnnounceExileModel', {read: ElementRef}) AnnounceExileModel?: ElementRef;
 
   @ViewChild('SpiritualFormationQuestion', {read: ElementRef}) SpiritualFormationQuestion?: ElementRef;
+
+  @ViewChild('gameHistory', {read: ElementRef}) gameHistory?: ElementRef;
 
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
@@ -65,6 +64,7 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   ROTSName: string;
   NicodemusName: string;
   PriestName: string;
+  hideShowButtonForDisscussion: string = "";
 
   // Special gamer property
   NicodemusSavingRound: BehaviorSubject<boolean>;
@@ -124,6 +124,7 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   winner: number = -1;
 
   private unsubscribe$: Subject<void> = new Subject<void>();
+  gameFinished: Subject<boolean> = new Subject();
   
   constructor(private httpService: HttpsCommService, 
     private route: ActivatedRoute,
@@ -204,15 +205,16 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
     );
 
     this.singalrService.finishDisscussion.pipe(tap(
-        finishDisscussion => {
-          // console.log(finishDisscussion);
+        (finishDisscussion: string) => {
           if(finishDisscussion == "InDisscussion"){
             if(this.discussionModel !== undefined) {
               this.discussionModel.nativeElement.click();
             }
-            // this.inDiscustion.next(true);
           }
-      }), takeUntil(this.unsubscribe$)).subscribe();
+      }), takeUntil(this.unsubscribe$)).subscribe(
+        (finishDisscussion: string) => {
+          this.hideShowButtonForDisscussion = finishDisscussion;
+      });
 
     
     this.singalrService.finishedViewIdentityOrNot.pipe(tap(
@@ -385,7 +387,6 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
       }, 3000);
     } else if(nextStep.nextStepName == "SetUserToNightWaiting") {
       this.nightWaitModalShowFlag.next(true);
-      // this.backupClosingButton.next(false);
       if(this.nightWaitingModel !== undefined) {
         this.nightWaitingModel.nativeElement.click();
       } else {
@@ -441,11 +442,12 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
 
   async gameStart(): Promise<void> {
     let half = this.onlineUser.length / 2;
-    this.httpService.CreateAGame(this.groupName!, half);
+    this.httpService.CreateAGame(this.groupName!);
   }
 
   finishedDiscussion() {
     // this.inDiscustion.next(false);
+    this.hideShowButtonForDisscussion = "";
     this.httpService.whoIsDiscussing(this.groupName!);
   }
 
@@ -533,10 +535,26 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
     }
     this.singalrService.question.next(initQuesiont);
     this.httpService.spiritualQuestionAnsweredCorrectOrNot(this.groupName!, this.name!, this.playerChoiceCorrect);
+    this.playerChoice = "";
+    this.playerChoiceCorrect = false;
   }
 
-  reset() {
-    this.startGameShow = false;
+  goToGameHistoryModal(): void{
+    if(this.gameHistory !== undefined) {
+      this.gameHistory.nativeElement.click();
+    } else {
+      console.log("gameHistory modal is undefined!");
+    }
+  }
+
+  cleanUp() {
+    console.log("Game Romm reset!");
     this.singalrService.reset();
+    this.gameFinished.next(true);
+    this.nightWaitModalShowFlag.next(false);
+    this.playerFinishChoice.next(false);
+    this.backupIdentityClosingButton.next(false);
+    this.discussionTopic = "";
+    this.aboutToExileName = "";
   }
 }

@@ -85,12 +85,12 @@
                 <div *ngIf="checkIfCurrentPlayerIsInGameOrNot(user.name); then inGameBadge else outGameBadge"> </div>
                 <ng-template #inGameBadge class="d-flex align-items-center">
                     <span class="badge bg-primary d-flex justify-content-center align-items-center">
-                        <div>In Game</div>
+                        <div>In</div>
                     </span>
                 </ng-template>
                 <ng-template #outGameBadge class="d-flex align-items-center">
                     <span class="badge bg-danger d-flex justify-content-center align-items-center" >
-                        <div>Out Game</div>
+                        <div>Out</div>
                     </span>
                 </ng-template>
             </div>

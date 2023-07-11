@@ -3,11 +3,53 @@
         <div class="container-fluid">
             <div>
                 <a class="navbar-brand" routerLink="/">
-                    <i class="fa-solid fa-cross"></i> Face2Face Home Church 
+                    <i class="fa-solid fa-cross"></i> Face2Face
                 </a>
             </div>
-            
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#brefHistory">
+                History <i class="fa-solid fa-book-open"></i>
+            </button>
         </div>
     </nav>
+</div>
+
+<div class="modal fade" id="brefHistory" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="brefHistory" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+                <h5 class="modal-title fs-6">Brief History</h5>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p class="text-break lh-base">
+                        Christianity came out of Judaism. In the beginning, Christianity was not yet called Christianity, 
+                        nor were Christians called Christians. 
+                        The place where they met and worshiped God was still in the synagogue. 
+                        Still, they chose an Old Testament word to call themselves - "the church" 
+                        (a group of people called by God). 
+                    </p>
+                    <p class="text-break lh-base">
+                        Their greatest struggle at this point was: Did they still belong to Judaism, 
+                        or had they been set apart? If they were set apart, what would we be in the future?
+                    </p>
+                    <p class="text-break lh-base">
+                        They were mixed up with other Jews. 
+                        On the one hand, the Jewish authorities were aware of this group's differences, 
+                        so they tried hard to suppress them. Once they found out, 
+                        they expelled them from the synagogue 
+                        (at that time, if Jews were expelled from the synagogue, it was equivalent to 'social death'); 
+                        on the other hand, this group had to work hard to clean out those mixed people, 
+                        and to form their own "church."
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-right">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Okay <i class="fa-regular fa-circle-check"></i>
+                </button>
+            </div>
+        </div>
+    </div> 
 </div>
 

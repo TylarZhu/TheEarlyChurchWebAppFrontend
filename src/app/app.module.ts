@@ -16,6 +16,7 @@ import { PlayersListComponent } from './players-list/players-list.component';
 import { SignalrService } from './service/signalr.service';
 import { HttpsCommService } from './service/https-comm.service';
 import { ViewIdentityModalComponent } from './view-identity-modal/view-identity-modal.component';
+import { GameHistoryComponent } from './game-history/game-history.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { ViewIdentityModalComponent } from './view-identity-modal/view-identity-
     CopyrightComponent,
     GameRoomComponent,
     PlayersListComponent,
-    ViewIdentityModalComponent
+    ViewIdentityModalComponent,
+    GameHistoryComponent
   ],
   imports: [
     BrowserModule,

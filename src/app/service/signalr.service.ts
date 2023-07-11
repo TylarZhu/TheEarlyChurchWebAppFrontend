@@ -57,6 +57,9 @@ export class SignalrService {
 
   winner: BehaviorSubject<number> = new BehaviorSubject<number>(-1);
 
+  history: BehaviorSubject<Record<string, string[]>> = 
+    new BehaviorSubject<Record<string, string[]>>({});
+
   initNextStep: INextStep = {
     nextStepName: "",
     options: []
@@ -82,8 +85,12 @@ export class SignalrService {
   }
 
   constructor(private httpService: HttpsCommService) {
-    this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
-    this.connection = new singalR.HubConnectionBuilder().withUrl(this.hubUrl).withAutomaticReconnect().build();
+    // this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
+    this.hubUrl = "https://theearlychurchgame.azurewebsites.net/PlayerGroupsHub";
+    this.connection = new singalR.HubConnectionBuilder()
+      .withUrl(this.hubUrl)
+      .withAutomaticReconnect()
+      .build();
     this.connection.serverTimeoutInMilliseconds = 100000;
     this.onlineUser =  new BehaviorSubject<IOnlineUsers[]>([]);
     this.messagesToAll = new BehaviorSubject<IMessage[]>([]);
@@ -221,6 +228,9 @@ export class SignalrService {
       this.winner.next(winner);
       this.GameOn.next(false);
     });
+    this.connection.on("announceGameHistory", (history: Record<string, string[]>) => {
+      this.history.next(history);
+    })
   }
 
   public changePriestRoundStatus(status: boolean): void {
@@ -228,6 +238,7 @@ export class SignalrService {
   }
 
   public reset(): void {
+    console.log("BehaviorSubject reset!")
     this.finishedViewIdentityOrNot.next(false);
     this.finishDisscussion.next("");
     this.nextStep.next(this.initNextStep);
@@ -251,5 +262,8 @@ export class SignalrService {
     this.ROTSGetInfomation.next(false);
     this.lastExiledPlayerName.next("");
     this.winner.next(-1);
+    this.history.next({});
+    this.JudasHintRound.next(false);
+    this.HintName.next("");
   }
 }

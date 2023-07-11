@@ -1,0 +1,42 @@
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between">
+            <h5 class="modal-title fs-6">Game Review <i class="fa-solid fa-clock-rotate-left"></i></h5>
+        </div>
+        <div class="modal-body modal-dialog-scrollable">
+            <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong> Day {{pageSelect}} </strong>
+                        </div>
+                    </div>
+                    <div class="row pt-2">
+                        <div class="col-md-4">
+                            <ul class="list-group">
+                                <div *ngFor="let dayHistory of histories.get(pageSelect)">
+                                    <li class="fs-6 list-group-item">{{dayHistory}}</li>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                <div class="row pt-2">
+                    <div class="btn-toolbar justify-content-center" role="toolbar" aria-label="Toolbar with button groups">
+                        <div class="btn-group me-2" role="group" aria-label="First group">
+                            <div *ngFor="let i of historiesLength">
+                                <button type="button" class="btn btn-primary" (click)="pageSelect = i.toString()">
+                                    {{i}}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-right">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close" (click)="callCleanUp()">
+                Close <i class="fa-regular fa-circle-xmark"></i>
+            </button>
+        </div>
+    </div>
+</div> 

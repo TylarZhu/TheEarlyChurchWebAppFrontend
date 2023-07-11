@@ -23,7 +23,7 @@
 </div>
 <div class="container-fluid d-flex pt-5">
     <div class="row flex-fill pt-2 justify-content-between">
-            <div *ngIf="false" class="col justify-content-start pt-2">
+            <!-- <div *ngIf="false" class="col justify-content-start pt-2">
                 <div class="dropdown-center">
                     <button class="btn btn-primary dropdown-toggle" type="button" 
                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -48,7 +48,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="col pt-2 justify-content-start">
                 <strong>Day {{day}}</strong>
             </div>
@@ -65,12 +65,18 @@
                     Show <i class="fa-regular fa-eye"></i>
                 </button>
             </div>
+
+            <div class="col pt-2 d-flex flex-row-reverse" *ngIf="hideShowButtonForDisscussion == 'InDisscussion'">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#discussionModel">
+                    Show <i class="fa-regular fa-eye"></i>
+                </button>
+            </div>
             
             <button #viewMyIdentity [hidden]="true" data-bs-toggle="modal" data-bs-target="#viewMyIdentity" ></button>
             <button #prepareToVoteModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#prepareToVoteModel"></button>
             <button #waitingForOtherPlayers  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayers"></button> 
             <button #discussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#discussionModel"></button>
-            <!-- <button #waitingDiscussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingDiscussionModel"></button> -->
+            <button #gameHistory  [hidden]="true" data-bs-toggle="modal" data-bs-target="#gameHistory"></button>
             <button #winningModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#winningModel"></button>
             <button #nightWaitingModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#nightWaitingModel"></button>
             <button #AnnounceExileModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#AnnounceExileModel"></button>
@@ -88,6 +94,7 @@
                         [childName]="name"
                         [childGameOn]="gameOn"
                         [voteState]="nextStep.nextStepName"
+                        [gameFinished]="gameFinished"
                     ></app-players-list>
                 </div>
             </div>
@@ -131,6 +138,9 @@ aria-labelledby="discussionModel" aria-hidden="true">
                 <div>
                     <p class="modal-title">Discussion</p>
                 </div>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Hide <i class="fa-regular fa-eye-slash"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div>
@@ -138,10 +148,6 @@ aria-labelledby="discussionModel" aria-hidden="true">
                 </div>
                 <div>
                     It is your turn to discuss! 
-                </div>
-
-                <div>
-                    Just a reminder, you identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-right">
@@ -257,27 +263,6 @@ data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayers" aria-hidden="t
     </div> 
 </div>
 
-<!-- <div class="modal fade" id="waitingDiscussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
-aria-labelledby="waitingDiscussionModel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body text-center">
-                <div class="spinner-grow text-danger" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <h5> Waiting for other players to finish talking ... </h5>
-                <button #closeWaitingDiscussionModel  [hidden]="true" type="button" class="btn btn-primary" 
-                data-bs-dismiss="modal" ></button>
-            </div>
-            <div *ngIf="_backupClosingButton">
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div> 
-</div> -->
-
 <div class="modal fade" id="prepareToVoteModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
 aria-labelledby="prepareToVoteModel" aria-hidden="true">
     <div class="modal-dialog">
@@ -307,7 +292,10 @@ aria-labelledby="winningModel" aria-hidden="true">
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="reset()">
+                <!-- <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="resetAndPrepareToViewGameHistory()">
+                    Okay <i class="fa-regular fa-circle-check"></i>
+                </button> -->
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="goToGameHistoryModal()">
                     Okay <i class="fa-regular fa-circle-check"></i>
                 </button>
             </div>
@@ -339,12 +327,9 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
 
                 <div *ngIf="_PriestMeetingRound">
                     <hr class="border border-danger border-2 opacity-50">
-
-                    <div> You are the <strong>Priest</strong> in this game!</div>
-                    <hr>
                     <div> 
                         You know <strong> {{ROTSName}} </strong> and <strong> {{NicodemusName}} </strong> that
-                        one of them is <strong> Nicodemus </strong> and another one is <strong> Ruler Of The Synagogue </strong>.
+                        one of them is <strong> Nicodemus </strong> and another one is <strong> Pharisee </strong>.
                     </div>
                     <div *ngIf="hintName != ''">
                         <hr>
@@ -357,9 +342,6 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
 
                 <div *ngIf="RulerOfTheSynagogue">
                     <hr class="border border-danger border-2 opacity-50">
-
-                    <div> You are the <strong>Ruler Of The Synagogue</strong> in this game!</div>
-                    <hr>
                     <div> 
                         You know <strong> {{PriestName}} </strong> and <strong> {{NicodemusName}} </strong> that
                         one of them is <strong> Priest </strong> and another one is <strong> Nicodemus </strong>.
@@ -371,11 +353,9 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
 
                 <div *ngIf="_NicodemusMeetingRound">
                     <hr class="border border-danger border-2 opacity-50">
-                    <div> You are <strong>Nicodemus</strong> in this game!</div>
-                    <hr>
                     <div> 
                         You know <strong> {{PriestName}} </strong> and <strong> {{ROTSName}} </strong> that
-                        one of them is <strong> Priest </strong> and another one is <strong> Ruler Of The Synagogue </strong>.
+                        one of them is <strong> Priest </strong> and another one is <strong> Pharisee </strong>.
                     </div>
                     <div *ngIf="_NicodemusSavingRound">
                         <div> It is your turn! Tonight, <strong> {{aboutToExileName}} </strong> will be exiled. 
@@ -541,7 +521,8 @@ aria-labelledby="SpiritualFormationQuestion" aria-hidden="true">
                     <div> Sorry you are wrong! </div>
                     <div> Correct Answer: <strong>{{SpiritualQuestion.question.An}}</strong> </div>
                     <div *ngIf="SpiritualQuestion.question.Ex !== undefined" style="white-space: pre-line"> 
-                        Explanation: {{SpiritualQuestion.question.Ex}} 
+                        Explanation: <br>
+                        {{SpiritualQuestion.question.Ex}} 
                     </div>
                 </div>
             </div>
@@ -557,3 +538,7 @@ aria-labelledby="SpiritualFormationQuestion" aria-hidden="true">
     </div> 
 </div>
 
+<div class="modal fade" id="gameHistory" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+aria-labelledby="gameHistory" aria-hidden="true">
+    <app-game-history (cleanUpEvent)="cleanUp()"></app-game-history>
+</div>

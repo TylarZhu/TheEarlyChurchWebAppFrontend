@@ -21,6 +21,7 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   @Input() childName: string | null;
   @Input() childGameOn: boolean; 
   @Input() voteState: string;
+  @Input() gameFinished: Subject<boolean> = new Subject();
 
   @ViewChild('waitOthersToVoteModel', {read: ElementRef}) waitOthersToVoteModel?: ElementRef;
   @ViewChild('closeWaitOthersToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
@@ -29,8 +30,6 @@ export class PlayersListComponent implements OnInit, OnDestroy{
 
   userChoosePersonName: string;
   conformToVote: boolean;
-  exilePersonName: string;
-  exileToVote: boolean;
   isPriest: boolean;
   PriestName: string;
   _JohnFireRound: boolean;
@@ -61,8 +60,6 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     this.userChoosePersonName = "";
     this.conformToVote = false;
     this.playerNotInGame = [];
-    this.exilePersonName = "";
-    this.exileToVote = false;
     this.isPriest = false;
     this.PriestName = "";
     this._JohnFireRound = false;
@@ -75,6 +72,10 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit(): void {
+    this.gameFinished.subscribe(
+      v => {
+        this.reset();
+    });
     this.singalrService.finishVoteWaitForOthers.pipe(tap(
       finishVoteWaitForOthers => {
         if(finishVoteWaitForOthers) {
@@ -205,7 +206,16 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   }
 
   ngOnDestroy(): void {
+    console.log("player list Destroy!");
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  reset(): void {
+    console.log("player list reset!");
+    this.JudasHimself = "";
+    this.JohnCannotFireList = [];
+    this.userChoosePersonName = "";
+    this.JudasCheckRound.next(false);
   }
 }
