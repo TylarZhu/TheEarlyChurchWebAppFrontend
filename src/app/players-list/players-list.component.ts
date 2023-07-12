@@ -26,7 +26,7 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   @ViewChild('waitOthersToVoteModel', {read: ElementRef}) waitOthersToVoteModel?: ElementRef;
   @ViewChild('closeWaitOthersToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
   
-  @ViewChild('JudasCheckingResult', {read: ElementRef}) JudasCheckingResult?: ElementRef;
+  // @ViewChild('JudasCheckingResult', {read: ElementRef}) JudasCheckingResult?: ElementRef;
 
   userChoosePersonName: string;
   conformToVote: boolean;
@@ -36,7 +36,7 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   JohnCannotFireList: string[];
   JudasCheckRound: BehaviorSubject<boolean>;
   _JudasCheckRound: boolean;
-  checkResult: boolean;
+  // checkResult: boolean;
   JudasHimself: string;
   playerNotInGame: IOnlineUsers[];
   _inDiscustionName: string;
@@ -66,7 +66,7 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     this.JohnCannotFireList = [];
     this.JudasCheckRound = new BehaviorSubject<boolean>(false);
     this._JudasCheckRound = false;
-    this.checkResult = false;
+    // this.checkResult = false;
     this.JudasHimself = "";
     this._inDiscustionName = "";
   }
@@ -111,26 +111,12 @@ export class PlayersListComponent implements OnInit, OnDestroy{
         this._JohnFireRound = JohnFireRound;
       }
     );
-    this.singalrService.JudasCheckResult.pipe(tap(_ => {
-      if(this.JudasCheckingResult !== undefined) {
-        this.JudasCheckingResult.nativeElement.click();
-      }
-    }), takeUntil(this.unsubscribe$)).subscribe(
-      (JudasCheckResult) => {
-        this.checkResult = JudasCheckResult;
-      }
-    );
     this.JudasCheckRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasCheckRound) => {
       this._JudasCheckRound = JudasCheckRound;
     });
     this.singalrService.playerNotInGame.pipe(takeUntil(this.unsubscribe$)).subscribe((playerNotInGame: IOnlineUsers[]) => {
       this.playerNotInGame = playerNotInGame;
     });
-    // this.gameRoomComponent.inDiscustion.pipe(tap((inDiscustion: boolean) => {
-    //   console.log(inDiscustion);
-    // })).subscribe((inDiscustion: boolean) => {
-    //   this._inDiscustion = inDiscustion;
-    // });
     this.singalrService.inDiscusstionUserName.pipe(takeUntil(this.unsubscribe$)).subscribe((inDiscusstionUserName: string) => {
       this._inDiscustionName = inDiscusstionUserName;
     });
@@ -150,10 +136,6 @@ export class PlayersListComponent implements OnInit, OnDestroy{
 
   assignNewGroupLeader(nextLeader: string) {
     this.httpService.assignNextGroupLeader(this.childGroupName!, nextLeader, this.childGroupLeader.name);
-  }
-  
-  NightRoundEnd(): void {
-    this.httpService.NightRoundEnd(this.childGroupName!);
   }
 
   exileHimOrHer(name: string, conformToExile: boolean) {

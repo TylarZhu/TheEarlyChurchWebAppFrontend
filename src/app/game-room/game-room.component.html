@@ -85,7 +85,7 @@
         
             <div class="w-100"></div>
             <div class="col pt-2">
-                <div class="list-group">
+                <div class="list-group overflow-hidden">
                     <!-- isPriest make sure Priest does not exile himself -->
                     <app-players-list 
                         [childGroupName]="groupName" 
@@ -369,7 +369,18 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
                         Guess a person who is most likely to be a Christian and give the hint to the Priest!</div>
                 </div>
                 <div *ngIf="_JudasCheckRound">
+                    <hr class="border border-danger border-2 opacity-50">
                     <div> You are <strong>Judas</strong>! It is your turn to check one person!</div>
+                    <div *ngIf="JudasCheckResultShow">
+                        <hr>
+                        <div *ngIf="JudasCheckResult; then isChristan else isUnknow"> </div>
+                        <ng-template #isChristan>
+                            <div> He/She is a <strong>Christian</strong> !</div>
+                        </ng-template>
+                        <ng-template #isUnknow>
+                            <div> <strong>Unknow result</strong> !</div>
+                        </ng-template>
+                    </div>
                 </div>
 
                 <div *ngIf="_JohnFireRound">
@@ -377,9 +388,10 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
                     <div> You are <strong>John</strong> in this game! It is your turn!</div>
                 </div>
 
-                
-                <button #closeNightWaitingModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                </button>
+                <div *ngIf="nightRoundFinish">
+                    <hr class="border border-danger border-2 opacity-50">
+                    <div><strong> Night Round Ends! </strong> Please click "End Night" Button.</div>
+                </div>
             </div>
             <div *ngIf="PriestRound">
                 <div class="modal-footer d-flex justify-content-right">
@@ -400,7 +412,7 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
             </div>
             <div *ngIf="_JohnFireRound">
                 <div class="modal-footer text-center d-flex justify-content-between">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="DoNotFire()">
+                    <button type="button" class="btn btn-danger" (click)="DoNotFire()">
                         No <i class="fa-solid fa-xmark"></i>
                     </button>
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
@@ -410,15 +422,33 @@ data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
             </div>
             <div *ngIf="_JudasCheckRound">
                 <div class="modal-footer d-flex justify-content-right">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="BeginToCheck()">
-                        check <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
+                    <div *ngIf="JudasCheckResultShow; then endNightRound else beginToCheck"> </div>
+                    <ng-template #endNightRound>
+                        <button type="button" class="btn btn-primary" (click)="NightRoundEnd()">
+                            Okay <i class="fa-regular fa-circle-check"></i>
+                        </button>
+                    </ng-template>
+                    <ng-template #beginToCheck>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                            Check <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </ng-template>
+                   
                 </div>
             </div>
             <div *ngIf="_JudasHintRound">
                 <div class="modal-footer d-flex justify-content-right">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
                         Ready <i class="fa-regular fa-circle-check"></i>
+                    </button>
+                </div>
+            </div>
+            <div *ngIf="nightRoundFinish">
+                <!-- <button #closeNightWaitingModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                </button> -->
+                <div class="modal-footer d-flex justify-content-right">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="goToAnnounceExileModel()">
+                    End Night <i class="fa-regular fa-sun"></i>
                     </button>
                 </div>
             </div>

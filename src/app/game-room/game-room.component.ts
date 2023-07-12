@@ -33,7 +33,7 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   @ViewChild('winningModel', {read: ElementRef}) winningModel?: ElementRef;
 
   @ViewChild('nightWaitingModel', {read: ElementRef}) nightWaitingModel?: ElementRef;
-  @ViewChild('closeNightWaitingModel', {read: ElementRef}) closeNightWaitingModel?: ElementRef;
+  // @ViewChild('closeNightWaitingModel', {read: ElementRef}) closeNightWaitingModel?: ElementRef;
 
   @ViewChild('AnnounceExileModel', {read: ElementRef}) AnnounceExileModel?: ElementRef;
 
@@ -93,6 +93,9 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   playerFinishChoice: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   _playerFinishChoice: boolean = false;
 
+  JudasCheckResult: boolean = false;
+  JudasCheckResultShow: boolean = false;
+
   ACorrect: boolean = false;
   BCorrect: boolean = false;
   CCorrect: boolean = false;
@@ -122,6 +125,8 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   _ROTSGetInfomation:boolean = false;
   lastExiledPlayerName: string = "";
   winner: number = -1;
+  nightRoundFinish: boolean = false;
+  
 
   private unsubscribe$: Subject<void> = new Subject<void>();
   gameFinished: Subject<boolean> = new Subject();
@@ -278,13 +283,7 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
     this.JudasCheckRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasCheckRound) => {
       this._JudasCheckRound = JudasCheckRound;
     });
-    this.singalrService.exileName.pipe(tap((exileName: string) => {
-      if(exileName != "") {
-        if(this.AnnounceExileModel !== undefined) {
-          this.AnnounceExileModel.nativeElement.click();
-        }
-      }
-    }), takeUntil(this.unsubscribe$)).subscribe((exileName: string) => {
+    this.singalrService.exileName.pipe(takeUntil(this.unsubscribe$)).subscribe((exileName: string) => {
       this.exileName = exileName;
     });
 
@@ -353,6 +352,15 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
     })).subscribe((winner: number) =>{
       this.winner = winner;
     });
+    this.singalrService.JudasCheckResult.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (JudasCheckResult) => {
+        this.JudasCheckResult = JudasCheckResult;
+      }
+    );
+    this.singalrService.JudasCheckResultShow.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (JudasCheckResultShow: boolean) => {
+        this.JudasCheckResultShow = JudasCheckResultShow;
+      });
   }
 
   ngOnDestroy(): void {
@@ -401,11 +409,7 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
       this.JudasCheckRound.next(true);
     } else if(nextStep.nextStepName == "quitNightWaiting") {
       this.nightWaitModalShowFlag.next(false);
-      if(this.closeNightWaitingModel !== undefined) {
-        this.closeNightWaitingModel.nativeElement.click();
-      } else {
-        console.log("nightWaitingModel is null!");
-      }
+      this.nightRoundFinish = true;
     }
   }
   
@@ -432,9 +436,9 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
     this.httpService.FireHimOrHer(this.groupName!, "NULL");
   }
 
-  BeginToCheck() {
-    this.JudasCheckRound.next(false);
-  }
+  // BeginToCheck() {
+  //   this.JudasCheckRound.next(false);
+  // }
 
   finishedToViewTheExileResult() {
     this.httpService.finishedToViewTheExileResult(this.groupName!);
@@ -547,6 +551,19 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
     }
   }
 
+  goToAnnounceExileModel(): void {
+    this.nightRoundFinish = false;
+    if(this.AnnounceExileModel !== undefined) {
+      this.AnnounceExileModel.nativeElement.click();
+    }
+  }
+
+  NightRoundEnd(): void {
+    this.JudasCheckRound.next(false);
+    this.singalrService.JudasCheckResultShow.next(false);
+    this.httpService.NightRoundEnd(this.groupName!);
+  }
+
   cleanUp() {
     console.log("Game Romm reset!");
     this.singalrService.reset();
@@ -556,5 +573,6 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
     this.backupIdentityClosingButton.next(false);
     this.discussionTopic = "";
     this.aboutToExileName = "";
+    this.nightRoundFinish = false;
   }
 }

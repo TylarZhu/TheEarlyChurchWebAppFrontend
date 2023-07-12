@@ -39,6 +39,7 @@ export class SignalrService {
   PriestName: BehaviorSubject<string>;
   RulerOfTheSynagogue: BehaviorSubject<boolean>;
   JudasCheckResult: BehaviorSubject<boolean>;
+  JudasCheckResultShow: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   exileName: BehaviorSubject<string>;
   ROTSName: BehaviorSubject<string>;
   NicodemusName: BehaviorSubject<string>;
@@ -195,6 +196,7 @@ export class SignalrService {
     });
 
     this.connection.on("JudasCheckResult", (status: boolean) => {
+      this.JudasCheckResultShow.next(true);
       this.JudasCheckResult.next(status);
     });
     this.connection.on("updateExiledUsers", (user: IOnlineUsers[]) => {
@@ -265,5 +267,6 @@ export class SignalrService {
     this.history.next({});
     this.JudasHintRound.next(false);
     this.HintName.next("");
+    this.JudasCheckResultShow.next(false);
   }
 }
