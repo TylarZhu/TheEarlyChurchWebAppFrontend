@@ -24,6 +24,9 @@
                         <div *ngIf="_inAnswerQuestionName == user.name" class="pe-1">
                             <i class="fa-solid fa-book-open"></i>
                         </div>
+                        <div *ngIf="offLinePlayerName.includes(user.name)" class="pe-1">
+                            <i class="fa-solid fa-ban"></i>
+                        </div>
                         <span class="badge bg-danger d-flex justify-content-center align-items-center">
                             <div>{{i + 1}}</div>
                         </span>
@@ -99,7 +102,7 @@
 </div> 
 
 
-<div class="modal fade" id="voteConformationModel" tabindex="-1" data-bs-backdrop="static" 
+<div class="modal fade" id="voteConformationModel" tabindex="-1"
 data-bs-keyboard="false" aria-labelledby="voteConformationModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -121,7 +124,7 @@ data-bs-keyboard="false" aria-labelledby="voteConformationModel" aria-hidden="tr
     </div>
 </div>
 
-<div class="modal fade" id="exileConformationModel" tabindex="-1" data-bs-backdrop="static" 
+<div class="modal fade" id="exileConformationModel" tabindex="-1"
 data-bs-keyboard="false" aria-labelledby="exileConformationModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -143,7 +146,7 @@ data-bs-keyboard="false" aria-labelledby="exileConformationModel" aria-hidden="t
     </div>
 </div>
 
-<div class="modal fade" id="FireConformationModel" tabindex="-1" data-bs-backdrop="static" 
+<div class="modal fade" id="FireConformationModel" tabindex="-1"
 data-bs-keyboard="false" aria-labelledby="FireConformationModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -165,7 +168,7 @@ data-bs-keyboard="false" aria-labelledby="FireConformationModel" aria-hidden="tr
     </div>
 </div>
 
-<div class="modal fade" id="CheckConformationModel" tabindex="-1" data-bs-backdrop="static" 
+<div class="modal fade" id="CheckConformationModel" tabindex="-1"
 data-bs-keyboard="false" aria-labelledby="CheckConformationModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -203,29 +206,3 @@ data-bs-keyboard="false" aria-labelledby="waitOthersToVoteModel" aria-hidden="tr
         </div>
     </div> 
 </div>
-
-<!-- <button #JudasCheckingResult  [hidden]="true" data-bs-toggle="modal" data-bs-target="#JudasCheckingResult"></button>
-<div class="modal fade" id="JudasCheckingResult" tabindex="-1" data-bs-backdrop="static" 
-data-bs-keyboard="false" aria-labelledby="JudasCheckingResult" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Judas Checking Result</h5>
-            </div>
-            <div class="modal-body text-center">
-                <div *ngIf="checkResult; then isChristan else isUnknow"> </div>
-                <ng-template #isChristan>
-                    <div> He/She is a <strong>Christian</strong> !</div>
-                </ng-template>
-                <ng-template #isUnknow>
-                    <div> <strong>Unknow result</strong> !</div>
-                </ng-template>
-            </div>
-            <div class="modal-footer text-center d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="NightRoundEnd()">
-                    Okay <i class="fa-regular fa-circle-check"></i>
-                </button>
-            </div>
-        </div>
-    </div> 
-</div> -->

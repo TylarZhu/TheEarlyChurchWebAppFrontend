@@ -169,9 +169,9 @@ export class HttpsCommService {
     );
   }
 
-  public finishedToViewTheExileResult(groupName: string): void {
+  public finishedToViewTheExileResult(groupName: string, name: string): void {
     const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.post(this.inGameUrl + "/finishedToViewTheExileResult" + "/" + groupName, 
+    this.http.post(this.inGameUrl + "/finishedToViewTheExileResult" + "/" + groupName + "/" + name, 
     {},
     {headers}).subscribe(
       response => {
@@ -199,7 +199,21 @@ export class HttpsCommService {
     );
   }
 
-  // public getGameHistory(groupName: string) {
-  //   this.http.get(this.inGameUrl + "/getGameHistory" + "/" + groupName).subscribe();
-  // }
+  public userLeaveTheGameByConnectionId(connectionId: string | null) {
+    console.log(connectionId);
+    if(connectionId !== null) {
+      this.http.delete(this.huburl + "/userLeaveTheGameByConnectionId/" + connectionId).subscribe();
+    }
+  }
+
+  // user refresh page or close tab methods
+  public PriestRoundStateFinish(groupName: string) {
+    const headers = new HttpHeaders().set("Content-Type", "application/json");
+    this.http.post(this.inGameUrl + "/PriestRound" + "/" + groupName, 
+    {},
+    {headers}).subscribe(
+      response => {
+      }
+    );
+  }
 }

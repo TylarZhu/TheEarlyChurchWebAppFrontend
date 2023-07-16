@@ -60,11 +60,13 @@ export class JoinARoomComponent implements OnInit, OnDestroy {
             response => {
               // if game room is not full
               if(!response) {
-                this.http.checkIfUserNameInGroupDuplicate(this.form.value.groupName, this.form.value.name).subscribe(
+                this.http.checkIfUserNameInGroupDuplicate(this.form.value.groupName, this.form.value.name)
+                .pipe(takeUntil(this.unsubscribe$))
+                .subscribe(
                   // if player's name is not duplicate
                   response => {
                     if(!response) {
-                      this.singalrService.connection.invoke("onConntionAndCreateGroup",this.form.value).then(
+                      this.singalrService.hubConnection.invoke("onConntionAndCreateGroup",this.form.value).then(
                         () => {
                           let gameRoom = this.form.value.groupName;
                           let name = this.form.value.name;

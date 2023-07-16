@@ -11,8 +11,6 @@ import { IMessage } from '../interface/IMessage';
 import { INextStep } from '../interface/INextStep';
 import { IQuestions } from '../interface/IQuestions';
 
-import { PlayersListComponent } from '../players-list/players-list.component';
-
 @Component({
   selector: 'app-game-room',
   templateUrl: './game-room.component.html',
@@ -43,8 +41,13 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
 
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
-  groupName: string | null;
-  name: string | null;
+  // groupName: string | null;
+  // name: string | null;
+  groupName: BehaviorSubject<string> = new BehaviorSubject<string>("");
+  _groupName: string = "";
+  name: BehaviorSubject<string> = new BehaviorSubject<string>("");
+  _name: string = "";
+
   groupLeader: IOnlineUsers;
   gameOn: boolean;
   MaxPlayer: number;
@@ -135,9 +138,19 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
     private route: ActivatedRoute,
     private singalrService: SignalrService,
     private router: Router){
+      let groupNameTemp = this.route.snapshot.paramMap.get('groupName');
+      if(groupNameTemp !== null) {
+        this.groupName.next(groupNameTemp);
+      }
+
+      let nameTemp = this.route.snapshot.paramMap.get('name');
+      if(nameTemp !== null) {
+        this.name.next(nameTemp);
+      }
+
       this.onlineUser = [];
-      this.groupName = this.route.snapshot.paramMap.get('groupName');
-      this.name = this.route.snapshot.paramMap.get('name');
+      // this.groupName = this.route.snapshot.paramMap.get('groupName');
+      // this.name = this.route.snapshot.paramMap.get('name');
       this.MaxPlayer = 0;
       this.messages = [];
       this.groupLeader = null!;
@@ -172,7 +185,22 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   }
 
   ngOnInit(): void {
-    this.singalrService.onlineUser.pipe(takeUntil(this.unsubscribe$)).subscribe((onlineUser: IOnlineUsers[]) => {
+    // this.singalrService.hubConnection.invoke("onConntionAndCreateGroup",this.form.value)
+    this.groupName.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (groupName: string) => {
+        this._groupName = groupName;
+    });
+    this.name.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (name: string) => {
+        this._name = name;
+    });
+    this.singalrService.onlineUser.pipe(tap((onlineUser: IOnlineUsers[]) => {
+      if(this.MaxPlayer > 0 && this.MaxPlayer == onlineUser.length){
+        this.startGameShow = true;
+      } else {
+        this.startGameShow = false;
+      }
+    }), takeUntil(this.unsubscribe$)).subscribe((onlineUser: IOnlineUsers[]) => {
       this.onlineUser = onlineUser;
     });
     this.singalrService.messagesToAll.pipe(takeUntil(this.unsubscribe$)).subscribe((messages: IMessage[]) => {
@@ -200,11 +228,7 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
       this.nextStep = nextStep;
     });
 
-    this.singalrService.maxPlayer.pipe(tap( x => {
-        if(x > 0 && x == this.onlineUser.length){
-          this.startGameShow = true;
-        }
-      }), takeUntil(this.unsubscribe$)).subscribe((maxPlayer: number) => {
+    this.singalrService.maxPlayer.pipe(takeUntil(this.unsubscribe$)).subscribe((maxPlayer: number) => {
         this.MaxPlayer = maxPlayer;
       }
     );
@@ -427,13 +451,13 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   NicodemusAction(action: boolean) 
   {
     this.NicodemusSavingRound.next(false);
-    this.httpService.NicodemusAction(this.groupName!, action);
+    this.httpService.NicodemusAction(this._groupName, action);
   }
 
   DoNotFire()
   {
     this.JohnFireRound.next(false);
-    this.httpService.FireHimOrHer(this.groupName!, "NULL");
+    this.httpService.FireHimOrHer(this._groupName, "NULL");
   }
 
   // BeginToCheck() {
@@ -441,27 +465,27 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   // }
 
   finishedToViewTheExileResult() {
-    this.httpService.finishedToViewTheExileResult(this.groupName!);
+    this.httpService.finishedToViewTheExileResult(this._groupName, this._name);
   }
 
   async gameStart(): Promise<void> {
     let half = this.onlineUser.length / 2;
-    this.httpService.CreateAGame(this.groupName!);
+    this.httpService.CreateAGame(this._groupName);
   }
 
   finishedDiscussion() {
     // this.inDiscustion.next(false);
     this.hideShowButtonForDisscussion = "";
-    this.httpService.whoIsDiscussing(this.groupName!);
+    this.httpService.whoIsDiscussing(this._groupName);
   }
 
   findViewIdentityReadyToPlay(): void {
-    this.httpService.IdentityViewingState(this.groupName!, this.name!);
+    this.httpService.IdentityViewingState(this._groupName, this._name);
   }
 
   async userLeavesGroup(){
-    await this.singalrService.connection.invoke("leaveGroup", this.groupName);
-    this.httpService.userLeaveTheGame(this.groupName!, this.name!, this.gameOn);
+    await this.singalrService.hubConnection.invoke("leaveGroup", this._groupName, this._name);
+    // this.httpService.userLeaveTheGame(this._groupName, this._name, false);
     this.router.navigate(['/']);
   }
   conformAnswer() {
@@ -538,7 +562,7 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
       }
     }
     this.singalrService.question.next(initQuesiont);
-    this.httpService.spiritualQuestionAnsweredCorrectOrNot(this.groupName!, this.name!, this.playerChoiceCorrect);
+    this.httpService.spiritualQuestionAnsweredCorrectOrNot(this._groupName, this._name!, this.playerChoiceCorrect);
     this.playerChoice = "";
     this.playerChoiceCorrect = false;
   }
@@ -561,7 +585,7 @@ export class GameRoomComponent implements OnInit, OnDestroy  {
   NightRoundEnd(): void {
     this.JudasCheckRound.next(false);
     this.singalrService.JudasCheckResultShow.next(false);
-    this.httpService.NightRoundEnd(this.groupName!);
+    this.httpService.NightRoundEnd(this._groupName);
   }
 
   cleanUp() {

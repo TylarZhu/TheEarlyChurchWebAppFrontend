@@ -9,7 +9,7 @@
             
             <div>
                 <h4>
-                    {{groupName}} {{onlineUser.length}}/{{MaxPlayer}}
+                    {{_groupName}} {{onlineUser.length}}/{{MaxPlayer}}
                 </h4>
                 
             </div>
@@ -52,8 +52,8 @@
             <div class="col pt-2 justify-content-start">
                 <strong>Day {{day}}</strong>
             </div>
-            <div *ngIf="groupName == groupLeader.groupName && 
-            name == groupLeader.name && !gameOn" 
+            <div *ngIf="_groupName == groupLeader.groupName && 
+            _name == groupLeader.name && !gameOn" 
             class="col pt-2 d-flex flex-row-reverse">
                 <button class="btn btn-warning"  (click)="gameStart()" [disabled]="!startGameShow">
                     Start Game <i class="fa-solid fa-circle-play"></i>
@@ -88,10 +88,10 @@
                 <div class="list-group overflow-hidden">
                     <!-- isPriest make sure Priest does not exile himself -->
                     <app-players-list 
-                        [childGroupName]="groupName" 
+                        [childGroupName]="_groupName" 
                         [childOnlineUser]="onlineUser"
                         [childGroupLeader]="groupLeader"
-                        [childName]="name"
+                        [childName]="_name"
                         [childGameOn]="gameOn"
                         [voteState]="nextStep.nextStepName"
                         [gameFinished]="gameFinished"
@@ -102,7 +102,7 @@
 </div>
 
 
-<div class="modal fade" id="backToMenu" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+<div class="modal fade" id="backToMenu" tabindex="-1" data-bs-keyboard="false" 
 aria-labelledby="backToMenu" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -130,7 +130,7 @@ aria-labelledby="backToMenu" aria-hidden="true">
     </div>
 </div>
 
-<div class="modal fade" id="discussionModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+<div class="modal fade" id="discussionModel" tabindex="-1" data-bs-keyboard="false" 
 aria-labelledby="discussionModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -201,7 +201,7 @@ aria-labelledby="viewMyIdentity" aria-hidden="true">
     </div>
 </div>
 
-<div class="modal fade" id="info" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+<div class="modal fade" id="info" tabindex="-1" data-bs-keyboard="false" 
 aria-labelledby="info" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -229,6 +229,7 @@ aria-labelledby="info" aria-hidden="true">
                     <i class="fa-solid fa-triangle-exclamation"></i> Judas guessed Christian <br>
                     <i class="fa-solid fa-microphone"></i> In discussion <br>
                     <i class="fa-solid fa-book-open"></i> Doing spiritual formation question <br>
+                    <i class="fa-solid fa-ban"></i> Player is offline <br>
                 </div>
             </div>
             <div class="modal-footer text-center d-flex justify-content-right">
@@ -263,7 +264,7 @@ data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayers" aria-hidden="t
     </div> 
 </div>
 
-<div class="modal fade" id="prepareToVoteModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
+<div class="modal fade" id="prepareToVoteModel" tabindex="-1" data-bs-keyboard="false" 
 aria-labelledby="prepareToVoteModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -303,7 +304,7 @@ aria-labelledby="winningModel" aria-hidden="true">
     </div> 
 </div>
 
-<div class="modal fade" id="nightWaitingModel" tabindex="-1" data-bs-backdrop="static" 
+<div class="modal fade" id="nightWaitingModel" tabindex="-1"
 data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -466,7 +467,7 @@ aria-labelledby="AnnounceExileModel" aria-hidden="true">
             <div class="modal-body text-center">
                 <h5> {{exileName}} has been exiled last night! <i class="fa-solid fa-skull"></i> </h5>
             </div>
-            <div *ngIf="checkIfCurrentPlayerIsInGameOrNot(name!); then inGame else outGame"></div>
+            <div *ngIf="checkIfCurrentPlayerIsInGameOrNot(_name); then inGame else outGame"></div>
             <ng-template #inGame>
                 <div class="modal-footer d-flex justify-content-right">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedToViewTheExileResult()">

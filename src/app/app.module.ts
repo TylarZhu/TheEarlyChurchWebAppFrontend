@@ -39,7 +39,7 @@ import { GameHistoryComponent } from './game-history/game-history.component';
       {path: '', component: HomePageComponent},
       {path: 'home', component: HomePageComponent},
       {path: 'gameRoom', component: GameRoomComponent}
-    ])
+    ], {useHash: true})
   ],
   providers: [
     SignalrService,

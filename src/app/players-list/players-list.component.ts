@@ -44,6 +44,7 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   _JudasHintRound: boolean = false;
   JudasName: string = "";
   hintName: string = "";
+  offLinePlayerName: string[] = [];
 
   private unsubscribe$: Subject<void> = new Subject<void>();
   
@@ -131,6 +132,9 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     });
     this.singalrService.HintName.pipe(takeUntil(this.unsubscribe$)).subscribe((HintName: string) => {
       this.hintName = HintName;
+    });
+    this.singalrService.offLinePlayerName.pipe(takeUntil(this.unsubscribe$)).subscribe((offLinePlayerName: string[]) => {
+      this.offLinePlayerName = offLinePlayerName;
     });
   } 
 

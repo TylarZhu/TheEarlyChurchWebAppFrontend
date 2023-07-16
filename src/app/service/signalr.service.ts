@@ -1,19 +1,20 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import * as singalR from '@microsoft/signalr';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { IOnlineUsers } from '../interface/IOnlineUser'
 import { IMessage } from '../interface/IMessage';
 import { HttpsCommService } from './https-comm.service';
 import { INextStep } from '../interface/INextStep';
 import { IQuestions } from '../interface/IQuestions';
+// import { GameRoomComponent } from '../game-room/game-room.component';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SignalrService {
+export class SignalrService implements OnInit {
   hubUrl: string;
-  connection: singalR.HubConnection;
+  hubConnection: singalR.HubConnection;
 
   // -------------- //
   // Group Entities //
@@ -23,6 +24,8 @@ export class SignalrService {
   identitiesExplanation: BehaviorSubject<string[]>;
   groupLeader: BehaviorSubject<IOnlineUsers>;
   maxPlayer: BehaviorSubject<number>;
+  // groupName: string = "";
+  // name: string = "";
 
   // ------------- //
   // Game Entities //
@@ -50,6 +53,7 @@ export class SignalrService {
   question: BehaviorSubject<IQuestions>;
   inAnswerQuestionName: BehaviorSubject<string> = new BehaviorSubject<string>("");
   JudasHintRound: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  offLinePlayerName: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 
   JudasName: BehaviorSubject<string> = new BehaviorSubject<string>("");
   HintName: BehaviorSubject<string> = new BehaviorSubject<string>("");
@@ -88,11 +92,11 @@ export class SignalrService {
   constructor(private httpService: HttpsCommService) {
     // this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
     this.hubUrl = "https://theearlychurchgame.azurewebsites.net/PlayerGroupsHub";
-    this.connection = new singalR.HubConnectionBuilder()
+    this.hubConnection = new singalR.HubConnectionBuilder()
       .withUrl(this.hubUrl)
       .withAutomaticReconnect()
       .build();
-    this.connection.serverTimeoutInMilliseconds = 100000;
+    this.hubConnection.serverTimeoutInMilliseconds = 100000;
     this.onlineUser =  new BehaviorSubject<IOnlineUsers[]>([]);
     this.messagesToAll = new BehaviorSubject<IMessage[]>([]);
     this.groupLeader = new BehaviorSubject<IOnlineUsers>(this.initUser);
@@ -122,117 +126,165 @@ export class SignalrService {
     this.question =  new BehaviorSubject<IQuestions>(this.initQuestion); 
   }
 
+  ngOnInit(): void {
+    // this.onDisconnect();
+  }
+
   public async initConnection(): Promise<void>{
     try {
-      await this.connection.start();
+      await this.hubConnection.start();
       console.log("SignalR Connected.");
       this.setSignalrClientMethods();
+
+      this.hubConnection.onclose(err => {
+        console.log("connection closed! Error: " + err);
+        // this.httpService.userLeaveTheGameByConnectionId(this.hubConnection.connectionId);
+        setTimeout(async (_: any) => await this.initConnection(), 3000);
+      });
     } catch(err) {
-      console.log(err);
+      console.log("SignalR err: " + err);
     }
   }
 
-  public async onDisconnect() {
-    this.connection.onclose(async () => {
-      await this.initConnection();
-    });
-  }
+  // public async onDisconnect() {
+  //   this.hubConnection.onclose(async () => {
+  //     console.log("connection closed!");
+  //     this.httpService.userLeaveTheGameByConnectionId(this.hubConnection.connectionId);
+  //     setTimeout(async (_: any) => await this.initConnection(), 3000);
+  //   });
+  // }
 
   private setSignalrClientMethods(): void{
-    this.connection.on('ReceiveMessages', (messages: IMessage[]) => {
+    this.hubConnection.on('ReceiveMessages', (messages: IMessage[]) => {
       this.messagesToAll.next(messages);
     });
 
-    this.connection.on('CreateNewUserJoinNewGroup', (connectionID: string, groupName: string, name: string, groupMaxPlayers: string) => {
+    this.hubConnection.on('CreateNewUserJoinNewGroup', (connectionID: string, groupName: string, name: string, groupMaxPlayers: string) => {
       this.httpService.createNewUserAndGroup(connectionID, groupName, name, groupMaxPlayers);
     });
-    this.connection.on('updateOnlineUserList', (onlineUser: IOnlineUsers[]) => {
+    this.hubConnection.on('updateOnlineUserList', (onlineUser: IOnlineUsers[]) => {
       this.onlineUser.next(onlineUser);
     });
-    this.connection.on('updateGroupLeader', (onlineUser: IOnlineUsers) => {
+    this.hubConnection.on('updateGroupLeader', (onlineUser: IOnlineUsers) => {
       this.groupLeader.next(onlineUser);
     });
-    this.connection.on("updatePlayersIdentities", (identity: string) => {
+    this.hubConnection.on("updatePlayersIdentities", (identity: string) => {
       this.identity.next(identity);
       this.GameOn.next(true);
     });
-    this.connection.on("IdentitiesExplanation", (identitiesExplanation: string[]) => {
+    this.hubConnection.on("IdentitiesExplanation", (identitiesExplanation: string[]) => {
       this.identitiesExplanation.next(identitiesExplanation);
     });
-    this.connection.on("getMaxPlayersInGroup", (maxPlayer: number) => {
+    this.hubConnection.on("getMaxPlayersInGroup", (maxPlayer: number) => {
       this.maxPlayer.next(maxPlayer);
     });
-    this.connection.on("finishedViewIdentityAndWaitOnOtherPlayers", (wait: boolean) => {
+    this.hubConnection.on("finishedViewIdentityAndWaitOnOtherPlayers", (wait: boolean) => {
       this.finishedViewIdentityOrNot.next(wait);
     });
     // state == InDisscussion, Disscussion modal triggered
     // state == Waiting, Microphone icron triggered
-    this.connection.on("currentUserInDiscusstion", (state: string, inDiscusstionUserName: string) => {
+    this.hubConnection.on("currentUserInDiscusstion", (state: string, inDiscusstionUserName: string) => {
       this.finishDisscussion.next(state);
       this.inDiscusstionUserName.next(inDiscusstionUserName);
     });
-    this.connection.on("nextStep", (nextStep: INextStep) => {
+    this.hubConnection.on("nextStep", (nextStep: INextStep) => {
       this.nextStep.next(nextStep);
     });
-    this.connection.on("finishVoteWaitForOthersOrVoteResult", (waitState: boolean, result: string) => {
+    this.hubConnection.on("finishVoteWaitForOthersOrVoteResult", (waitState: boolean, result: string) => {
       this.finishVoteWaitForOthers.next(waitState);
       this.voteResult.next(result);
     });
 
-    this.connection.on("PriestROTSNicoMeet", (ROTSName: string, priestName: string, NicodemusName: string) => {
+    this.hubConnection.on("PriestROTSNicoMeet", (ROTSName: string, priestName: string, NicodemusName: string) => {
       this.ROTSName.next(ROTSName);
       this.PriestName.next(priestName);
       this.NicodemusName.next(NicodemusName);
     });
-    this.connection.on("PriestRound", () => {
+    this.hubConnection.on("PriestRound", () => {
       this.PriestMeetingRound.next(true);
       this.PriestRound.next(true);
     });
-    this.connection.on("RulerOfTheSynagogueMeeting", () => {
+    this.hubConnection.on("RulerOfTheSynagogueMeeting", () => {
       this.RulerOfTheSynagogue.next(true);
     });
-    this.connection.on("NicoMeeting", () => {
+    this.hubConnection.on("NicoMeeting", () => {
       this.NicodemusMeetingRound.next(true);
     });
 
-    this.connection.on("JudasCheckResult", (status: boolean) => {
+    this.hubConnection.on("JudasCheckResult", (status: boolean) => {
       this.JudasCheckResultShow.next(true);
       this.JudasCheckResult.next(status);
     });
-    this.connection.on("updateExiledUsers", (user: IOnlineUsers[]) => {
+    this.hubConnection.on("updateExiledUsers", (user: IOnlineUsers[]) => {
       this.playerNotInGame.next(user);
     });
-    this.connection.on("announceExile", (name: string) => {
+    this.hubConnection.on("announceExile", (name: string) => {
       this.exileName.next(name);
     });
-    this.connection.on("changeDay", (day: number) => {
+    this.hubConnection.on("changeDay", (day: number) => {
       this.day.next(day);
     });
-    this.connection.on("getAQuestion", (question: IQuestions) => {
+    this.hubConnection.on("getAQuestion", (question: IQuestions) => {
       this.question.next(question);
     });
-    this.connection.on("inAnswerQuestionName", (inAnswerQuestionName: string) => {
+    this.hubConnection.on("inAnswerQuestionName", (inAnswerQuestionName: string) => {
       this.inAnswerQuestionName.next(inAnswerQuestionName);
     });
-    this.connection.on("JudasGivePriestHint", (priestName: string) => {
+    this.hubConnection.on("JudasGivePriestHint", (priestName: string) => {
       this.JudasHintRound.next(true);
       this.PriestName.next(priestName);
     });
-    this.connection.on("PriestReceiveHint", (JudasName: string, HintName: string) => {
+    this.hubConnection.on("PriestReceiveHint", (JudasName: string, HintName: string) => {
       this.JudasName.next(JudasName);
       this.HintName.next(HintName);
     });
-    this.connection.on("announceLastExiledPlayerInfo", (status: boolean, name: string) => {
+    this.hubConnection.on("announceLastExiledPlayerInfo", (status: boolean, name: string) => {
       this.ROTSGetInfomation.next(status);
       this.lastExiledPlayerName.next(name);
     });
-    this.connection.on("announceWinner", (winner: number) => {
+    this.hubConnection.on("announceWinner", (winner: number) => {
       this.winner.next(winner);
       this.GameOn.next(false);
     });
-    this.connection.on("announceGameHistory", (history: Record<string, string[]>) => {
+    this.hubConnection.on("announceGameHistory", (history: Record<string, string[]>) => {
       this.history.next(history);
-    })
+    });
+
+    // user refresh Page or close tab
+    this.hubConnection.on("announceOffLinePlayer", (offLinePlayerName: string[]) => {
+      this.offLinePlayerName.next(offLinePlayerName);
+    });
+    this.hubConnection.on("IdentityViewingStateFinish", (groupName: string, name: string) => {
+      this.httpService.IdentityViewingState(groupName, name);
+    });
+    this.hubConnection.on("DiscussingStateFinish", (groupName: string) => {
+      this.httpService.whoIsDiscussing(groupName);
+    });
+    this.hubConnection.on("VoteStateFinish", (groupName: string, name: string) => {
+      this.httpService.voteHimOrHer(groupName, name, name);
+    });
+    this.hubConnection.on("PriestRoundStateFinish", (groupName: string) => {
+      this.httpService.PriestRoundStateFinish(groupName);
+    });
+    this.hubConnection.on("JudasMeetWithPriestStateFinish", (groupName: string) => {
+      this.httpService.JudasMeetWithPriest(groupName, "NULL");
+    });
+    this.hubConnection.on("NicodemusSavingRoundBeginStateFinish", (groupName: string) => {
+      this.httpService.NicodemusAction(groupName, false);
+    });
+    this.hubConnection.on("JohnFireRoundBeginStateFinish", (groupName: string) => {
+      this.httpService.FireHimOrHer(groupName, "NULL");
+    });
+    this.hubConnection.on("JudasCheckRoundStateFinish", (groupName: string) => {
+      this.httpService.JudasCheckRound(groupName, "NULL");
+    });
+    this.hubConnection.on("finishedToViewTheExileResultStateFinish", (groupName: string, name: string) => {
+      this.httpService.finishedToViewTheExileResult(groupName, name);
+    });
+    this.hubConnection.on("spiritualQuestionAnsweredCorrectOrNotStateFinish", 
+    (groupName: string, leaveUserName: string) => {
+      this.httpService.spiritualQuestionAnsweredCorrectOrNot(groupName, leaveUserName, false);
+    });
   }
 
   public changePriestRoundStatus(status: boolean): void {
@@ -268,5 +320,6 @@ export class SignalrService {
     this.JudasHintRound.next(false);
     this.HintName.next("");
     this.JudasCheckResultShow.next(false);
+    this.offLinePlayerName.next([]);
   }
 }
