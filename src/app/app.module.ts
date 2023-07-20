@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { NavComponent } from './nav/nav.component';
@@ -17,6 +18,7 @@ import { SignalrService } from './service/signalr.service';
 import { HttpsCommService } from './service/https-comm.service';
 import { ViewIdentityModalComponent } from './view-identity-modal/view-identity-modal.component';
 import { GameHistoryComponent } from './game-history/game-history.component';
+import { QuestionModalComponent } from './question-modal/question-modal.component';
 
 @NgModule({
   declarations: [
@@ -29,12 +31,14 @@ import { GameHistoryComponent } from './game-history/game-history.component';
     GameRoomComponent,
     PlayersListComponent,
     ViewIdentityModalComponent,
-    GameHistoryComponent
+    GameHistoryComponent,
+    QuestionModalComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     ReactiveFormsModule,
+    FormsModule,
     RouterModule.forRoot([
       {path: '', component: HomePageComponent},
       {path: 'home', component: HomePageComponent},

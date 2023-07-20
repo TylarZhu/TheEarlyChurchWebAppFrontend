@@ -1,4 +1,5 @@
 import { Injectable, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import * as singalR from '@microsoft/signalr';
 import { BehaviorSubject, of } from 'rxjs';
 
@@ -22,6 +23,7 @@ export class SignalrService implements OnInit {
   onlineUser: BehaviorSubject<IOnlineUsers[]>;
   messagesToAll: BehaviorSubject<IMessage[]>;
   identitiesExplanation: BehaviorSubject<string[]>;
+  openIdentitiesExplanationModal: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   groupLeader: BehaviorSubject<IOnlineUsers>;
   maxPlayer: BehaviorSubject<number>;
   // groupName: string = "";
@@ -54,6 +56,9 @@ export class SignalrService implements OnInit {
   inAnswerQuestionName: BehaviorSubject<string> = new BehaviorSubject<string>("");
   JudasHintRound: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   offLinePlayerName: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+  stillInActionPlayers: BehaviorSubject<IOnlineUsers[]> = new BehaviorSubject<IOnlineUsers[]>([]);
+
+  openOrCloseExileResultModal: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   JudasName: BehaviorSubject<string> = new BehaviorSubject<string>("");
   HintName: BehaviorSubject<string> = new BehaviorSubject<string>("");
@@ -89,9 +94,9 @@ export class SignalrService implements OnInit {
     }
   }
 
-  constructor(private httpService: HttpsCommService) {
-    // this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
-    this.hubUrl = "https://theearlychurchgame.azurewebsites.net/PlayerGroupsHub";
+  constructor(private httpService: HttpsCommService, private router: Router) {
+    this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
+    // this.hubUrl = "https://theearlychurchgame.azurewebsites.net/PlayerGroupsHub";
     this.hubConnection = new singalR.HubConnectionBuilder()
       .withUrl(this.hubUrl)
       .withAutomaticReconnect()
@@ -127,7 +132,7 @@ export class SignalrService implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.onDisconnect();
+    this.onDisconnect();
   }
 
   public async initConnection(): Promise<void>{
@@ -146,13 +151,13 @@ export class SignalrService implements OnInit {
     }
   }
 
-  // public async onDisconnect() {
-  //   this.hubConnection.onclose(async () => {
-  //     console.log("connection closed!");
-  //     this.httpService.userLeaveTheGameByConnectionId(this.hubConnection.connectionId);
-  //     setTimeout(async (_: any) => await this.initConnection(), 3000);
-  //   });
-  // }
+  public async onDisconnect() {
+    this.hubConnection.onclose(async () => {
+      console.log("connection closed!");
+      // this.httpService.userLeaveTheGameByConnectionId(this.hubConnection.connectionId);
+      setTimeout(async (_: any) => await this.initConnection(), 3000);
+    });
+  }
 
   private setSignalrClientMethods(): void{
     this.hubConnection.on('ReceiveMessages', (messages: IMessage[]) => {
@@ -162,7 +167,7 @@ export class SignalrService implements OnInit {
     this.hubConnection.on('CreateNewUserJoinNewGroup', (connectionID: string, groupName: string, name: string, groupMaxPlayers: string) => {
       this.httpService.createNewUserAndGroup(connectionID, groupName, name, groupMaxPlayers);
     });
-    this.hubConnection.on('updateOnlineUserList', (onlineUser: IOnlineUsers[]) => {
+    this.hubConnection.on('updateUserList', (onlineUser: IOnlineUsers[]) => {
       this.onlineUser.next(onlineUser);
     });
     this.hubConnection.on('updateGroupLeader', (onlineUser: IOnlineUsers) => {
@@ -172,8 +177,9 @@ export class SignalrService implements OnInit {
       this.identity.next(identity);
       this.GameOn.next(true);
     });
-    this.hubConnection.on("IdentitiesExplanation", (identitiesExplanation: string[]) => {
+    this.hubConnection.on("IdentitiesExplanation", (identitiesExplanation: string[], openIdentitiesExplanationModal: boolean) => {
       this.identitiesExplanation.next(identitiesExplanation);
+      this.openIdentitiesExplanationModal.next(openIdentitiesExplanationModal);
     });
     this.hubConnection.on("getMaxPlayersInGroup", (maxPlayer: number) => {
       this.maxPlayer.next(maxPlayer);
@@ -249,6 +255,12 @@ export class SignalrService implements OnInit {
     this.hubConnection.on("announceGameHistory", (history: Record<string, string[]>) => {
       this.history.next(history);
     });
+    this.hubConnection.on("stillWaitingFor", (stillInActionPlayers: IOnlineUsers[]) => {
+      this.stillInActionPlayers.next(stillInActionPlayers);
+    });
+    this.hubConnection.on("openOrCloseExileResultModal", (status: boolean) => {
+      this.openOrCloseExileResultModal.next(status);
+    });
 
     // user refresh Page or close tab
     this.hubConnection.on("announceOffLinePlayer", (offLinePlayerName: string[]) => {
@@ -284,6 +296,12 @@ export class SignalrService implements OnInit {
     this.hubConnection.on("spiritualQuestionAnsweredCorrectOrNotStateFinish", 
     (groupName: string, leaveUserName: string) => {
       this.httpService.spiritualQuestionAnsweredCorrectOrNot(groupName, leaveUserName, false);
+    });
+    this.hubConnection.on("repostOnlineUser", (newConnectionId: string, groupName: string, name: string, maxPlayer: string) => {
+      this.httpService.createNewUserAndGroup(newConnectionId, groupName, name, maxPlayer);
+    });
+    this.hubConnection.on("redirectToHomePage", () => { 
+      this.router.navigate(['/']);
     });
   }
 
@@ -321,5 +339,9 @@ export class SignalrService implements OnInit {
     this.HintName.next("");
     this.JudasCheckResultShow.next(false);
     this.offLinePlayerName.next([]);
+    this.stillInActionPlayers.next([]);
+    this.identitiesExplanation.next([]);
+    this.openOrCloseExileResultModal.next(false);
+    this.openIdentitiesExplanationModal.next(true);
   }
 }

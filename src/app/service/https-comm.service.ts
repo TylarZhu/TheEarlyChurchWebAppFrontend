@@ -14,10 +14,10 @@ export class HttpsCommService {
   inGameUrl: string;
 
   constructor(private http: HttpClient) { 
-    // this.huburl = "https://localhost:7252/HubRequest";
-    // this.inGameUrl = "https://localhost:7252/InGame";
-    this.huburl = "https://theearlychurchgame.azurewebsites.net/HubRequest";
-    this.inGameUrl = "https://theearlychurchgame.azurewebsites.net/InGame";
+    this.huburl = "https://localhost:7252/HubRequest";
+    this.inGameUrl = "https://localhost:7252/InGame";
+    // this.huburl = "https://theearlychurchgame.azurewebsites.net/HubRequest";
+    // this.inGameUrl = "https://theearlychurchgame.azurewebsites.net/InGame";
   }
 
   public createNewUserAndGroup(connectionId: string, groupName: string, username: string, groupMaxPlayers: string): void {
@@ -199,12 +199,12 @@ export class HttpsCommService {
     );
   }
 
-  public userLeaveTheGameByConnectionId(connectionId: string | null) {
-    console.log(connectionId);
-    if(connectionId !== null) {
-      this.http.delete(this.huburl + "/userLeaveTheGameByConnectionId/" + connectionId).subscribe();
-    }
-  }
+  // public userLeaveTheGameByConnectionId(connectionId: string | null) {
+  //   console.log(connectionId);
+  //   if(connectionId !== null) {
+  //     this.http.delete(this.huburl + "/userLeaveTheGameByConnectionId/" + connectionId).subscribe();
+  //   }
+  // }
 
   // user refresh page or close tab methods
   public PriestRoundStateFinish(groupName: string) {

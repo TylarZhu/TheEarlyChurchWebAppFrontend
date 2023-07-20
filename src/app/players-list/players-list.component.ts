@@ -6,7 +6,7 @@ import { INextStep } from '../interface/INextStep';
 import { SignalrService } from '../service/signalr.service';
 import { GameRoomComponent } from '../game-room/game-room.component'
 
-import { BehaviorSubject, tap, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, tap, Subject, takeUntil, pipe } from 'rxjs';
 
 @Component({
   selector: 'app-players-list',
@@ -22,6 +22,7 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   @Input() childGameOn: boolean; 
   @Input() voteState: string;
   @Input() gameFinished: Subject<boolean> = new Subject();
+  @Input() identity: string = "";
 
   @ViewChild('waitOthersToVoteModel', {read: ElementRef}) waitOthersToVoteModel?: ElementRef;
   @ViewChild('closeWaitOthersToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
@@ -32,6 +33,8 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   conformToVote: boolean;
   isPriest: boolean;
   PriestName: string;
+  ROTSName: string = "";
+  NicoName: string = "";
   _JohnFireRound: boolean;
   JohnCannotFireList: string[];
   JudasCheckRound: BehaviorSubject<boolean>;
@@ -45,6 +48,7 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   JudasName: string = "";
   hintName: string = "";
   offLinePlayerName: string[] = [];
+  stillInActionPlayers: IOnlineUsers[] = [];
 
   private unsubscribe$: Subject<void> = new Subject<void>();
   
@@ -82,22 +86,25 @@ export class PlayersListComponent implements OnInit, OnDestroy{
         if(finishVoteWaitForOthers) {
           if(this.waitOthersToVoteModel !== undefined) {
             this.waitOthersToVoteModel.nativeElement.click();
-          } else {
-            console.log("waitOthersToVoteModel is null!");
           }
         } else {
           if(this.closePrepareToVoteModel !== undefined) {
             this.closePrepareToVoteModel.nativeElement.click();
-          } else {
-            console.log("closePrepareToVoteModel is null!");
           }
         }
-      })).subscribe();
+      }
+      )).subscribe();
     this.singalrService.PriestRound.pipe(takeUntil(this.unsubscribe$)).subscribe((PriestRound: boolean) => {
       this.isPriest = PriestRound;
     });
     this.singalrService.PriestName.pipe(takeUntil(this.unsubscribe$)).subscribe((PriestName: string) => {
       this.PriestName = PriestName;
+    });
+    this.singalrService.NicodemusName.pipe(takeUntil(this.unsubscribe$)).subscribe((NicodemusName: string) => {
+      this.NicoName = NicodemusName;
+    });
+    this.singalrService.ROTSName.pipe(takeUntil(this.unsubscribe$)).subscribe((ROTSName: string) => {
+      this.ROTSName = ROTSName;
     });
     this.singalrService.nextStep.pipe(tap((nextStep: INextStep) => {
       console.log("PlayerList: " + nextStep.nextStepName);
@@ -135,6 +142,10 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     });
     this.singalrService.offLinePlayerName.pipe(takeUntil(this.unsubscribe$)).subscribe((offLinePlayerName: string[]) => {
       this.offLinePlayerName = offLinePlayerName;
+    });
+    this.singalrService.stillInActionPlayers.pipe(takeUntil(this.unsubscribe$))
+    .subscribe((stillInActionPlayers: IOnlineUsers[]) => {
+      this.stillInActionPlayers = stillInActionPlayers;
     });
   } 
 
