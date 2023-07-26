@@ -1,6 +1,6 @@
 <div class="container">
     <nav class="navbar rounded shadow fixed-top" style="background-color: #b3d6ef;">
-        <div class="container text-center d-flex justify-content-between">
+        <div class="container d-flex justify-content-between">
             <div>
                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#backToMenu">
                     <i class="fa-solid fa-backward"></i>
@@ -11,7 +11,6 @@
                 <h4>
                     {{_groupName}} {{onlineUser.length}}/{{MaxPlayer}}
                 </h4>
-                
             </div>
             <div>
                 <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#info"> 
@@ -22,84 +21,67 @@
     </nav>
 </div>
 <div class="container-fluid d-flex pt-5">
-    <div class="row flex-fill pt-2 justify-content-between">
-            <!-- <div *ngIf="false" class="col justify-content-start pt-2">
-                <div class="dropdown-center">
-                    <button class="btn btn-primary dropdown-toggle" type="button" 
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                        Massages 
-                        <i class="fa-regular fa-comments"></i>
-                    </button>
-                    <div class="dropdown-menu" style="max-height: 85vh; max-width: 58vh;" id="messageGroup">
-                        <div *ngFor="let message of messages; index as i;">
-                            <div class="dropdown-item">
-                                <div *ngIf="message.type === 'system'; then system else game"></div>
-                                <ng-template #game>
-                                    <p class="badge bg-primary text-wrap fw-bold fs-6">
-                                        {{message.message}}
-                                    </p>
-                                </ng-template>
-                                <ng-template #system>
-                                    <p class="badge bg-warning text-wrap fw-bold fs-6">
-                                        {{message.message}}
-                                    </p>
-                                </ng-template>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            <div class="col pt-2 justify-content-start">
+    <div class="row flex-fill pt-2">
+        <div class="col d-flex justify-content-between">
+            <div class="pt-2">
+                <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#GameMessageHistory" aria-controls="GameMessageHistory">
+                    <i class="fa-solid fa-comment-dots"></i>
+                </button>
+            </div>
+            <div class="pt-2">
                 <strong>Day {{day}}</strong>
             </div>
             <div *ngIf="_groupName == groupLeader.groupName && 
             _name == groupLeader.name && !gameOn" 
-            class="col pt-2 d-flex flex-row-reverse">
+            class="pt-2">
                 <button class="btn btn-warning"  (click)="gameStart()" [disabled]="!startGameShow">
-                    Start Game <i class="fa-solid fa-circle-play"></i>
+                    Start <i class="fa-solid fa-circle-play"></i>
                 </button>
             </div>
 
-            <div class="col pt-2 d-flex flex-row-reverse" *ngIf="_nightWaitModalShowFlag">
+            <div class="pt-2" *ngIf="_nightWaitModalShowFlag">
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nightWaitingModel">
                     Show <i class="fa-regular fa-eye"></i>
                 </button>
             </div>
 
-            <div class="col pt-2 d-flex flex-row-reverse" *ngIf="hideShowButtonForDisscussion == 'InDisscussion'">
+            <div class="pt-2" *ngIf="hideShowButtonForDisscussion == 'InDisscussion'">
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#discussionModel">
                     Show <i class="fa-regular fa-eye"></i>
                 </button>
             </div>
-            
-            <button #viewMyIdentity [hidden]="true" data-bs-toggle="modal" data-bs-target="#viewMyIdentity" ></button>
-            <button #prepareToVoteModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#prepareToVoteModel"></button>
-            <button #waitingForOtherPlayers  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayers"></button> 
-            <button #discussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#discussionModel"></button>
-            <button #gameHistory  [hidden]="true" data-bs-toggle="modal" data-bs-target="#gameHistory"></button>
-            <button #winningModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#winningModel"></button>
-            <button #nightWaitingModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#nightWaitingModel"></button>
-            <button #AnnounceExileModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#AnnounceExileModel"></button>
-            <button #SpiritualFormationQuestion [hidden]="true" data-bs-toggle="modal" data-bs-target="#SpiritualFormationQuestion"></button>
-            <button #waitingForOtherPlayersToViewExileResult [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayersToViewExileResult"></button>
-        
-            <div class="w-100"></div>
-            <div class="col pt-2">
-                <div class="list-group overflow-hidden">
-                    <!-- isPriest make sure Priest does not exile himself -->
-                    <app-players-list 
-                        [childGroupName]="_groupName" 
-                        [childOnlineUser]="onlineUser"
-                        [childGroupLeader]="groupLeader"
-                        [childName]="_name"
-                        [childGameOn]="gameOn"
-                        [voteState]="nextStep.nextStepName"
-                        [gameFinished]="gameFinished"
-                        [identity]="identity"
-                    ></app-players-list>
-                </div>
+        </div>
+        <button #viewMyIdentity [hidden]="true" data-bs-toggle="modal" data-bs-target="#viewMyIdentity" ></button>
+        <button #prepareToVoteModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#prepareToVoteModel"></button>
+        <button #waitingForOtherPlayers  [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayers"></button> 
+        <button #discussionModel  [hidden]="true" data-bs-toggle="modal" data-bs-target="#discussionModel"></button>
+        <button #gameHistory  [hidden]="true" data-bs-toggle="modal" data-bs-target="#gameHistory"></button>
+        <button #winningModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#winningModel"></button>
+        <button #nightWaitingModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#nightWaitingModel"></button>
+        <button #AnnounceExileModel [hidden]="true" data-bs-toggle="modal" data-bs-target="#AnnounceExileModel"></button>
+        <button #SpiritualFormationQuestion [hidden]="true" data-bs-toggle="modal" data-bs-target="#SpiritualFormationQuestion"></button>
+        <button #waitingForOtherPlayersToViewExileResult [hidden]="true" data-bs-toggle="modal" data-bs-target="#waitingForOtherPlayersToViewExileResult"></button>
+    
+        <div class="w-100"></div>
+        <div class="col pt-2">
+            <div class="list-group overflow-hidden">
+                <!-- isPriest make sure Priest does not exile himself -->
+                <app-players-list 
+                    [childGroupName]="_groupName" 
+                    [childOnlineUser]="onlineUser"
+                    [childGroupLeader]="groupLeader"
+                    [childName]="_name"
+                    [childGameOn]="gameOn"
+                    [voteState]="nextStep.nextStepName"
+                    [identity]="identity"
+                ></app-players-list>
             </div>
+        </div>
     </div>
+</div>
+
+<div class="offcanvas offcanvas-start overflow-y-auto" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="GameMessageHistory" aria-labelledby="GameMessageHistory">
+    <app-game-message-history #closeGameMessageHistory></app-game-message-history>
 </div>
 
 
@@ -111,7 +93,7 @@ aria-labelledby="backToMenu" aria-hidden="true">
                 <p class="modal-title fs-6">Back to Home</p>
             </div>
             <div class="modal-body text-center">
-                <div *ngIf="nightRoundFinish">
+                <div *ngIf="_nightRoundFinish">
                     <strong>Night Round Finished! Please go back to the modal and view the exile result!</strong>
                 </div>
                 <p class="badge bg-danger text-wrap fw-bold fs-3">
@@ -165,13 +147,6 @@ aria-labelledby="discussionModel" aria-hidden="true">
     </div>
 </div>
 
-<!-- <div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
-aria-labelledby="viewMyIdentity" aria-hidden="true">
-    <app-view-identity-modal 
-    [childAbilities]="abilities"
-    [identity]="identity"
-    (findViewIdentityReadyToPlay)="findViewIdentityReadyToPlay()"></app-view-identity-modal>
-</div> -->
 <div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
 aria-labelledby="viewMyIdentity" aria-hidden="true">
     <div class="modal-dialog">
@@ -209,51 +184,7 @@ aria-labelledby="viewMyIdentity" aria-hidden="true">
 
 <div class="modal fade" id="info" tabindex="-1" data-bs-keyboard="false" 
 aria-labelledby="info" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">You Identity</h5>
-            </div>
-            <div class="modal-body">
-                <div *ngIf="nightRoundFinish">
-                    <strong>Night Round Finished! Please go back to the modal and view the exile result!</strong>
-                </div>
-                <div>
-                    You identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
-                </div>
-                <div class="fs-6">
-                    Description:
-                    <ul>
-                        <div *ngFor="let ability of abilities;">
-                            <li class="fs-6">{{ability}}</li>
-                        </div>
-                    </ul>
-                </div>
-                <hr class="border border-danger border-2 opacity-50">
-                <div class="fs-6">Icon Description</div>
-                <div>
-                    <i class="fa-regular fa-star"></i> Room Host <br>
-                    <i class="fa-solid fa-user-secret"></i> Judas <br>
-                    <i class="fa-solid fa-hanukiah"></i> Priest <br>
-                    <i class="fa-solid fa-triangle-exclamation"></i> Judas guessed Christian <br>
-                    <i class="fa-solid fa-microphone"></i> In discussion <br>
-                    <i class="fa-solid fa-book-open"></i> Doing spiritual formation question <br>
-                    <i class="fa-solid fa-ban"></i> Player is offline <br>
-                    <i class="fa-solid fa-user-ninja"></i> Nicodemus POV <br>
-                    <i class="fa-solid fa-question"></i> Priest and Pharisee POV
-
-                </div>
-            </div>
-            <div class="modal-footer text-center d-flex justify-content-right">
-                <button #closeInfoModel  [hidden]="true" type="button" class="btn btn-primary" 
-                data-bs-dismiss="modal"></button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >
-                    Got it! <i class="fa-regular fa-circle-check"></i>
-                </button>
-            </div>
-        </div>
-        
-    </div> 
+     <app-info-modal #infoModal></app-info-modal>
 </div>
 
 <div class="modal fade" id="waitingForOtherPlayers" tabindex="-1" data-bs-backdrop="static" 
@@ -262,22 +193,30 @@ data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayers" aria-hidden="t
         <div class="modal-content">
             <div class="modal-body">
                 <div>
-                    <div><strong>Waiting for these players finish viewing their identity:</strong></div>
-                    <ul class="list-group">
-                        <div *ngFor="let user of stillInActionPlayers">
-                            <li class="list-group-item">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div> {{user.name}}
-                            </li>
+                    <div class="pb-2"><strong>Waiting for other players to finish viewing their identity ...</strong></div>
+                    <div class="progress" role="progressbar" aria-label="Animated striped example" [attr.aria-valuenow]="waitingProgessPercentage" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" [style.width]="waitingProgessPercentage + '%'"></div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="button" class="btn btn-outline-primary"
+                        (click)="isCollapsed = ! isCollapsed"
+                        [attr.aria-expanded]="!isCollapsed"
+                        aria-controls="collapseExample">
+                            Waiting for players list
+                        </button>
+                        <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+                            <ul class="list-group">
+                                <div *ngFor="let user of stillInActionPlayers">
+                                    <li class="list-group-item">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div> {{user.name}}
+                                    </li>
+                                </div>
+                            </ul>
                         </div>
-                    </ul>
+                    </div>
                 </div>
                 <button #closeWaitingForOtherPlayers  [hidden]="true" type="button" class="btn btn-primary" 
-                data-bs-dismiss="modal" ></button>
-            </div>
-            <div *ngIf="_backupIdentityClosingButton">
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+                    data-bs-dismiss="modal" ></button>
             </div>
         </div>
         
@@ -308,9 +247,6 @@ aria-labelledby="winningModel" aria-hidden="true">
                 <div *ngIf="winner == 2">
                     <h4> Judaism Wins! <i class="fa-solid fa-star-of-david"></i> </h4>
                 </div>
-                <div *ngIf="voteResult != ''">
-                    <strong>{{voteResult}}</strong>
-                </div>
             </div>
             <div class="modal-footer d-flex justify-content-right">
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="goToGameHistoryModal()">
@@ -323,155 +259,8 @@ aria-labelledby="winningModel" aria-hidden="true">
 
 <div class="modal fade" id="nightWaitingModel" tabindex="-1" data-bs-backdrop="static"
 data-bs-keyboard="false" aria-labelledby="nightWaitingModel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header d-flex justify-content-between">
-                <h5 class="modal-title fs-6">Night waiting screen</h5>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" [disabled]="nightRoundFinish">
-                    Hide <i class="fa-regular fa-eye-slash"></i>
-                </button>
-            </div>
-            <div class="modal-body text-center">
-                <!-- BASIC SETTINGS -->
-                <div class="spinner-grow text-danger" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <div> 
-                    <strong>{{voteResult}}</strong>
-                </div>
-                <div> It is <strong> Day {{day}} </strong> night time! <i class="fa-solid fa-cloud-moon"></i> </div>
-                <div> Please <strong>do not look at other's screen</strong>, and wait for the daylight ... </div>
-                <!-- BASIC SETTINGS END-->
-
-                <div *ngIf="_PriestMeetingRound">
-                    <hr class="border border-danger border-2 opacity-50">
-                    <div> 
-                        You know <strong> {{ROTSName}} </strong> and <strong> {{NicodemusName}} </strong> that
-                        one of them is <strong> Nicodemus </strong> and another one is <strong> Pharisee </strong>.
-                    </div>
-                    <div *ngIf="hintName != ''">
-                        <hr>
-                        <strong>{{JudasName}}</strong> is Judas! He/She tells you that <strong>{{hintName}}</strong> might be a Christian!
-                    </div>
-                    <div *ngIf="PriestRound">
-                        <div> It is your turn! If you are ready, please click the exlie button. </div>
-                    </div>
-                </div>
-
-                <div *ngIf="RulerOfTheSynagogue">
-                    <hr class="border border-danger border-2 opacity-50">
-                    <div> 
-                        You know <strong> {{PriestName}} </strong> and <strong> {{NicodemusName}} </strong> that
-                        one of them is <strong> Priest </strong> and another one is <strong> Nicodemus </strong>.
-                    </div>
-                    <div *ngIf="_ROTSGetInfomation">
-                        You know <strong>{{lastExiledPlayerName}}</strong> who is exiled last night is a Christian!
-                    </div>
-                </div>
-
-                <div *ngIf="_NicodemusMeetingRound">
-                    <hr class="border border-danger border-2 opacity-50">
-                    <div> 
-                        You know <strong> {{PriestName}} </strong> and <strong> {{ROTSName}} </strong> that
-                        one of them is <strong> Priest </strong> and another one is <strong> Pharisee </strong>.
-                    </div>
-                    <div *ngIf="_NicodemusSavingRound">
-                        <div> It is your turn! Tonight, <strong> {{aboutToExileName}} </strong> will be exiled. 
-                            Are you going to save him/her? </div>
-                    </div>
-                </div>
-
-                <div *ngIf="_JudasHintRound">
-                    <hr class="border border-danger border-2 opacity-50">
-                    <div> You are <strong>Judas</strong>! <strong>{{PriestName}}</strong> is the Priest. 
-                        Guess a person who is most likely to be a Christian and give the hint to the Priest!</div>
-                </div>
-                <div *ngIf="_JudasCheckRound">
-                    <hr class="border border-danger border-2 opacity-50">
-                    <div> You are <strong>Judas</strong>! It is your turn to check one person!</div>
-                    <div *ngIf="JudasCheckResultShow">
-                        <hr>
-                        <div *ngIf="JudasCheckResult; then isChristan else isUnknow"> </div>
-                        <ng-template #isChristan>
-                            <div> He/She is a <strong>Christian</strong> !</div>
-                        </ng-template>
-                        <ng-template #isUnknow>
-                            <div> <strong>Unknow result</strong> !</div>
-                        </ng-template>
-                    </div>
-                </div>
-
-                <div *ngIf="_JohnFireRound">
-                    <hr class="border border-danger border-2 opacity-50">
-                    <div> You are <strong>John</strong> in this game! It is your turn!</div>
-                </div>
-
-                <div *ngIf="nightRoundFinish">
-                    <hr class="border border-danger border-2 opacity-50">
-                    <div><strong> Night Round Ends! </strong> Please click "End Night" Button.</div>
-                </div>
-            </div>
-            <div *ngIf="PriestRound">
-                <div class="modal-footer d-flex justify-content-right">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                        Ready to exile <i class="fa-regular fa-circle-check"></i>
-                    </button>
-                </div>
-            </div>
-            <div *ngIf="_NicodemusSavingRound">
-                <div class="modal-footer text-center d-flex justify-content-between">
-                    <button type="button" class="btn btn-danger" (click)="NicodemusAction(false)">
-                        No <i class="fa-solid fa-xmark"></i>
-                    </button>
-                    <button type="button" class="btn btn-primary" (click)="NicodemusAction(true)">
-                        Save <i class="fa-solid fa-handshake-angle"></i>
-                    </button>
-                </div>
-            </div>
-            <div *ngIf="_JohnFireRound">
-                <div class="modal-footer text-center d-flex justify-content-between">
-                    <button type="button" class="btn btn-danger" (click)="DoNotFire()">
-                        No <i class="fa-solid fa-xmark"></i>
-                    </button>
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                        Fire <i class="fa-solid fa-fire-flame-curved"></i>
-                    </button>
-                </div>
-            </div>
-            <div *ngIf="_JudasCheckRound">
-                <div class="modal-footer d-flex justify-content-right">
-                    <div *ngIf="JudasCheckResultShow; then endNightRound else beginToCheck"> </div>
-                    <ng-template #endNightRound>
-                        <button type="button" class="btn btn-primary" (click)="NightRoundEnd()">
-                            Okay <i class="fa-regular fa-circle-check"></i>
-                        </button>
-                    </ng-template>
-                    <ng-template #beginToCheck>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                            Check <i class="fa-solid fa-magnifying-glass"></i>
-                        </button>
-                    </ng-template>
-                   
-                </div>
-            </div>
-            <div *ngIf="_JudasHintRound">
-                <div class="modal-footer d-flex justify-content-right">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                        Ready <i class="fa-regular fa-circle-check"></i>
-                    </button>
-                </div>
-            </div>
-            <div *ngIf="nightRoundFinish">
-                <!-- <button #closeNightWaitingModel  [hidden]="true" type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                </button> -->
-                <div class="modal-footer d-flex justify-content-right">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="goToAnnounceExileModel()">
-                    End Night <i class="fa-regular fa-sun"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div> 
+    <app-night-waiting-model [_groupName]="_groupName"
+    (openAnnounceExileModelEvent)="openAnnounceExileModel()"></app-night-waiting-model>
 </div>
 
 <div class="modal fade" id="AnnounceExileModel" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
@@ -509,14 +298,27 @@ data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayersToViewExileResul
         <div class="modal-content">
             <div class="modal-body">
                 <div>
-                    <div><strong>Waiting for these players finish view exile result:</strong></div>
-                    <ul class="list-group">
-                        <div *ngFor="let user of stillInActionPlayers">
-                            <li class="list-group-item">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div> {{user.name}}
-                            </li>
+                    <div class="pb-2"><strong>Waiting for others to finish view exile result ...</strong></div>
+                    <div class="progress" role="progressbar" aria-label="Animated striped example" [attr.aria-valuenow]="waitingProgessPercentage" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" [style.width]="waitingProgessPercentage + '%'"></div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="button" class="btn btn-outline-primary"
+                        (click)="isCollapsed = ! isCollapsed"
+                        [attr.aria-expanded]="!isCollapsed"
+                        aria-controls="collapseExample">
+                            Waiting for players list
+                        </button>
+                        <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+                            <ul class="list-group">
+                                <div *ngFor="let user of stillInActionPlayers">
+                                    <li class="list-group-item">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div> {{user.name}}
+                                    </li>
+                                </div>
+                            </ul>
                         </div>
-                    </ul>
+                    </div>
                 </div>
                 <button #closewaitingForOtherPlayersToViewExileResult  [hidden]="true" type="button" class="btn btn-primary" 
                 data-bs-dismiss="modal" ></button>
@@ -528,86 +330,7 @@ data-bs-keyboard="false" aria-labelledby="waitingForOtherPlayersToViewExileResul
 
 <div class="modal fade" id="SpiritualFormationQuestion" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
 aria-labelledby="SpiritualFormationQuestion" aria-hidden="true">
-    <!-- <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header d-flex justify-content-between">
-                <h5 class="modal-title fs-6">Spiritual Formation Question</h5>
-            </div>
-            <div class="modal-body">
-                <div> {{SpiritualQuestion.question.Q}} </div>
-                <ul class="list-group overflow-hidden">
-                    <li class="list-group-item d-flex justify-content-left" (click)="playerChoice = 'A'">
-                        <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="" id="A">
-
-                        <div *ngIf="ACorrect">
-                            <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
-                        </div>
-                        <div *ngIf="AWrong">
-                            <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
-                        </div>
-
-                        <label class="form-check-label" for="A">{{SpiritualQuestion.question.A}}</label>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-left" (click)="playerChoice = 'B'">
-                        <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="" id="B">
-
-                        <div *ngIf="BCorrect">
-                            <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
-                        </div>
-                        <div *ngIf="BWrong">
-                            <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
-                        </div>
-
-                        <label class="form-check-label" for="B">{{SpiritualQuestion.question.B}}</label>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-left" (click)="playerChoice = 'C'">
-                        <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="" id="C">
-                      
-                        <div *ngIf="CCorrect">
-                            <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
-                        </div>
-                        <div *ngIf="CWrong">
-                            <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
-                        </div>
-                      
-                      <label class="form-check-label" for="C">{{SpiritualQuestion.question.C}}</label>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-left" (click)="playerChoice = 'D'">
-                        <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="" id="D">
-                        
-                        <div *ngIf="DCorrect">
-                            <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
-                        </div>
-                        <div *ngIf="DWrong">
-                            <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
-                        </div>
-
-                        <label class="form-check-label" for="D">{{SpiritualQuestion.question.D}}</label>
-                    </li>
-                </ul>
-                <div *ngIf="_playerFinishChoice && playerChoiceCorrect">
-                    <div> You are correct! </div>
-                </div>
-                <div *ngIf="_playerFinishChoice && !playerChoiceCorrect">
-                    <div> Sorry you are wrong! </div>
-                    <div> Correct Answer: <strong>{{SpiritualQuestion.question.An}}</strong> </div>
-                    <div *ngIf="SpiritualQuestion.question.Ex !== undefined" style="white-space: pre-line"> 
-                        Explanation: <br>
-                        {{SpiritualQuestion.question.Ex}} 
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer d-flex justify-content-right">
-                <button *ngIf="!_playerFinishChoice" type="button" class="btn btn-primary" (click)="conformAnswer()">
-                    Conform <i class="fa-regular fa-circle-check"></i>
-                </button>
-                <button *ngIf="_playerFinishChoice" type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="increaseWeightOrNot()">
-                    Ok <i class="fa-regular fa-circle-check"></i>
-                </button>
-            </div>
-        </div>
-    </div>  -->
-    <app-question-modal [_groupName]="_groupName" [_name]="_name" [gameFinished]="gameFinished"></app-question-modal>
+    <app-question-modal [_groupName]="_groupName" [_name]="_name"></app-question-modal>
 </div>
 
 <div class="modal fade" id="gameHistory" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 

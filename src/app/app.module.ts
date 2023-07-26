@@ -19,6 +19,11 @@ import { HttpsCommService } from './service/https-comm.service';
 import { ViewIdentityModalComponent } from './view-identity-modal/view-identity-modal.component';
 import { GameHistoryComponent } from './game-history/game-history.component';
 import { QuestionModalComponent } from './question-modal/question-modal.component';
+import { GameMessageHistoryComponent } from './game-message-history/game-message-history.component';
+import { NightWaitingModelComponent } from './night-waiting-model/night-waiting-model.component';
+
+import { NgbModule, NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { InfoModalComponent } from './info-modal/info-modal.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +37,10 @@ import { QuestionModalComponent } from './question-modal/question-modal.componen
     PlayersListComponent,
     ViewIdentityModalComponent,
     GameHistoryComponent,
-    QuestionModalComponent
+    QuestionModalComponent,
+    GameMessageHistoryComponent,
+    NightWaitingModelComponent,
+    InfoModalComponent
   ],
   imports: [
     BrowserModule,
@@ -43,17 +51,19 @@ import { QuestionModalComponent } from './question-modal/question-modal.componen
       {path: '', component: HomePageComponent},
       {path: 'home', component: HomePageComponent},
       {path: 'gameRoom', component: GameRoomComponent}
-    ], {useHash: true})
+    ], {useHash: true}),
+    NgbModule,
+    NgbCollapseModule
   ],
   providers: [
     SignalrService,
     HttpsCommService,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (SignalrService: SignalrService) => () => SignalrService.initConnection(),
-      deps: [SignalrService],
-      multi: true
-    }
+    // {
+    //   provide: APP_INITIALIZER,
+    //   useFactory: (SignalrService: SignalrService) => () => SignalrService.initConnection(),
+    //   deps: [SignalrService],
+    //   multi: true
+    // }
   ],
   bootstrap: [AppComponent]
 })

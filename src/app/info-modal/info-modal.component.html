@@ -1,0 +1,97 @@
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">You Identity</h5>
+        </div>
+        <div class="modal-body">
+            <div *ngIf="nightRoundFinish">
+                <strong>Night Round Finished! Please go back to the modal and view the exile result!</strong>
+            </div>
+            <div *ngIf="!gameOn; then notStart else start"></div>
+            <ng-template #start>
+                <div>
+                    You identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
+                </div>
+                <div class="fs-6">
+                    Description:
+                    <ul>
+                        <div *ngFor="let ability of abilities;">
+                            <li class="fs-6">{{ability}}</li>
+                        </div>
+                    </ul>
+                </div>
+                <div *ngIf="identity == 'Nicodemus'">
+                    <p class="fst-italic fs-6">
+                        He was accompanied by Nicodemus, the man who earlier had visited Jesus at night. Nicodemus brought a mixture of myrrh and aloes, about seventy-five pounds. (John 19:39)
+                    </p>
+                </div>
+                <div *ngIf="identity == 'Judas'">
+                    <p class="fst-italic fs-6">
+                        But woe to that man who betrays the Son of Man! It would be better for him of he had not been born. (Mark 14:21)
+                    </p>
+                </div>
+                <div *ngIf="identity == 'Preist'">
+                    <p class="fst-italic fs-6">
+                        ... Again the high priest asked him, "Are you the Messiah, the Son of the Blessed One?" (Mark 14:60)
+                    </p>
+                </div>
+                <div *ngIf="identity == 'Pharisee'">
+                    <p class="fst-italic fs-6">
+                        Woe to you, scribes and Pharisees, you hypocrites! You shut the door of the kingdom of heaven in people's faces. You yourselves do not enter, nor will you let those enter who are trying to. (Matthew 23:13)
+                    </p>
+                </div>
+                <div *ngIf="identity == 'Judaism'">
+                    <p class="fst-italic fs-6">
+                        No man putteth new wine into old bottles; else the new wine will burst the bottles, and be spilled, and the bottles shall perish. But new wine must be put into new bottles; and both are preserved (Matthew 9:17)
+                    </p>
+                </div>
+                <div *ngIf="identity == 'Peter'">
+                    <p class="fst-italic fs-6">
+                        The third time he said to him, "Simon son of John, do you love me?" Peter was hurt because Jesus asked him the third time, "Do you love me?" He said, "Lord, you know all things; you know that I love you." Jesus said, "Feed my sheep ... (John 21:15)
+                    </p>
+                </div>
+                <div *ngIf="identity == 'John'">
+                    <p class="fst-italic fs-6">
+                        One of them, the disciple whom Jesus loved, was reclining next to him (John 13:23)
+                    </p>
+                </div>
+                <div *ngIf="identity == 'Laity'">
+                    <p class="fst-italic fs-6">
+                        After the people saw the sign Jesus performed, they began to say, "Surely this is the Prophet who is to come into the world." (John 6:14)
+                    </p>
+                </div>
+            </ng-template>
+            <ng-template #notStart>
+                <div>
+                    <p class="text-body-secondary">No identity for now ...</p>
+                </div>
+            </ng-template>
+            <div>
+                <button type="button" class="btn btn-outline-primary" (click)="isCollapsed = !isCollapsed"
+                [attr.aria-expanded]="!isCollapsed" aria-controls="collapseExample">
+                    Icon Explanation
+                </button>
+            </div>
+            <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+                <div>
+                    <i class="fa-regular fa-star"></i> Room Host <br>
+                    <i class="fa-solid fa-user-secret"></i> Judas <br>
+                    <i class="fa-solid fa-hanukiah"></i> Priest <br>
+                    <i class="fa-solid fa-triangle-exclamation"></i> Judas guessed Christian <br>
+                    <i class="fa-solid fa-microphone"></i> In discussion <br>
+                    <i class="fa-solid fa-book-open"></i> Doing spiritual formation question <br>
+                    <i class="fa-solid fa-ban"></i> Player is offline <br>
+                    <i class="fa-solid fa-user-ninja"></i> Nicodemus POV <br>
+                    <i class="fa-solid fa-question"></i> Priest and Pharisee POV
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer text-center d-flex justify-content-right">
+            <button #closeInfoModel  [hidden]="true" type="button" class="btn btn-primary" 
+            data-bs-dismiss="modal"></button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >
+                Got it! <i class="fa-regular fa-circle-check"></i>
+            </button>
+        </div>
+    </div>
+</div>

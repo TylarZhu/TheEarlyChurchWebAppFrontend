@@ -23,7 +23,7 @@ export class SignalrService implements OnInit {
   onlineUser: BehaviorSubject<IOnlineUsers[]>;
   messagesToAll: BehaviorSubject<IMessage[]>;
   identitiesExplanation: BehaviorSubject<string[]>;
-  openIdentitiesExplanationModal: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  openIdentitiesExplanationModal: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   groupLeader: BehaviorSubject<IOnlineUsers>;
   maxPlayer: BehaviorSubject<number>;
   // groupName: string = "";
@@ -59,6 +59,7 @@ export class SignalrService implements OnInit {
   stillInActionPlayers: BehaviorSubject<IOnlineUsers[]> = new BehaviorSubject<IOnlineUsers[]>([]);
 
   openOrCloseExileResultModal: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  waitingProgessPercentage: BehaviorSubject<number> = new BehaviorSubject<number>(0.0);
 
   JudasName: BehaviorSubject<string> = new BehaviorSubject<string>("");
   HintName: BehaviorSubject<string> = new BehaviorSubject<string>("");
@@ -68,6 +69,8 @@ export class SignalrService implements OnInit {
   winner: BehaviorSubject<number> = new BehaviorSubject<number>(-1);
 
   history: BehaviorSubject<Record<string, string[]>> = 
+    new BehaviorSubject<Record<string, string[]>>({});
+  GameMessageHistory: BehaviorSubject<Record<string, string[]>> = 
     new BehaviorSubject<Record<string, string[]>>({});
 
   initNextStep: INextStep = {
@@ -177,8 +180,11 @@ export class SignalrService implements OnInit {
       this.identity.next(identity);
       this.GameOn.next(true);
     });
-    this.hubConnection.on("IdentitiesExplanation", (identitiesExplanation: string[], openIdentitiesExplanationModal: boolean) => {
+    this.hubConnection.on("IdentitiesExplanation", (identitiesExplanation: string[]) => {
       this.identitiesExplanation.next(identitiesExplanation);
+      
+    });
+    this.hubConnection.on("identityModalOpen", (openIdentitiesExplanationModal: boolean) => {
       this.openIdentitiesExplanationModal.next(openIdentitiesExplanationModal);
     });
     this.hubConnection.on("getMaxPlayersInGroup", (maxPlayer: number) => {
@@ -216,7 +222,9 @@ export class SignalrService implements OnInit {
     this.hubConnection.on("NicoMeeting", () => {
       this.NicodemusMeetingRound.next(true);
     });
-
+    this.hubConnection.on("PriestMeetingOnReconnect", () => {
+      this.PriestMeetingRound.next(true);
+    });
     this.hubConnection.on("JudasCheckResult", (status: boolean) => {
       this.JudasCheckResultShow.next(true);
       this.JudasCheckResult.next(status);
@@ -255,11 +263,17 @@ export class SignalrService implements OnInit {
     this.hubConnection.on("announceGameHistory", (history: Record<string, string[]>) => {
       this.history.next(history);
     });
+    this.hubConnection.on("updateGameMessageHistory", (gameMessageHistory: Record<string, string[]>) => {
+      this.GameMessageHistory.next(gameMessageHistory);
+    });
     this.hubConnection.on("stillWaitingFor", (stillInActionPlayers: IOnlineUsers[]) => {
       this.stillInActionPlayers.next(stillInActionPlayers);
     });
     this.hubConnection.on("openOrCloseExileResultModal", (status: boolean) => {
       this.openOrCloseExileResultModal.next(status);
+    });
+    this.hubConnection.on("updateWaitingProgess", (waitingProgessPercentage: number) => {
+      this.waitingProgessPercentage.next(waitingProgessPercentage);
     });
 
     // user refresh Page or close tab
@@ -335,6 +349,7 @@ export class SignalrService implements OnInit {
     this.lastExiledPlayerName.next("");
     this.winner.next(-1);
     this.history.next({});
+    this.GameMessageHistory.next({});
     this.JudasHintRound.next(false);
     this.HintName.next("");
     this.JudasCheckResultShow.next(false);
@@ -342,6 +357,7 @@ export class SignalrService implements OnInit {
     this.stillInActionPlayers.next([]);
     this.identitiesExplanation.next([]);
     this.openOrCloseExileResultModal.next(false);
-    this.openIdentitiesExplanationModal.next(true);
+    this.openIdentitiesExplanationModal.next(false);
+    this.waitingProgessPercentage.next(0.0);
   }
 }

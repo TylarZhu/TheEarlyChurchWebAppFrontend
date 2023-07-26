@@ -10,13 +10,6 @@ import { BehaviorSubject, tap } from 'rxjs';
   styleUrls: ['./game-history.component.css']
 })
 export class GameHistoryComponent implements OnInit, OnDestroy {
-  // histories: Map<string, string[]> = new Map([
-  //   ["1", ["hahaha", "gagaga", "hehehe", "gagaga", "hehehe", "gagaga", "hehehe", "gagaga", "hehehe", "gagaga", "hehehe", "gagaga", "hehehe", "gagaga", "hehehe", "gagaga", "hehehe"]],
-  //   ["2", ["hahaha", "gagaga", "hehehe", "gagaga", "hehehe"]],
-  //   ["3", ["hahaha", "gagaga", "hehehe", "gagaga", "hehehe"]],
-  //   ['4', ["hahaha", "gagaga", "hehehe", "gagaga", "hehehe"]],
-  //   ['5', ["hahaha", "gagaga", "hehehe", "gagaga", "hehehe"]]
-  // ]);
 
   @Output() cleanUpEvent = new EventEmitter<void>();
 

@@ -11,7 +11,6 @@ export class HomePageComponent implements OnInit, OnDestroy, AfterViewInit {
   createARoomModal: Modal | undefined;
 
   @ViewChild('backgroundAndDeveloperInfo', {read: ElementRef}) backgroundAndDeveloperInfo?: ElementRef;
-  @ViewChild('gameHistory', {read: ElementRef}) gameHistory?: ElementRef;
 
   ngOnInit(): void {
     this.joinARoomModal = new window.bootstrap.Modal(
@@ -43,10 +42,5 @@ export class HomePageComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     
-  }
-
-  nextModal() {
-    console.log("nextMoal")
-    this.gameHistory!.nativeElement.click();
   }
 }

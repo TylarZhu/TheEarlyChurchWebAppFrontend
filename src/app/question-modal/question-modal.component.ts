@@ -41,7 +41,7 @@ export class QuestionModalComponent implements OnInit, OnDestroy {
 
   @Input() _groupName: string = "";
   @Input() _name: string = "";
-  @Input() gameFinished: Subject<boolean> = new Subject();
+  // @Input() gameFinished: Subject<boolean> = new Subject();
 
   private readonly unsubscribe$: Subject<void> = new Subject<void>();
 
@@ -51,13 +51,18 @@ export class QuestionModalComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.gameFinished.subscribe(
-      v => {
-        this.reset();
-    });
+    // this.gameFinished.subscribe(
+    //   v => {
+    //     this.reset();
+    // });
     // this.playerFinishChoice.pipe(takeUntil(this.unsubscribe$)).subscribe((playerFinishChoice: boolean) => {
     //   this._playerFinishChoice = playerFinishChoice;
     // });
+    this.singalrService.GameOn.pipe(tap((GameOn: boolean) => {
+      if(!GameOn) {
+        this.reset();
+      }
+    }), takeUntil(this.unsubscribe$)).subscribe();
     this.singalrService.question.pipe(takeUntil(this.unsubscribe$)).subscribe((question: IQuestions) => {
       this.SpiritualQuestion = question;
     });

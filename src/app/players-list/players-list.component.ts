@@ -4,7 +4,7 @@ import { HttpsCommService } from '../service/https-comm.service';
 import { IOnlineUsers } from '../interface/IOnlineUser';
 import { INextStep } from '../interface/INextStep';
 import { SignalrService } from '../service/signalr.service';
-import { GameRoomComponent } from '../game-room/game-room.component'
+import { GameRoomComponent } from '../game-room/game-room.component';
 
 import { BehaviorSubject, tap, Subject, takeUntil, pipe } from 'rxjs';
 
@@ -21,13 +21,11 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   @Input() childName: string | null;
   @Input() childGameOn: boolean; 
   @Input() voteState: string;
-  @Input() gameFinished: Subject<boolean> = new Subject();
+  // @Input() gameFinished: Subject<boolean> = new Subject();
   @Input() identity: string = "";
 
   @ViewChild('waitOthersToVoteModel', {read: ElementRef}) waitOthersToVoteModel?: ElementRef;
   @ViewChild('closeWaitOthersToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
-  
-  // @ViewChild('JudasCheckingResult', {read: ElementRef}) JudasCheckingResult?: ElementRef;
 
   userChoosePersonName: string;
   conformToVote: boolean;
@@ -35,11 +33,10 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   PriestName: string;
   ROTSName: string = "";
   NicoName: string = "";
-  _JohnFireRound: boolean;
+  _JohnFireRound: boolean = false;
+  
   JohnCannotFireList: string[];
-  JudasCheckRound: BehaviorSubject<boolean>;
   _JudasCheckRound: boolean;
-  // checkResult: boolean;
   JudasHimself: string;
   playerNotInGame: IOnlineUsers[];
   _inDiscustionName: string;
@@ -49,11 +46,12 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   hintName: string = "";
   offLinePlayerName: string[] = [];
   stillInActionPlayers: IOnlineUsers[] = [];
-
+  isCollapsed: boolean = true;
+  waitingProgessPercentage: number = 0.0;
   private unsubscribe$: Subject<void> = new Subject<void>();
   
   constructor(private httpService: HttpsCommService,
-      private singalrService: SignalrService,
+      private singalrService: SignalrService, 
       private gameRoomComponent: GameRoomComponent)
   {
     this.childGroupName = "";
@@ -67,20 +65,22 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     this.playerNotInGame = [];
     this.isPriest = false;
     this.PriestName = "";
-    this._JohnFireRound = false;
     this.JohnCannotFireList = [];
-    this.JudasCheckRound = new BehaviorSubject<boolean>(false);
     this._JudasCheckRound = false;
-    // this.checkResult = false;
     this.JudasHimself = "";
     this._inDiscustionName = "";
   }
 
   ngOnInit(): void {
-    this.gameFinished.subscribe(
-      v => {
+    // this.gameFinished.subscribe(
+    //   v => {
+    //     this.reset();
+    // });
+    this.singalrService.GameOn.pipe(tap((GameOn: boolean) => {
+      if(!GameOn) {
         this.reset();
-    });
+      }
+    }), takeUntil(this.unsubscribe$)).subscribe();
     this.singalrService.finishVoteWaitForOthers.pipe(tap(
       finishVoteWaitForOthers => {
         if(finishVoteWaitForOthers) {
@@ -110,18 +110,12 @@ export class PlayersListComponent implements OnInit, OnDestroy{
       console.log("PlayerList: " + nextStep.nextStepName);
       if(nextStep.nextStepName == "JohnFireRound") {
         this.JohnCannotFireList = nextStep.options!;
+        this.gameRoomComponent.JohnFireRound.next(true);
       } else if(nextStep.nextStepName == "JudasCheckRound") {
-        this.JudasCheckRound.next(true);
+        this._JudasCheckRound = true;
         this.JudasHimself = nextStep.options![0];
       }
     }), takeUntil(this.unsubscribe$)).subscribe();
-    this.gameRoomComponent.JohnFireRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JohnFireRound) => {
-        this._JohnFireRound = JohnFireRound;
-      }
-    );
-    this.JudasCheckRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasCheckRound) => {
-      this._JudasCheckRound = JudasCheckRound;
-    });
     this.singalrService.playerNotInGame.pipe(takeUntil(this.unsubscribe$)).subscribe((playerNotInGame: IOnlineUsers[]) => {
       this.playerNotInGame = playerNotInGame;
     });
@@ -147,6 +141,12 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     .subscribe((stillInActionPlayers: IOnlineUsers[]) => {
       this.stillInActionPlayers = stillInActionPlayers;
     });
+    this.gameRoomComponent.JohnFireRound.pipe(takeUntil(this.unsubscribe$)).subscribe((JohnFireRound: boolean) => {
+      this._JohnFireRound = JohnFireRound;
+    });
+    this.singalrService.waitingProgessPercentage.pipe(takeUntil(this.unsubscribe$)).subscribe((waitingProgessPercentage: number) => {
+      this.waitingProgessPercentage = waitingProgessPercentage;
+    })
   } 
 
   assignNewGroupLeader(nextLeader: string) {
@@ -183,7 +183,7 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   checkHimOrHer(name: string, conformTofire: boolean) {
     this.userChoosePersonName = name;
     if(conformTofire) {
-      this.JudasCheckRound.next(false);
+      this._JudasCheckRound = false;
       this.singalrService.ROTSGetInfomation.next(false);
       this.httpService.JudasCheckRound(this.childGroupName!, name);
     }
@@ -213,6 +213,6 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     this.JudasHimself = "";
     this.JohnCannotFireList = [];
     this.userChoosePersonName = "";
-    this.JudasCheckRound.next(false);
+    this._JudasCheckRound = false;
   }
 }
