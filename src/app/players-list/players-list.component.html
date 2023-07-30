@@ -27,6 +27,18 @@
                         <div *ngIf="offLinePlayerName.includes(user.name)" class="pe-1">
                             <i class="fa-solid fa-ban"></i>
                         </div>
+                        <div *ngIf="identity == 'Nicodemus' && 
+                        (PriestName == user.name || ROTSName == user.name)" class="pe-1">
+                            <i class="fa-solid fa-user-ninja"></i>
+                        </div>
+                        <div *ngIf="identity == 'Preist' && 
+                        (NicoName == user.name || ROTSName == user.name)" class="pe-1">
+                            <i class="fa-solid fa-question"></i>
+                        </div>
+                        <div *ngIf="identity == 'Pharisee' && 
+                        (NicoName == user.name || PriestName == user.name)" class="pe-1">
+                            <i class="fa-solid fa-question"></i>
+                        </div>
                         <span class="badge bg-danger d-flex justify-content-center align-items-center">
                             <div>{{i + 1}}</div>
                         </span>
@@ -88,12 +100,12 @@
                 <div *ngIf="checkIfCurrentPlayerIsInGameOrNot(user.name); then inGameBadge else outGameBadge"> </div>
                 <ng-template #inGameBadge class="d-flex align-items-center">
                     <span class="badge bg-primary d-flex justify-content-center align-items-center">
-                        <div>In</div>
+                        <div>In Game</div>
                     </span>
                 </ng-template>
                 <ng-template #outGameBadge class="d-flex align-items-center">
                     <span class="badge bg-danger d-flex justify-content-center align-items-center" >
-                        <div>Out</div>
+                        <div>Out Game</div>
                     </span>
                 </ng-template>
             </div>
@@ -195,11 +207,30 @@ data-bs-keyboard="false" aria-labelledby="CheckConformationModel" aria-hidden="t
 data-bs-keyboard="false" aria-labelledby="waitOthersToVoteModel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-body text-center">
-                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
+            <div class="modal-body">
+                <div>
+                    <div class="pb-2"><strong>Waiting for others to finish voting ...</strong></div>
+                    <div class="progress" role="progressbar" aria-label="Animated striped example" [attr.aria-valuenow]="waitingProgessPercentage" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" [style.width]="waitingProgessPercentage + '%'"></div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="button" class="btn btn-outline-primary pt-2"
+                        (click)="isCollapsed = ! isCollapsed"
+                        [attr.aria-expanded]="!isCollapsed"
+                        aria-controls="collapseExample">
+                            Waiting for players list
+                        </button>
+                        <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+                            <ul class="list-group">
+                                <div *ngFor="let user of stillInActionPlayers">
+                                    <li class="list-group-item">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div> {{user.name}}
+                                    </li>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                <h5> Please wait for others to finish voting ...  <i class="fa-solid fa-check-to-slot"></i> </h5>
                 <button #closeWaitOthersToVoteModel  [hidden]="true" type="button" class="btn btn-primary" 
                 data-bs-dismiss="modal"></button>
             </div>

@@ -199,12 +199,12 @@ export class HttpsCommService {
     );
   }
 
-  public userLeaveTheGameByConnectionId(connectionId: string | null) {
-    console.log(connectionId);
-    if(connectionId !== null) {
-      this.http.delete(this.huburl + "/userLeaveTheGameByConnectionId/" + connectionId).subscribe();
-    }
-  }
+  // public userLeaveTheGameByConnectionId(connectionId: string | null) {
+  //   console.log(connectionId);
+  //   if(connectionId !== null) {
+  //     this.http.delete(this.huburl + "/userLeaveTheGameByConnectionId/" + connectionId).subscribe();
+  //   }
+  // }
 
   // user refresh page or close tab methods
   public PriestRoundStateFinish(groupName: string) {

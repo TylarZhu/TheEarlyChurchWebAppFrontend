@@ -59,10 +59,10 @@ export class CreateARoomComponent implements OnInit, OnDestroy {
     this.http.checkIfGroupExists(this.form.value.groupName)
     .pipe(takeUntil(this.unsubscribe$))
     .subscribe(
-      response => {
+      async response => {
         // if game room not exists
         if(!response){
-          this.singalrService.hubConnection.invoke("onConntionAndCreateGroup",this.form.value)
+          await this.singalrService.hubConnection.invoke("onConntionAndCreateGroup",this.form.value)
           .then(
             () => {
               let gameRoom = this.form.value.groupName;

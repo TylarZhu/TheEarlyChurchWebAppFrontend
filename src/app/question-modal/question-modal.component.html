@@ -1,0 +1,79 @@
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between">
+            <h5 class="modal-title fs-6">Spiritual Formation Question</h5>
+        </div>
+        <div class="modal-body">
+            <div> {{SpiritualQuestion.question.Q}} </div>
+            <ul class="list-group overflow-hidden">
+                <li class="list-group-item d-flex justify-content-left">
+                    <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="A" id="A" [(ngModel)]="playerChoice" [disabled]="playerFinishChoice">
+
+                    <div *ngIf="ACorrect">
+                        <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
+                    </div>
+                    <div *ngIf="AWrong">
+                        <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
+                    </div>
+
+                    <label class="form-check-label" for="A">{{SpiritualQuestion.question.A}}</label>
+                </li>
+                <li class="list-group-item d-flex justify-content-left">
+                    <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="B" id="B" [(ngModel)]="playerChoice" [disabled]="playerFinishChoice">
+
+                    <div *ngIf="BCorrect">
+                        <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
+                    </div>
+                    <div *ngIf="BWrong">
+                        <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
+                    </div>
+
+                    <label class="form-check-label" for="B">{{SpiritualQuestion.question.B}}</label>
+                </li>
+                <li class="list-group-item d-flex justify-content-left">
+                    <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="C" id="C" [(ngModel)]="playerChoice" [disabled]="playerFinishChoice">
+                  
+                    <div *ngIf="CCorrect">
+                        <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
+                    </div>
+                    <div *ngIf="CWrong">
+                        <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
+                    </div>
+                  
+                  <label class="form-check-label" for="C">{{SpiritualQuestion.question.C}}</label>
+                </li>
+                <li class="list-group-item d-flex justify-content-left">
+                    <input class="form-check-input me-1" type="radio" name="listGroupRadio" value="D" id="D" [(ngModel)]="playerChoice" [disabled]="playerFinishChoice">
+                    
+                    <div *ngIf="DCorrect">
+                        <div class="pe-1"> <i class="fa-regular fa-circle-check" style="color: #2d904b;"></i> </div>
+                    </div>
+                    <div *ngIf="DWrong">
+                        <div class="pe-1"> <i class="fa-regular fa-circle-xmark" style="color: #ee1111;"></i> </div>
+                    </div>
+
+                    <label class="form-check-label" for="D">{{SpiritualQuestion.question.D}}</label>
+                </li>
+            </ul>
+            <div *ngIf="playerFinishChoice && playerChoiceCorrect">
+                <div> You are correct! </div>
+            </div>
+            <div *ngIf="playerFinishChoice && !playerChoiceCorrect">
+                <div> Sorry you are wrong! </div>
+                <div> Correct Answer: <strong>{{SpiritualQuestion.question.An}}</strong> </div>
+                <div *ngIf="SpiritualQuestion.question.Ex !== undefined" style="white-space: pre-line"> 
+                    <strong>Explanation:</strong> <br>
+                    {{SpiritualQuestion.question.Ex}} 
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-right">
+            <button *ngIf="!playerFinishChoice" type="button" class="btn btn-primary" (click)="conformAnswer()">
+                Conform <i class="fa-regular fa-circle-check"></i>
+            </button>
+            <button *ngIf="playerFinishChoice" type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="increaseWeightOrNot()">
+                Ok <i class="fa-regular fa-circle-check"></i>
+            </button>
+        </div>
+    </div>
+</div> 

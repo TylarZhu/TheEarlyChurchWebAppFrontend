@@ -1,0 +1,26 @@
+<div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasExampleLabel">History Messages</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <button type="button" #closeGameMessageHistory [hidden]="true" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+</div>
+<div class="offcanvas-body">
+    <div *ngIf="GameMessageHistory.size == 0; then noMessage else showMessage"></div>
+    <ng-template #noMessage>
+        <div>
+            <p class="text-body-secondary">There is no history messages for now ...</p>
+        </div>
+    </ng-template>
+
+    <ng-template #showMessage>
+        <div *ngFor="let historyMessage of GameMessageHistory | keyvalue">
+            <div class="fw-bold">Day {{historyMessage.key}}</div>
+            <ul class="list-group list-group-flush">
+                <div *ngFor="let message of historyMessage.value">
+                    <li class="list-group-item" style="white-space: pre-line;">
+                        {{message}}
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </ng-template>
+</div>
