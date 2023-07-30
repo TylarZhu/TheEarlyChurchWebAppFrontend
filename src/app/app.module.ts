@@ -58,12 +58,12 @@ import { InfoModalComponent } from './info-modal/info-modal.component';
   providers: [
     SignalrService,
     HttpsCommService,
-    // {
-    //   provide: APP_INITIALIZER,
-    //   useFactory: (SignalrService: SignalrService) => () => SignalrService.initConnection(),
-    //   deps: [SignalrService],
-    //   multi: true
-    // }
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (SignalrService: SignalrService) => () => SignalrService.initConnection(),
+      deps: [SignalrService],
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

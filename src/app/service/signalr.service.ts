@@ -26,8 +26,6 @@ export class SignalrService implements OnInit {
   openIdentitiesExplanationModal: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   groupLeader: BehaviorSubject<IOnlineUsers>;
   maxPlayer: BehaviorSubject<number>;
-  // groupName: string = "";
-  // name: string = "";
 
   // ------------- //
   // Game Entities //
@@ -97,7 +95,7 @@ export class SignalrService implements OnInit {
     }
   }
 
-  constructor(private httpService: HttpsCommService, private router: Router) {
+  constructor(private httpService: HttpsCommService) {
     this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
     // this.hubUrl = "https://theearlychurchgame.azurewebsites.net/PlayerGroupsHub";
     this.hubConnection = new singalR.HubConnectionBuilder()
@@ -275,7 +273,6 @@ export class SignalrService implements OnInit {
     this.hubConnection.on("updateWaitingProgess", (waitingProgessPercentage: number) => {
       this.waitingProgessPercentage.next(waitingProgessPercentage);
     });
-
     // user refresh Page or close tab
     this.hubConnection.on("announceOffLinePlayer", (offLinePlayerName: string[]) => {
       this.offLinePlayerName.next(offLinePlayerName);
@@ -313,9 +310,6 @@ export class SignalrService implements OnInit {
     });
     this.hubConnection.on("repostOnlineUser", (newConnectionId: string, groupName: string, name: string, maxPlayer: string) => {
       this.httpService.createNewUserAndGroup(newConnectionId, groupName, name, maxPlayer);
-    });
-    this.hubConnection.on("redirectToHomePage", () => { 
-      this.router.navigate(['/']);
     });
   }
 

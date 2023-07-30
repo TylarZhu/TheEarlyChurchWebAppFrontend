@@ -96,12 +96,17 @@ aria-labelledby="backToMenu" aria-hidden="true">
                 <div *ngIf="_nightRoundFinish">
                     <strong>Night Round Finished! Please go back to the modal and view the exile result!</strong>
                 </div>
-                <p class="badge bg-danger text-wrap fw-bold fs-3">
-                    Are you sure to go back to home?
-                </p>
-                <p class="badge bg-primary text-wrap fs-6">
-                    You cannot continue to play once you quit.
-                </p>
+                <div *ngIf="gameOn; then inGameDisplay else outGameDisplay"></div>
+                <ng-template #inGameDisplay>
+                    <p class="badge bg-danger text-wrap fw-bold">
+                        Cannot quit room because the game is on!
+                    </p>
+                </ng-template>
+                <ng-template #outGameDisplay>
+                    <p class="badge bg-danger text-wrap fw-bold">
+                        Are you sure to go back to home?
+                    </p>
+                </ng-template>
             </div>
             <div class="modal-footer text-center d-flex justify-content-between">
                 <button #closeBackToMenuModel  [hidden]="true" type="button" class="btn btn-primary" 
@@ -109,7 +114,7 @@ aria-labelledby="backToMenu" aria-hidden="true">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     No <i class="fa-solid fa-xmark"></i>
                 </button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="userLeavesGroup()">
+                <button [disabled]="gameOn" type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="userLeavesGroup()">
                     Yes <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>

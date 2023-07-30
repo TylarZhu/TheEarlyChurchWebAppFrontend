@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter} from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { BehaviorSubject, tap } from 'rxjs';
 
@@ -14,7 +14,6 @@ import { GameRoomComponent } from '../game-room/game-room.component';
 })
 export class NightWaitingModelComponent implements OnInit, OnDestroy {
   @Input() _groupName: string = "";
-  // @Input() gameFinished: Subject<boolean> = new Subject();
 
   @Output() openAnnounceExileModelEvent = new EventEmitter<boolean>(false);
 
