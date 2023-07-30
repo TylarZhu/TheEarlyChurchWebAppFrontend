@@ -90,8 +90,8 @@ export class SignalrService implements OnInit {
   }
 
   constructor(private httpService: HttpsCommService) {
-    // this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
-    this.hubUrl = "https://theearlychurchgame.azurewebsites.net/PlayerGroupsHub";
+    this.hubUrl = "https://localhost:7252/PlayerGroupsHub";
+    // this.hubUrl = "https://theearlychurchgame.azurewebsites.net/PlayerGroupsHub";
     this.hubConnection = new singalR.HubConnectionBuilder()
       .withUrl(this.hubUrl)
       .withAutomaticReconnect()
