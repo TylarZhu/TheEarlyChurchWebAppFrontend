@@ -1,4 +1,4 @@
-<div class="modal-dialog ">
+<div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
             <p class="modal-title">My Identity</p>
@@ -11,7 +11,7 @@
                 <div class="fs-6">
                     Description:
                     <ul>
-                        <div *ngFor="let ability of childAbilities;">
+                        <div *ngFor="let ability of abilities;">
                             <li class="fs-6">{{ability}}</li>
                         </div>
                     </ul>
@@ -19,11 +19,15 @@
                 <div class="fs-6">
                     If you forget your identity, please click the <strong>top right question mark button</strong> to view again.
                 </div>
+                <div>
+                    Time left: <countdown #cd [config]="config" (event)="handleEvent($event)"></countdown>
+                </div>
             </div>
         </div>
         
         <div class="modal-footer d-flex justify-content-right">
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="finishedViewIdentity()">Got it! <i class="fa-regular fa-circle-check"></i></button>
+            <button #closeViewIdentityModal type="button" class="btn btn-primary" data-bs-dismiss="modal" [hidden]="true"></button>
         </div>
     </div>
     

@@ -2,7 +2,8 @@
     <div class="modal-content">
         <div class="modal-header d-flex justify-content-between">
             <h5 class="modal-title fs-6">Night waiting screen</h5>
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" [disabled]="nightRoundFinish">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" 
+            [disabled]="nightRoundFinish || PriestRound || _JohnFireRound || JudasCheckRound">
                 Hide <i class="fa-regular fa-eye-slash"></i>
             </button>
         </div>
@@ -39,9 +40,25 @@
                     You know <strong> {{PriestName}} </strong> and <strong> {{NicodemusName}} </strong> that
                     one of them is <strong> Priest </strong> and another one is <strong> Nicodemus </strong>.
                 </div>
-                <div *ngIf="_ROTSGetInfomation">
-                    You know <strong>{{lastExiledPlayerName}}</strong> who is exiled last night is a Christian!
-                </div>
+                <hr class="border border-danger border-2 opacity-50">
+                <div *ngIf="_ROTSGetInfomation; then ROTSGetInfo else ROTSNotGetInfo"></div>
+                <ng-template #ROTSGetInfo>
+                    <div>
+                        You know <strong>{{lastExiledPlayerName}}</strong> who is exiled last night is a Christian!
+                    </div>
+                </ng-template>
+                <ng-template #ROTSNotGetInfo>
+                    <div *ngIf="lastExiledPlayerName == ''; then peacefulNight else NotPeacefulNight"></div>
+                    <ng-template #peacefulNight>
+                        <div>You do not receive any infomation</div>
+                    </ng-template>
+                    <ng-template #NotPeacefulNight>
+                        <div>
+                            You do not know <strong>{{lastExiledPlayerName}}</strong> is a Christian or not!
+                        </div>
+                    </ng-template>
+                    
+                </ng-template>
             </div>
 
             <div *ngIf="_NicodemusMeetingRound">
@@ -58,8 +75,10 @@
 
             <div *ngIf="_JudasHintRound">
                 <hr class="border border-danger border-2 opacity-50">
-                <div> You are <strong>Judas</strong>! <strong>{{PriestName}}</strong> is the Priest. 
-                    Guess a person who is most likely to be a Christian and give the hint to the Priest!</div>
+                <div> 
+                    You are <strong>Judas</strong>! <strong>{{PriestName}}</strong> is the Priest. 
+                    Guess a person who is most likely to be a Christian and give the hint to the Priest!
+                </div>
             </div>
             <div *ngIf="JudasCheckRound">
                 <hr class="border border-danger border-2 opacity-50">

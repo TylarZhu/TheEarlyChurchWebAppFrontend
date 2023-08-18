@@ -35,7 +35,7 @@
             _name == groupLeader.name && !gameOn" 
             class="pt-2">
                 <button class="btn btn-warning"  (click)="gameStart()" [disabled]="!startGameShow">
-                    Start <i class="fa-solid fa-circle-play"></i>
+                    Start Game <i class="fa-solid fa-circle-play"></i>
                 </button>
             </div>
 
@@ -49,6 +49,12 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#discussionModel">
                     Show <i class="fa-regular fa-eye"></i>
                 </button>
+            </div>
+
+            <div class="pt-2" *ngIf="nextStep.nextStepName == 'vote'">
+                <div>
+                    Vote time left: <countdown #voteCd [config]="config" (event)="voteCountdownEvent($event)"></countdown>
+                </div>
             </div>
         </div>
         <button #viewMyIdentity [hidden]="true" data-bs-toggle="modal" data-bs-target="#viewMyIdentity" ></button>
@@ -73,8 +79,20 @@
                     [childName]="_name"
                     [childGameOn]="gameOn"
                     [voteState]="nextStep.nextStepName"
-                    [identity]="identity"
+                    (voteStopCountdown)="voteStopCountdown()"
                 ></app-players-list>
+            </div>
+        </div>
+        <div class="w-100"></div>
+        <div class="col pt-2" *ngIf="startReconnection">
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <div>
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    You were <strong>disconnected</strong> from the Hub. Trying to reconnect 
+                    <div class="spinner-border spinner-border-sm text-danger" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -154,37 +172,7 @@ aria-labelledby="discussionModel" aria-hidden="true">
 
 <div class="modal fade" id="viewMyIdentity" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" 
 aria-labelledby="viewMyIdentity" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <p class="modal-title">My Identity</p>
-            </div>
-            <div class="modal-body">
-                <div class="fs-6">
-                    <div>
-                        You identity is: <div class="badge bg-danger text-wrap fw-bold">{{identity}}</div>
-                    </div>
-                    <div class="fs-6">
-                        Description:
-                        <ul>
-                            <div *ngFor="let ability of abilities;">
-                                <li class="fs-6">{{ability}}</li>
-                            </div>
-                        </ul>
-                    </div>
-                    <div class="fs-6">
-                        If you forget your identity, please click the <strong>top right question mark button</strong> to view again.
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modal-footer d-flex justify-content-right">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="findViewIdentityReadyToPlay()">
-                    Got it! <i class="fa-regular fa-circle-check"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+    <app-view-identity-modal #viewIdentityModalApp [_groupName]="_groupName" [_name]="_name"></app-view-identity-modal>
 </div>
 
 <div class="modal fade" id="info" tabindex="-1" data-bs-keyboard="false" 
@@ -277,6 +265,10 @@ aria-labelledby="AnnounceExileModel" aria-hidden="true">
             </div>
             <div class="modal-body text-center">
                 <h5> {{exileName}} has been exiled last night! <i class="fa-solid fa-skull"></i> </h5>
+                <div>
+                    Time left: <countdown #AnnounceExileModelCd [config]="config" 
+                        (event)="AnnounceExileModelCdEvent($event)"></countdown>
+                </div>
             </div>
             <div *ngIf="checkIfCurrentPlayerIsInGameOrNot(_name); then inGame else outGame"></div>
             <ng-template #inGame>
@@ -293,6 +285,7 @@ aria-labelledby="AnnounceExileModel" aria-hidden="true">
                     </button>
                 </div>
             </ng-template>
+            <button #closeAnnounceExileModel type="button" class="btn" hidden="true" data-bs-dismiss="modal"></button>
         </div>
     </div> 
 </div>

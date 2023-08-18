@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { CountdownModule } from 'ngx-countdown';
 
 import { AppComponent } from './app.component';
 import { NavComponent } from './nav/nav.component';
@@ -47,6 +48,7 @@ import { InfoModalComponent } from './info-modal/info-modal.component';
     HttpClientModule,
     ReactiveFormsModule,
     FormsModule,
+    CountdownModule,
     RouterModule.forRoot([
       {path: '', component: HomePageComponent},
       {path: 'home', component: HomePageComponent},

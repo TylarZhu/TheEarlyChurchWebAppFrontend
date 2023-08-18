@@ -1,3 +1,8 @@
 #gameTitle{
     min-height: 20vh;
 }
+img {
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+}

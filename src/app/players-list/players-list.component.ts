@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, ViewChild, ElementRef, OnInit, OnDestroy, EventEmitter } from '@angular/core';
 import { HttpsCommService } from '../service/https-comm.service';
 
 import { IOnlineUsers } from '../interface/IOnlineUser';
@@ -21,23 +21,24 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   @Input() childName: string | null;
   @Input() childGameOn: boolean; 
   @Input() voteState: string;
-  // @Input() gameFinished: Subject<boolean> = new Subject();
-  @Input() identity: string = "";
+  @Output() voteStopCountdown: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('waitOthersToVoteModel', {read: ElementRef}) waitOthersToVoteModel?: ElementRef;
   @ViewChild('closeWaitOthersToVoteModel', {read: ElementRef}) closePrepareToVoteModel?: ElementRef;
 
+  identity: string = "";
+
   userChoosePersonName: string;
   conformToVote: boolean;
   isPriest: boolean;
-  PriestName: string;
+  PriestName: string = "";
   ROTSName: string = "";
   NicoName: string = "";
   _JohnFireRound: boolean = false;
   
   JohnCannotFireList: string[];
   _JudasCheckRound: boolean;
-  JudasHimself: string;
+  JudasHimself: string = "";
   playerNotInGame: IOnlineUsers[];
   _inDiscustionName: string;
   _inAnswerQuestionName: string = "";
@@ -50,9 +51,10 @@ export class PlayersListComponent implements OnInit, OnDestroy{
   waitingProgessPercentage: number = 0.0;
   private unsubscribe$: Subject<void> = new Subject<void>();
   
-  constructor(private httpService: HttpsCommService,
-      private singalrService: SignalrService, 
-      private gameRoomComponent: GameRoomComponent)
+  constructor(
+    private httpService: HttpsCommService,
+    private singalrService: SignalrService, 
+    private gameRoomComponent: GameRoomComponent)
   {
     this.childGroupName = "";
     this.childOnlineUser = [];
@@ -64,23 +66,20 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     this.conformToVote = false;
     this.playerNotInGame = [];
     this.isPriest = false;
-    this.PriestName = "";
     this.JohnCannotFireList = [];
     this._JudasCheckRound = false;
-    this.JudasHimself = "";
     this._inDiscustionName = "";
   }
 
   ngOnInit(): void {
-    // this.gameFinished.subscribe(
-    //   v => {
-    //     this.reset();
-    // });
     this.singalrService.GameOn.pipe(tap((GameOn: boolean) => {
       if(!GameOn) {
         this.reset();
       }
     }), takeUntil(this.unsubscribe$)).subscribe();
+    this.singalrService.identity.pipe(takeUntil(this.unsubscribe$)).subscribe((identity: string) => {
+      this.identity = identity;
+    });
     this.singalrService.finishVoteWaitForOthers.pipe(tap(
       finishVoteWaitForOthers => {
         if(finishVoteWaitForOthers) {
@@ -113,7 +112,10 @@ export class PlayersListComponent implements OnInit, OnDestroy{
         this.gameRoomComponent.JohnFireRound.next(true);
       } else if(nextStep.nextStepName == "JudasCheckRound") {
         this._JudasCheckRound = true;
-        this.JudasHimself = nextStep.options![0];
+        if(nextStep.options !== undefined) {
+          this.JudasHimself = nextStep.options[0];
+          this.PriestName = nextStep.options[1];
+        }
       }
     }), takeUntil(this.unsubscribe$)).subscribe();
     this.singalrService.playerNotInGame.pipe(takeUntil(this.unsubscribe$)).subscribe((playerNotInGame: IOnlineUsers[]) => {
@@ -146,7 +148,10 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     });
     this.singalrService.waitingProgessPercentage.pipe(takeUntil(this.unsubscribe$)).subscribe((waitingProgessPercentage: number) => {
       this.waitingProgessPercentage = waitingProgessPercentage;
-    })
+    });
+    this.singalrService.JudasHimself.pipe(takeUntil(this.unsubscribe$)).subscribe((JudasHimself: string) => {
+      this.JudasHimself = JudasHimself;
+    });
   } 
 
   assignNewGroupLeader(nextLeader: string) {
@@ -158,7 +163,8 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     if(conformToExile) {
       this.singalrService.changePriestRoundStatus(false);
       this.singalrService.HintName.next("");
-      this.httpService.aboutToExileHimOrHer(this.childGroupName!, name);
+      this.singalrService.hubConnection.invoke("exileHimOrHer", this.childGroupName, name)
+      // this.httpService.aboutToExileHimOrHer(this.childGroupName!, name);
     }
   }
 
@@ -176,7 +182,8 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     this.userChoosePersonName = name;
     if(conformTofire) {
       this.gameRoomComponent.JohnFireRound.next(false);
-      this.httpService.FireHimOrHer(this.childGroupName!, name);
+      this.singalrService.hubConnection.invoke("JohnFireRoundBegin", this.childGroupName!, name, true);
+      // this.httpService.FireHimOrHer(this.childGroupName!, name);
     }
   }
 
@@ -185,21 +192,24 @@ export class PlayersListComponent implements OnInit, OnDestroy{
     if(conformTofire) {
       this._JudasCheckRound = false;
       this.singalrService.ROTSGetInfomation.next(false);
-      this.httpService.JudasCheckRound(this.childGroupName!, name);
+      this.singalrService.hubConnection.invoke("JudasCheckRound", this.childGroupName!, name);
+      // this.httpService.JudasCheckRound(this.childGroupName!, name);
     }
   }
 
   voteHimOrHer(name: string, conformToVote: boolean){
     this.userChoosePersonName = name;
     if(conformToVote) {
-      this.httpService.voteHimOrHer(this.childGroupName!, name, this.childName!);
+      this.singalrService.hubConnection.invoke("voteHimOrHer", this.childGroupName!, name, this.childName!);
       this.conformToVote = false;
+      this.voteStopCountdown.emit();
     }
   }
 
   HintHimOrHer(name: string) {
     this.singalrService.JudasHintRound.next(false);
-    this.httpService.JudasMeetWithPriest(this.childGroupName!, name);
+    this.singalrService.hubConnection.invoke("JudasMeetWithPriest", this.childGroupName!, name);
+    // this.httpService.JudasMeetWithPriest(this.childGroupName!, name);
   }
 
   ngOnDestroy(): void {
@@ -210,7 +220,6 @@ export class PlayersListComponent implements OnInit, OnDestroy{
 
   reset(): void {
     console.log("player list reset!");
-    this.JudasHimself = "";
     this.JohnCannotFireList = [];
     this.userChoosePersonName = "";
     this._JudasCheckRound = false;

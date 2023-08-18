@@ -60,6 +60,8 @@ export class SignalrService implements OnInit {
   waitingProgessPercentage: BehaviorSubject<number> = new BehaviorSubject<number>(0.0);
 
   JudasName: BehaviorSubject<string> = new BehaviorSubject<string>("");
+  // JudasHimself is for Judas only.
+  JudasHimself: BehaviorSubject<string> = new BehaviorSubject<string>("");
   HintName: BehaviorSubject<string> = new BehaviorSubject<string>("");
   ROTSGetInfomation: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   lastExiledPlayerName: BehaviorSubject<string> = new BehaviorSubject<string>("");
@@ -71,6 +73,7 @@ export class SignalrService implements OnInit {
   GameMessageHistory: BehaviorSubject<Record<string, string[]>> = 
     new BehaviorSubject<Record<string, string[]>>({});
 
+  startReconnection: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   initNextStep: INextStep = {
     nextStepName: "",
     options: []
@@ -102,7 +105,8 @@ export class SignalrService implements OnInit {
       .withUrl(this.hubUrl)
       .withAutomaticReconnect()
       .build();
-    this.hubConnection.serverTimeoutInMilliseconds = 100000;
+    this.hubConnection.serverTimeoutInMilliseconds = 300000;
+    this.hubConnection.keepAliveIntervalInMilliseconds = 300000;
     this.onlineUser =  new BehaviorSubject<IOnlineUsers[]>([]);
     this.messagesToAll = new BehaviorSubject<IMessage[]>([]);
     this.groupLeader = new BehaviorSubject<IOnlineUsers>(this.initUser);
@@ -133,7 +137,7 @@ export class SignalrService implements OnInit {
   }
 
   ngOnInit(): void {
-    this.onDisconnect();
+    
   }
 
   public async initConnection(): Promise<void>{
@@ -142,22 +146,22 @@ export class SignalrService implements OnInit {
       console.log("SignalR Connected.");
       this.setSignalrClientMethods();
 
-      this.hubConnection.onclose(err => {
-        console.log("connection closed! Error: " + err);
-        // this.httpService.userLeaveTheGameByConnectionId(this.hubConnection.connectionId);
+      this.hubConnection.onreconnecting((error) => {
+        console.log("reconnecting! Error: " + error);
+        this.startReconnection.next(true);
+      });
+      this.hubConnection.onreconnected((connectionId) => {
+        console.log("reconnected! New connection id: " + connectionId);
+        this.startReconnection.next(false);
+      });
+
+      this.hubConnection.onclose((error) => {
+        console.log("connection closed! Error: " + error);
         setTimeout(async (_: any) => await this.initConnection(), 3000);
       });
     } catch(err) {
       console.log("SignalR err: " + err);
     }
-  }
-
-  public async onDisconnect() {
-    this.hubConnection.onclose(async () => {
-      console.log("connection closed!");
-      // this.httpService.userLeaveTheGameByConnectionId(this.hubConnection.connectionId);
-      setTimeout(async (_: any) => await this.initConnection(), 3000);
-    });
   }
 
   private setSignalrClientMethods(): void{
@@ -242,9 +246,13 @@ export class SignalrService implements OnInit {
     this.hubConnection.on("inAnswerQuestionName", (inAnswerQuestionName: string) => {
       this.inAnswerQuestionName.next(inAnswerQuestionName);
     });
-    this.hubConnection.on("JudasGivePriestHint", (priestName: string) => {
+    this.hubConnection.on("JudasGivePriestHint", () => {
       this.JudasHintRound.next(true);
+    });
+    // AssignJudasHimselfAndPriestName is for Judas reconnection. 
+    this.hubConnection.on("AssignJudasHimselfAndPriestName", (priestName: string, JudasName) => {
       this.PriestName.next(priestName);
+      this.JudasHimself.next(JudasName);
     });
     this.hubConnection.on("PriestReceiveHint", (JudasName: string, HintName: string) => {
       this.JudasName.next(JudasName);
@@ -277,37 +285,37 @@ export class SignalrService implements OnInit {
     this.hubConnection.on("announceOffLinePlayer", (offLinePlayerName: string[]) => {
       this.offLinePlayerName.next(offLinePlayerName);
     });
-    this.hubConnection.on("IdentityViewingStateFinish", (groupName: string, name: string) => {
-      this.httpService.IdentityViewingState(groupName, name);
-    });
-    this.hubConnection.on("DiscussingStateFinish", (groupName: string) => {
-      this.httpService.whoIsDiscussing(groupName);
-    });
-    this.hubConnection.on("VoteStateFinish", (groupName: string, name: string) => {
-      this.httpService.voteHimOrHer(groupName, name, name);
-    });
-    this.hubConnection.on("PriestRoundStateFinish", (groupName: string) => {
-      this.httpService.PriestRoundStateFinish(groupName);
-    });
-    this.hubConnection.on("JudasMeetWithPriestStateFinish", (groupName: string) => {
-      this.httpService.JudasMeetWithPriest(groupName, "NULL");
-    });
-    this.hubConnection.on("NicodemusSavingRoundBeginStateFinish", (groupName: string) => {
-      this.httpService.NicodemusAction(groupName, false);
-    });
-    this.hubConnection.on("JohnFireRoundBeginStateFinish", (groupName: string) => {
-      this.httpService.FireHimOrHer(groupName, "NULL");
-    });
-    this.hubConnection.on("JudasCheckRoundStateFinish", (groupName: string) => {
-      this.httpService.JudasCheckRound(groupName, "NULL");
-    });
-    this.hubConnection.on("finishedToViewTheExileResultStateFinish", (groupName: string, name: string) => {
-      this.httpService.finishedToViewTheExileResult(groupName, name);
-    });
-    this.hubConnection.on("spiritualQuestionAnsweredCorrectOrNotStateFinish", 
-    (groupName: string, leaveUserName: string) => {
-      this.httpService.spiritualQuestionAnsweredCorrectOrNot(groupName, leaveUserName, false);
-    });
+    // this.hubConnection.on("IdentityViewingStateFinish", (groupName: string, name: string) => {
+    //   this.httpService.IdentityViewingState(groupName, name);
+    // });
+    // this.hubConnection.on("DiscussingStateFinish", (groupName: string) => {
+    //   this.httpService.whoIsDiscussing(groupName);
+    // });
+    // this.hubConnection.on("VoteStateFinish", (groupName: string, name: string) => {
+    //   this.httpService.voteHimOrHer(groupName, name, name);
+    // });
+    // this.hubConnection.on("PriestRoundStateFinish", (groupName: string) => {
+    //   this.httpService.PriestRoundStateFinish(groupName);
+    // });
+    // this.hubConnection.on("JudasMeetWithPriestStateFinish", (groupName: string) => {
+    //   this.httpService.JudasMeetWithPriest(groupName, "NULL");
+    // });
+    // this.hubConnection.on("NicodemusSavingRoundBeginStateFinish", (groupName: string) => {
+    //   this.httpService.NicodemusAction(groupName, false);
+    // });
+    // this.hubConnection.on("JohnFireRoundBeginStateFinish", (groupName: string) => {
+    //   this.httpService.FireHimOrHer(groupName, "NULL");
+    // });
+    // this.hubConnection.on("JudasCheckRoundStateFinish", (groupName: string) => {
+    //   this.httpService.JudasCheckRound(groupName, "NULL");
+    // });
+    // this.hubConnection.on("finishedToViewTheExileResultStateFinish", (groupName: string, name: string) => {
+    //   this.httpService.finishedToViewTheExileResult(groupName, name);
+    // });
+    // this.hubConnection.on("spiritualQuestionAnsweredCorrectOrNotStateFinish", 
+    // (groupName: string, leaveUserName: string) => {
+    //   this.httpService.spiritualQuestionAnsweredCorrectOrNot(groupName, leaveUserName, false);
+    // });
     this.hubConnection.on("repostOnlineUser", (newConnectionId: string, groupName: string, name: string, maxPlayer: string) => {
       this.httpService.createNewUserAndGroup(newConnectionId, groupName, name, maxPlayer);
     });
@@ -353,5 +361,6 @@ export class SignalrService implements OnInit {
     this.openOrCloseExileResultModal.next(false);
     this.openIdentitiesExplanationModal.next(false);
     this.waitingProgessPercentage.next(0.0);
+    this.JudasHimself.next("");
   }
 }

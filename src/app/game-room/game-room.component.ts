@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-import { Subject, take, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { BehaviorSubject, tap } from 'rxjs';
+import { CountdownComponent, CountdownConfig, CountdownEvent } from "ngx-countdown";
 
 import { HttpsCommService } from '../service/https-comm.service';
 import { IOnlineUsers } from '../interface/IOnlineUser';
@@ -12,15 +13,17 @@ import { INextStep } from '../interface/INextStep';
 import { IQuestions } from '../interface/IQuestions';
 import { InfoModalComponent } from '../info-modal/info-modal.component';
 import { GameMessageHistoryComponent } from '../game-message-history/game-message-history.component';
+import { ViewIdentityModalComponent } from '../view-identity-modal/view-identity-modal.component';
 
 @Component({
   selector: 'app-game-room',
   templateUrl: './game-room.component.html',
-  styleUrls: ['./game-room.component.css'],
+  styleUrls: ['./game-room.component.css']
 })
 export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
 
   @ViewChild('viewMyIdentity', {read: ElementRef}) identityModal?: ElementRef;
+  @ViewChild('viewIdentityModalApp') viewIdentityModalApp?: ViewIdentityModalComponent;
 
   @ViewChild('waitingForOtherPlayers', {read: ElementRef}) waitingForOtherPlayersModal?: ElementRef;
   @ViewChild('closeWaitingForOtherPlayers', {read: ElementRef}) closeWaitingForOtherPlayers?: ElementRef;
@@ -48,6 +51,11 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
 
   @ViewChild('GameMessageHistoryComponent') closeGameMessageHistory?: GameMessageHistoryComponent;
 
+  @ViewChild('voteCd', { static: false }) private voteCd?: CountdownComponent;
+
+  @ViewChild('AnnounceExileModelCd', {static: false}) private AnnounceExileModelCd?: CountdownComponent;
+  @ViewChild('closeAnnounceExileModel', {read: ElementRef}) closeAnnounceExileModel?: ElementRef;
+
   onlineUser: IOnlineUsers[];
   messages: IMessage[];
   groupName: BehaviorSubject<string> = new BehaviorSubject<string>("");
@@ -58,9 +66,7 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
   groupLeader: IOnlineUsers;
   gameOn: boolean;
   MaxPlayer: number;
-  identity: string;
   startGameShow: boolean;
-  abilities: string[];
   day: number;
   nextStep: INextStep;
   discussionTopic: string;
@@ -68,9 +74,7 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
   exileName: string;
   hideShowButtonForDisscussion: string = "";
   stillInActionPlayers: IOnlineUsers[] = [];
-  // DOM Property
   _nightWaitModalShowFlag: boolean = false;
-  // identityModalOpen: boolean = false;
 
   winner: number = -1;
   nightRoundFinish: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -78,11 +82,19 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
   JohnFireRound:  BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   waitingProgessPercentage: number = 0.0;
   isCollapsed: boolean = true;
+  
+  startReconnection: boolean = false;
+
+  config: CountdownConfig = {
+    leftTime: 60,
+    format: 'm:ss',
+    demand: true
+  };
 
   private readonly unsubscribe$: Subject<void> = new Subject<void>();
-  // gameFinished: Subject<boolean> = new Subject();
   
-  constructor(private httpService: HttpsCommService, 
+  constructor(
+    private httpService: HttpsCommService, 
     private route: ActivatedRoute,
     private singalrService: SignalrService,
     private router: Router)
@@ -102,9 +114,7 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
     this.messages = [];
     this.groupLeader = null!;
     this.gameOn = false;
-    this.identity = "";
     this.startGameShow = false;
-    this.abilities = [];
     this.day = 1;
     this.nextStep = null!;
     this.discussionTopic = "";
@@ -135,10 +145,6 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
     });
     this.singalrService.groupLeader.pipe(takeUntil(this.unsubscribe$)).subscribe((groupLeader: IOnlineUsers) =>{
       this.groupLeader = groupLeader;
-    });
-    this.singalrService.identitiesExplanation.pipe(takeUntil(this.unsubscribe$))
-    .subscribe((identitiesExplanation: string[]) => {
-      this.abilities = identitiesExplanation
     });
     this.singalrService.nextStep.pipe(tap(
       nextStep => {
@@ -191,13 +197,15 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
     }}), takeUntil(this.unsubscribe$)).subscribe((GameOn: boolean) => {
       this.gameOn = GameOn;
     });
-    this.singalrService.identity.pipe(takeUntil(this.unsubscribe$)).subscribe((identity: string) => {
-      this.identity = identity;
-    });
     this.singalrService.openIdentitiesExplanationModal.pipe(tap((openIdentitiesExplanationModal: boolean) => {
       if(openIdentitiesExplanationModal) {
         if(this.identityModal !== undefined) 
           this.identityModal.nativeElement.click();
+          if(this.viewIdentityModalApp !== undefined) {
+            this.viewIdentityModalApp.startCd();
+          } else {
+            console.log("viewIdentityModalApp is undefined!");
+          }
         }
       }
     ), takeUntil(this.unsubscribe$)).subscribe();
@@ -260,6 +268,11 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
     this.singalrService.waitingProgessPercentage.pipe(takeUntil(this.unsubscribe$)).subscribe((waitingProgessPercentage: number) => {
       this.waitingProgessPercentage = waitingProgessPercentage;
     });
+
+    // when user disconnect and try to reconnect to the server.
+    this.singalrService.startReconnection.pipe(takeUntil(this.unsubscribe$)).subscribe((startReconnection: boolean) => {
+      this.startReconnection = startReconnection;
+    });
   }
 
   async ngAfterViewInit() {
@@ -294,6 +307,9 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
         } else {
           console.log("closePrepareToVoteModel is null!");
         }
+        if(this.voteCd !== undefined) {
+          this.voteCd.begin();
+        }
       }, 3000);
     } else if(nextStep.nextStepName == "SetUserToNightWaiting") {
       this._nightWaitModalShowFlag = true;
@@ -305,8 +321,6 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
       }
     } else if(nextStep.nextStepName == "quitNightWaiting") {
       this.nightRoundFinish.next(true);
-      // this.closeBackToMenuModalAndInfoModal();
-
     }
   }
   
@@ -321,15 +335,6 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
     return flag;
   }
 
-  finishedToViewTheExileResult() {
-    this._nightWaitModalShowFlag = false;
-    this.httpService.finishedToViewTheExileResult(this._groupName, this._name);
-  }
-
-  SetNightWaitModalShowFlagToFalse(): void {
-    this._nightWaitModalShowFlag = false;
-  }
-
   async gameStart(): Promise<void> {
     let half = this.onlineUser.length / 2;
     this.httpService.CreateAGame(this._groupName);
@@ -337,11 +342,25 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
 
   finishedDiscussion() {
     this.hideShowButtonForDisscussion = "";
-    this.httpService.whoIsDiscussing(this._groupName);
+    this.singalrService.hubConnection.invoke("whoIsDiscussing", this._groupName);
+    // this.httpService.whoIsDiscussing(this._groupName);
   }
 
-  findViewIdentityReadyToPlay(): void {
-    this.httpService.IdentityViewingState(this._groupName, this._name);
+  voteCountdownEvent(e: CountdownEvent): void {
+    if(e.action === 'done') {
+      if(this.voteCd !== undefined) {
+        this.voteCd.restart();
+      }
+      this.closeBackToMenuModalAndInfoModal();
+      this.singalrService.hubConnection.invoke("voteHimOrHer", this._groupName!, this._name, this._name);
+    }
+  }
+
+  voteStopCountdown(): void {
+    console.log("voteStopCountdown called");
+    if(this.voteCd !== undefined) {
+      this.voteCd.restart();
+    }
   }
 
   async userLeavesGroup(){
@@ -362,7 +381,42 @@ export class GameRoomComponent implements OnInit, OnDestroy, AfterViewInit  {
     this.nightRoundFinish.next(false);
     if(this.AnnounceExileModel !== undefined) {
       this.AnnounceExileModel.nativeElement.click();
+      if(this.AnnounceExileModelCd !== undefined) {
+        this.AnnounceExileModelCd.begin();
+      }
     }
+  }
+
+  AnnounceExileModelCdEvent(e: CountdownEvent): void {
+    if(e.action === 'done') {
+      if(this.AnnounceExileModelCd !== undefined) {
+        this.AnnounceExileModelCd.restart();
+      }
+      if(this.closeAnnounceExileModel !== undefined) {
+        this.closeAnnounceExileModel.nativeElement.click();
+      }
+      if(this.checkIfCurrentPlayerIsInGameOrNot(this._name)) {
+        this.finishedToViewTheExileResult();
+      } else {
+        this.SetNightWaitModalShowFlagToFalse();
+      }
+    }
+  }
+
+  finishedToViewTheExileResult() {
+    if(this.AnnounceExileModelCd !== undefined) {
+      this.AnnounceExileModelCd.restart();
+    }
+    this._nightWaitModalShowFlag = false;
+    this.singalrService.hubConnection.invoke("finishedToViewTheExileResult", this._groupName, this._name);
+    // this.httpService.finishedToViewTheExileResult(this._groupName, this._name);
+  }
+
+  SetNightWaitModalShowFlagToFalse(): void {
+    if(this.AnnounceExileModelCd !== undefined) {
+      this.AnnounceExileModelCd.restart();
+    }
+    this._nightWaitModalShowFlag = false;
   }
 
   closeBackToMenuModalAndInfoModal(): void{

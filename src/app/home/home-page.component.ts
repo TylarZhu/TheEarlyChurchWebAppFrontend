@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Modal } from "bootstrap";
 
 @Component({
   selector: 'app-home-page',
@@ -7,40 +6,21 @@ import { Modal } from "bootstrap";
   styleUrls: ['./home-page.component.css']
 })
 export class HomePageComponent implements OnInit, OnDestroy, AfterViewInit {
-  joinARoomModal: Modal | undefined;
-  createARoomModal: Modal | undefined;
+  imagePath: string = "../../assets/topicIcon.png";
 
   @ViewChild('backgroundAndDeveloperInfo', {read: ElementRef}) backgroundAndDeveloperInfo?: ElementRef;
 
   ngOnInit(): void {
-    this.joinARoomModal = new window.bootstrap.Modal(
-      document.getElementById('joinARoom')!, {
-        keyboard: false
-    });
-    this.createARoomModal = new window.bootstrap.Modal(
-      document.getElementById('createARoom')!, {
-        keyboard: false
-      }
-    );
   }
 
   ngAfterViewInit(): void {
-    if(this.backgroundAndDeveloperInfo !== undefined){
-      this.backgroundAndDeveloperInfo.nativeElement.click();
-    } else {
-      console.log("backgroundAndDeveloperInfo is null!")
-    }
-  }
-
-  openJoinARoomModal = () => {
-    this.joinARoomModal?.show();
-  }
-
-  openCreateARoomModel = () => {
-    this.createARoomModal?.show();
+    // if(this.backgroundAndDeveloperInfo !== undefined){
+    //   this.backgroundAndDeveloperInfo.nativeElement.click();
+    // } else {
+    //   console.log("backgroundAndDeveloperInfo is null!")
+    // }
   }
 
   ngOnDestroy(): void {
-    
   }
 }

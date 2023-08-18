@@ -148,7 +148,9 @@ export class QuestionModalComponent implements OnInit, OnDestroy {
       }
     }
     this.singalrService.question.next(initQuesiont);
-    this.httpService.spiritualQuestionAnsweredCorrectOrNot(this._groupName, this._name, this.playerChoiceCorrect);
+    this.singalrService.hubConnection.invoke("spiritualQuestionAnsweredCorrectOrNot", 
+      this._groupName, this._name, this.playerChoiceCorrect);
+    // this.httpService.spiritualQuestionAnsweredCorrectOrNot(this._groupName, this._name, this.playerChoiceCorrect);
     this.playerChoice = "";
     this.playerChoiceCorrect = false;
   }

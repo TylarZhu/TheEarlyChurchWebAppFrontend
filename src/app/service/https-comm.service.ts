@@ -89,115 +89,115 @@ export class HttpsCommService {
     );
   }
 
-  public IdentityViewingState(groupName: string, name: string): void{
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.post<IOnlineUsers>(
-      this.inGameUrl + "/IdentityViewingState/" + groupName + "/" + name,
-      {},
-      {headers}
-    ).subscribe(
-      response => {
-      }
-    ); 
-  }
+  // public IdentityViewingState(groupName: string, name: string): void{
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.post<IOnlineUsers>(
+  //     this.inGameUrl + "/IdentityViewingState/" + groupName + "/" + name,
+  //     {},
+  //     {headers}
+  //   ).subscribe(
+  //     response => {
+  //     }
+  //   ); 
+  // }
 
-  public whoIsDiscussing(groupName: string): void{
-    this.http.get(this.inGameUrl + "/WhoIsDiscussing" + "/" + groupName).subscribe();
-  }
+  // public whoIsDiscussing(groupName: string): void{
+  //   this.http.get(this.inGameUrl + "/WhoIsDiscussing" + "/" + groupName).subscribe();
+  // }
 
-  public voteHimOrHer(groupName: string, voteName: string, fromWho: string): void{
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.post(this.inGameUrl + "/voteHimOrHer" + "/" + groupName + "/" + voteName + "/" + fromWho,
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public voteHimOrHer(groupName: string, voteName: string, fromWho: string): void{
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.post(this.inGameUrl + "/voteHimOrHer" + "/" + groupName + "/" + voteName + "/" + fromWho,
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 
   public assignPriestAndRulerOfTheSynagogue(groupName: string): void {
     this.http.get(this.inGameUrl + "/assignPriestAndRulerOfTheSynagogue" + "/" + groupName).subscribe();
   }
 
-  public aboutToExileHimOrHer(groupName: string, exileName: string): void{
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.put(this.inGameUrl + "/aboutToExileHimOrHer" + "/" + groupName + "/" + exileName, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public aboutToExileHimOrHer(groupName: string, exileName: string): void{
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.put(this.inGameUrl + "/aboutToExileHimOrHer" + "/" + groupName + "/" + exileName, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 
-  public NicodemusAction(groupName: string, saveOrNot: boolean): void {
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.put(this.inGameUrl + "/NicodemusAction" + "/" + groupName + "/" + saveOrNot, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public NicodemusAction(groupName: string, saveOrNot: boolean): void {
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.put(this.inGameUrl + "/NicodemusAction" + "/" + groupName + "/" + saveOrNot, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 
-  public FireHimOrHer(groupName: string, firePerson: string): void {
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.put(this.inGameUrl + "/JohnFireRound" + "/" + groupName + "/" + firePerson + "/" + true, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public FireHimOrHer(groupName: string, firePerson: string): void {
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.put(this.inGameUrl + "/JohnFireRound" + "/" + groupName + "/" + firePerson + "/" + true, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 
-  public JudasCheckRound(groupName: string, checkPerson: string): void {
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.put(this.inGameUrl + "/JudasCheckRound" + "/" + groupName + "/" + checkPerson, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public JudasCheckRound(groupName: string, checkPerson: string): void {
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.put(this.inGameUrl + "/JudasCheckRound" + "/" + groupName + "/" + checkPerson, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
   
-  public NightRoundEnd(groupName: string): void{
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.put(this.inGameUrl + "/NightRoundEnd" + "/" + groupName, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public NightRoundEnd(groupName: string): void{
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.put(this.inGameUrl + "/NightRoundEnd" + "/" + groupName, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 
-  public finishedToViewTheExileResult(groupName: string, name: string): void {
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.post(this.inGameUrl + "/finishedToViewTheExileResult" + "/" + groupName + "/" + name, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public finishedToViewTheExileResult(groupName: string, name: string): void {
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.post(this.inGameUrl + "/finishedToViewTheExileResult" + "/" + groupName + "/" + name, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 
-  public spiritualQuestionAnsweredCorrectOrNot(groupName: string, name: string, playerChoiceCorrectOrNot: boolean): void {
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.post(this.inGameUrl + "/spiritualQuestionAnsweredCorrectOrNot" + "/" + groupName + "/" + name + "/" + playerChoiceCorrectOrNot, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public spiritualQuestionAnsweredCorrectOrNot(groupName: string, name: string, playerChoiceCorrectOrNot: boolean): void {
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.post(this.inGameUrl + "/spiritualQuestionAnsweredCorrectOrNot" + "/" + groupName + "/" + name + "/" + playerChoiceCorrectOrNot, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 
-  public JudasMeetWithPriest(groupName: string, name: string) {
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.post(this.inGameUrl + "/JudasMeetWithPriest" + "/" + groupName + "/" + name, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public JudasMeetWithPriest(groupName: string, name: string) {
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.post(this.inGameUrl + "/JudasMeetWithPriest" + "/" + groupName + "/" + name, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 
   // public userLeaveTheGameByConnectionId(connectionId: string | null) {
   //   console.log(connectionId);
@@ -207,13 +207,13 @@ export class HttpsCommService {
   // }
 
   // user refresh page or close tab methods
-  public PriestRoundStateFinish(groupName: string) {
-    const headers = new HttpHeaders().set("Content-Type", "application/json");
-    this.http.post(this.inGameUrl + "/PriestRound" + "/" + groupName, 
-    {},
-    {headers}).subscribe(
-      response => {
-      }
-    );
-  }
+  // public PriestRoundStateFinish(groupName: string) {
+  //   const headers = new HttpHeaders().set("Content-Type", "application/json");
+  //   this.http.post(this.inGameUrl + "/PriestRound" + "/" + groupName, 
+  //   {},
+  //   {headers}).subscribe(
+  //     response => {
+  //     }
+  //   );
+  // }
 }

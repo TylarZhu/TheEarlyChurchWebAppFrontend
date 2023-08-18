@@ -1,6 +1,15 @@
 <div class="container-fluid" id="content">
     <div class="card fixed-bottom text-bg-dark">
         <div class="card-body">
+            <div class="alert alert-danger d-flex align-items-center" role="alert" *ngIf="startReconnection">
+                <div>
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    You were <strong>disconnected</strong> from the Hub. Trying to reconnect 
+                    <div class="spinner-border spinner-border-sm text-danger" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
             <div class="card-text d-flex flex-row justify-content-center">
                 <div></div>
                 <div class="fs-10" style="font-size: 0.9rem;">

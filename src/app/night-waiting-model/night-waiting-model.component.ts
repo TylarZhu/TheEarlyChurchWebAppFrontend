@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter} from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild} from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { BehaviorSubject, tap } from 'rxjs';
+import { CountdownComponent, CountdownConfig, CountdownEvent } from "ngx-countdown";
 
 import { INextStep } from '../interface/INextStep';
 import { SignalrService } from '../service/signalr.service';
@@ -16,6 +17,8 @@ export class NightWaitingModelComponent implements OnInit, OnDestroy {
   @Input() _groupName: string = "";
 
   @Output() openAnnounceExileModelEvent = new EventEmitter<boolean>(false);
+
+  // @ViewChild('PriestRoundCd', {static: false}) PriestRoundCd?: CountdownComponent;
 
   voteResult: string = "";
   day: number = 1;
@@ -42,18 +45,21 @@ export class NightWaitingModelComponent implements OnInit, OnDestroy {
   hintName: string = "";
   aboutToExileName: string = "";
 
+  // config: CountdownConfig = {
+  //   leftTime: 60,
+  //   format: 'm:ss',
+  //   demand: true
+  // };
+
   private readonly unsubscribe$: Subject<void> = new Subject<void>();
 
   constructor(private singalrService: SignalrService, 
-    private httpService: HttpsCommService, private gameRoomComponent: GameRoomComponent){
+    // private httpService: HttpsCommService, 
+    private gameRoomComponent: GameRoomComponent){
 
   }
 
   ngOnInit(): void {
-    // this.gameFinished.subscribe(
-    //   v => {
-    //     this.cleanUp();
-    // });
     this.singalrService.voteResult.pipe(takeUntil(this.unsubscribe$)).subscribe((voteResult: string) => {
       this.voteResult = voteResult;
     });
@@ -134,18 +140,30 @@ export class NightWaitingModelComponent implements OnInit, OnDestroy {
     console.log("nightWaitingModel destory");
   }
 
+  PriestRoundCdEvent(e: CountdownEvent): void {
+    if(e.action === 'done') {
+      // if(this.PriestRoundCd !== undefined) {
+      //   this.PriestRoundCd.restart();
+      // }
+      this.singalrService.hubConnection.invoke("PriestRound", this._groupName, true);
+    }
+  } 
+
   NicodemusAction(action: boolean): void {
     this.NicodemusSavingRound = false;
-    this.httpService.NicodemusAction(this._groupName, action);
+    this.singalrService.hubConnection.invoke("NicodemusAction", this._groupName, action);
+    // this.httpService.NicodemusAction(this._groupName, action);
   }
   DoNotFire(): void {
     this.gameRoomComponent.JohnFireRound.next(false);
-    this.httpService.FireHimOrHer(this._groupName, "NULL");
+    this.singalrService.hubConnection.invoke("JohnFireRoundBegin", this._groupName, "NULL", true)
+    // this.httpService.FireHimOrHer(this._groupName, "NULL");
   }
   NightRoundEnd(): void {
     this.JudasCheckRound = false;
     this.singalrService.JudasCheckResultShow.next(false);
-    this.httpService.NightRoundEnd(this._groupName);
+    this.singalrService.hubConnection.invoke("NightRoundEnd", this._groupName);
+    // this.httpService.NightRoundEnd(this._groupName);
   }
   goToAnnounceExileModel(): void {
     this.nightRoundFinish = false;
@@ -153,6 +171,7 @@ export class NightWaitingModelComponent implements OnInit, OnDestroy {
   }
 
   cleanUp(): void {
+    this.nightRoundFinish = false;
     console.log("nightWaitingModel reset.");
     this.aboutToExileName = "";
   }

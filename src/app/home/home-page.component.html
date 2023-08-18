@@ -3,26 +3,26 @@
 <div class="container-fluid">
     <div class="row justify-content-center align-items-center min-vh-100">
         <div class="row justify-content-center text-center" id="gameTitle" >
+            
             <div class="col-5 align-self-center text-center">
-                <!-- <p style="font-size: 1.8rem;"> The Early Church Game</p> -->
-                <h1>抉择</h1>
+                <img [src]="imagePath" class="img-fluid" alt="...">
             </div>
             <div class="w-100"></div>
             <div class="col-5 align-self-center text-center">
-                    <!-- <p style="font-size: 1.8rem;"> The Early Church Game</p> -->
-                    <h1> The Early Church</h1>
+                <h3>抉择</h3>
             </div>
             <div class="w-100"></div>
             <div class="col-5 align-self-center text-center">
-                <h1> <i class="fa-solid fa-church"></i></h1>
+                <h3> The Early Church</h3>
             </div>
+            
             <div class="w-100"></div>
-            <div class="col-10 align-self-center" >
+            <div class="col-10 align-self-center pt-2">
                 <div class="d-grid gap-2 col-3 mx-auto">
-                    <button class="btn btn-outline-secondary" type="button" role="button" (click)="openCreateARoomModel()">
+                    <button class="btn btn-outline-secondary" type="button" role="button" data-bs-toggle="modal" data-bs-target="#createARoom">
                         <h5>Create Room</h5>
                     </button>
-                    <button class="btn btn-outline-secondary" type="button" role="button" (click)="openJoinARoomModal()">
+                    <button class="btn btn-outline-secondary" type="button" role="button" data-bs-toggle="modal" data-bs-target="#joinARoom">
                         <h5>Join Room</h5>
                     </button>
                     <button #backgroundAndDeveloperInfo [hidden]="true" data-bs-toggle="modal" data-bs-target="#backgroundAndDeveloperInfo" ></button>
@@ -34,12 +34,12 @@
 
 <app-copyright></app-copyright>
 
-<div class="modal fade" id="joinARoom" tabindex="-1" aria-labelledby="joinARoomModal" aria-hidden="true" >
-    <app-join-a-room></app-join-a-room>
+<div class="modal fade" id="createARoom" tabindex="-1" aria-labelledby="createARoom" aria-hidden="true">
+    <app-create-a-room></app-create-a-room>
 </div>
 
-<div class="modal fade" id="createARoom" tabindex="-1" aria-labelledby="createARoomModal" aria-hidden="true">
-    <app-create-a-room></app-create-a-room>
+<div class="modal fade" id="joinARoom" tabindex="-1" aria-labelledby="joinARoom" aria-hidden="true" >
+    <app-join-a-room></app-join-a-room>
 </div>
 
 <div class="modal fade" id="backgroundAndDeveloperInfo" tabindex="-1" data-bs-keyboard="false" 
